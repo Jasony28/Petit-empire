@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1f3354">
+<meta name="description" content="Jeu de gestion : achète, revends et fais grandir ta ville.">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Petit Empire">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}html{-webkit-text-size-adjust:100%}</style>
+<title>Petit Empire</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Nunito:wght@500;700;800;900&family=DM+Mono:wght@500&display=swap">
+<style>
+/* Layout: one-screen phone game — sticky cash bar, a living 2D town, news strip, scrolling panel, fixed bottom tabs */
+:root{
+  --bg:#e7f0ec; --panel:#ffffff; --ink:#1b2932; --muted:#566a74; --line:#d0dedd; --chip:#eef5f2;
+  --sky:#bfe0ef; --night:#1f3354; --ground:#8dbd86;
+  --accent:#d4512a; --on-accent:#ffffff; --gold:#e09d14; --good:#1f8456; --bad:#c03b32;
+  --display:"Bagel Fat One","Arial Rounded MT Bold",system-ui,sans-serif;
+  --body:"Nunito",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --mono:"DM Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0e171c; --panel:#16232a; --ink:#e5eef0; --muted:#93a8b1; --line:#283a43; --chip:#1d2d35;
+  --sky:#3d6f8f; --night:#0b1529; --ground:#3f6b45;
+  --accent:#f07a4c; --on-accent:#1d0d05; --gold:#f2b53a; --good:#4cc487; --bad:#f06c62; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0e171c; --panel:#16232a; --ink:#e5eef0; --muted:#93a8b1; --line:#283a43; --chip:#1d2d35;
+  --sky:#3d6f8f; --night:#0b1529; --ground:#3f6b45;
+  --accent:#f07a4c; --on-accent:#1d0d05; --gold:#f2b53a; --good:#4cc487; --bad:#f06c62; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font:500 15px/1.4 var(--body);-webkit-tap-highlight-color:transparent}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--panel)}
+.wrap{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--panel);border-bottom:1px solid var(--line)}
+.bar .wrap{display:flex;align-items:center;gap:12px;padding-block:10px}
+.logo{font:400 19px/1 var(--display);color:var(--accent);letter-spacing:.01em}
+.cash{margin-left:auto;text-align:right;min-width:0}
+.cash b{display:block;font:400 24px/1 var(--display);font-variant-numeric:tabular-nums;white-space:nowrap}
+.cash small{font:500 12px var(--mono);color:var(--muted)}
+.town{position:relative}
+#town{display:block;width:100%;height:150px;touch-action:manipulation}
+.news{display:flex;gap:8px;align-items:baseline;padding-block:8px;border-bottom:1px solid var(--line);background:var(--chip);font-size:13px;min-height:36px}
+.news .tag{font:500 11px var(--mono);color:var(--accent);text-transform:uppercase;letter-spacing:.06em;flex:none}
+main{padding-block:14px 96px;display:flex;flex-direction:column;gap:10px}
+h2{font:400 20px/1.1 var(--display);margin:4px 0 0;text-wrap:balance}
+.sub{color:var(--muted);font-size:13px;margin:0}
+.row{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:8px}
+.top{display:flex;align-items:center;gap:10px}
+.name{font-weight:900;font-size:16px;min-width:0}
+.name small{display:block;font-weight:600;font-size:12px;color:var(--muted)}
+.price{margin-left:auto;text-align:right;font:500 16px var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
+.price small{display:block;font-size:12px}
+.up{color:var(--good)} .down{color:var(--bad)} .mut{color:var(--muted)}
+canvas.spark{width:88px;height:32px;flex:none}
+.meta{display:flex;flex-wrap:wrap;gap:6px 12px;font-size:12.5px;color:var(--muted)}
+.meta b{color:var(--ink);font-weight:800}
+.pill{display:inline-block;padding:2px 8px;border-radius:99px;background:var(--chip);font:500 11.5px var(--mono);color:var(--ink)}
+.btns{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.btn{font:800 14px var(--body);border:0;border-radius:10px;padding:10px 8px;background:var(--accent);color:var(--on-accent);cursor:pointer;touch-action:manipulation}
+.btn.alt{background:var(--chip);color:var(--ink);border:1px solid var(--line)}
+.btn.sell{background:var(--good);color:var(--on-accent)}
+.btn:disabled{opacity:.38;cursor:default}
+.btn:focus-visible,.tab:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.btn.wide{width:100%;font-size:15px;padding:12px}
+.btn small{display:block;font:500 12px var(--mono);opacity:.9}
+.seg{display:flex;gap:4px;background:var(--chip);border:1px solid var(--line);border-radius:10px;padding:3px;align-self:flex-start}
+.seg button{border:0;background:none;font:800 13px var(--body);color:var(--muted);padding:6px 12px;border-radius:7px;cursor:pointer}
+.seg button.on{background:var(--panel);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.12)}
+.lv{font:400 22px/1 var(--display);color:var(--accent);min-width:42px;text-align:center}
+.bar2{height:6px;border-radius:9px;background:var(--chip);overflow:hidden}
+.bar2 i{display:block;height:100%;background:var(--gold);width:0}
+.locked{opacity:.55;border-style:dashed}
+.goal{flex-direction:row;align-items:center}
+.goal .chk{width:28px;height:28px;border-radius:50%;flex:none;display:grid;place-items:center;background:var(--chip);border:2px solid var(--line);font-weight:900;color:var(--on-accent)}
+.goal.done .chk{background:var(--good);border-color:var(--good)}
+.help{background:var(--chip);border:1px solid var(--line);border-radius:14px;padding:12px 14px;font-size:14px}
+.help ol{margin:6px 0 8px;padding-left:20px}
+.help li{margin:3px 0}
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:6;background:var(--panel);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(4,1fr);padding-bottom:env(safe-area-inset-bottom,0px);padding-left:max(8px,env(safe-area-inset-left,0px));padding-right:max(8px,env(safe-area-inset-right,0px))}
+.tab{border:0;background:none;color:var(--muted);font:800 12.5px var(--body);padding:10px 2px 12px;cursor:pointer;position:relative}
+.tab .ic{display:block;font-size:19px;line-height:1.2}
+.tab.on{color:var(--accent)}
+.tab .dot{position:absolute;top:8px;right:28%;width:8px;height:8px;border-radius:50%;background:var(--gold)}
+.toast{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 70px);transform:translate(-50%,-20px);opacity:0;transition:.25s;z-index:20;background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-weight:800;font-size:14px;max-width:calc(100% - 32px);text-align:center;pointer-events:none}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+textarea.code{width:100%;font:500 12px/1.35 var(--mono);background:var(--chip);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:8px;resize:vertical;word-break:break-all}
+.her{background:var(--panel);border:2px solid var(--gold);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:8px}
+@media (prefers-reduced-motion: reduce){.toast{transition:none}}
+</style>
+
+</head>
+<body>
+<header class="bar"><div class="wrap">
+  <div class="logo">Petit<br>Empire</div>
+  <div class="cash"><b id="cash">50 €</b><small id="rate">0 €/s · Jour 1</small></div>
+</div></header>
+
+<div class="town">
+  <canvas id="town" aria-label="Ta ville : chaque commerce acheté apparaît comme un bâtiment"></canvas>
+  <div class="news wrap" id="news"><span class="tag" id="newsTag">Jour 1</span><span id="newsTxt">Bienvenue ! Ouvre ton premier stand de crêpes ou achète du blé quand il est bas.</span></div>
+</div>
+
+<main class="wrap" id="main"></main>
+
+<nav class="tabs" id="tabs">
+  <button class="tab on" data-tab="market"><span class="ic">⚖︎</span>Marché</button>
+  <button class="tab" data-tab="biz"><span class="ic">⌂</span>Commerces</button>
+  <button class="tab" data-tab="upg"><span class="ic">⚒︎</span>Améliorer</button>
+  <button class="tab" data-tab="goals"><span class="ic">★</span>Objectifs<span class="dot" id="gdot" hidden></span></button>
+</nav>
+<div class="toast" id="toast"></div>
+
+<script>
+/* ---------- Données du jeu ---------- */
+const GOODS=[
+ {id:'ble',name:'Blé',unit:'sac',base:12,vol:.055,unlock:0},
+ {id:'cafe',name:'Café',unit:'kg',base:60,vol:.065,unlock:600},
+ {id:'soie',name:'Soie',unit:'rouleau',base:260,vol:.075,unlock:8000},
+ {id:'cuivre',name:'Cuivre',unit:'lingot',base:1200,vol:.06,unlock:9e4},
+ {id:'safran',name:'Safran',unit:'boîte',base:6500,vol:.095,unlock:8e5},
+ {id:'or',name:'Or',unit:'once',base:34000,vol:.05,unlock:8e6},
+];
+const BIZ=[
+ {id:'crepe',name:'Stand de crêpes',cost:15,rate:.4,col:'#e9845a'},
+ {id:'kiosque',name:'Kiosque à journaux',cost:120,rate:2.5,col:'#5aa3c9'},
+ {id:'boul',name:'Boulangerie',cost:1100,rate:14,col:'#d9a441'},
+ {id:'brasserie',name:'Brasserie',cost:12000,rate:90,col:'#b85a6a'},
+ {id:'atelier',name:'Atelier textile',cost:1.3e5,rate:600,col:'#7a8fd1'},
+ {id:'port',name:'Port marchand',cost:1.4e6,rate:4200,col:'#4f9e8a'},
+ {id:'banque',name:'Banque',cost:2e7,rate:32000,col:'#c9b78f'},
+ {id:'bourse',name:'Bourse',cost:3e8,rate:2.6e5,col:'#8e6fb3'},
+ {id:'tour',name:'Tour Empire',cost:5e9,rate:2.4e6,col:'#6c7f8c'},
+];
+const MILES=[10,25,50,100,150,200,300,400];
+const cap=l=>20*2**l, fee=l=>[4,3,2,1][l];
+const OFF_FRAC=[.1,.3,.6,1], OFF_H=[1,3,6,10];
+const UPG=[
+ {id:'entrepot',name:'Entrepôt',max:12,cost:l=>150*5**l,desc:l=>`Capacité ${fmt(cap(l))} → ${fmt(cap(l+1))} unités`},
+ {id:'flair',name:'Flair du marché',max:1,cost:()=>2500,desc:()=>'Montre la tendance et si le prix est bas ou haut'},
+ {id:'nego',name:'Négociateur',max:3,cost:l=>[800,25000,6e5][l],desc:l=>`Commission ${fee(l)} % → ${fee(l+1)} %`},
+ {id:'marketing',name:'Campagne publicitaire',max:12,cost:l=>3000*11**l,desc:()=>'Revenus des commerces ×1,5'},
+ {id:'gerant',name:'Gérant de nuit',max:3,cost:l=>[5000,3e5,2e7][l],desc:l=>`Gains hors ligne ${OFF_FRAC[l]*100} % sur ${OFF_H[l]} h → ${OFF_FRAC[l+1]*100} % sur ${OFF_H[l+1]} h`},
+ {id:'reseau',name:"Réseau d'informateurs",max:3,cost:l=>[2e4,2e6,2e8][l],desc:()=>'Pièces d’opportunité plus fréquentes et plus riches'},
+];
+const lvl=id=>S.biz[id]||0;
+const totalLv=()=>BIZ.reduce((a,b)=>a+lvl(b.id),0);
+const GOALS=[
+ {id:'sell1',t:'Première affaire',d:'Revendre un produit avec bénéfice',ok:()=>S.sold>0},
+ {id:'k1',t:'Premier millier',d:'Gagner 1 000 € dans la partie',ok:()=>S.run.earned>=1e3},
+ {id:'crepe10',t:'Roi de la crêpe',d:'Avoir 10 stands de crêpes',ok:()=>lvl('crepe')>=10},
+ {id:'flip2',t:'Coup de maître',d:'Revendre au double de ton prix d’achat',ok:()=>S.bestFlip>=2},
+ {id:'boul',t:'Bon pain',d:'Ouvrir une boulangerie',ok:()=>lvl('boul')>=1},
+ {id:'k100',t:'Cent mille',d:'Gagner 100 000 €',ok:()=>S.run.earned>=1e5},
+ {id:'ent5',t:'Grand stock',d:'Entrepôt au niveau 5',ok:()=>(S.upg.entrepot||0)>=5},
+ {id:'lv100',t:'Quartier animé',d:'100 niveaux de commerces au total',ok:()=>totalLv()>=100},
+ {id:'m1',t:'Millionnaire',d:'Gagner 1 M€',ok:()=>S.run.earned>=1e6},
+ {id:'ops10',t:'Œil de lynx',d:'Attraper 10 pièces d’opportunité',ok:()=>S.ops>=10},
+ {id:'port',t:'Larguez les amarres',d:'Ouvrir le port marchand',ok:()=>lvl('port')>=1},
+ {id:'her1',t:'Dynastie',d:'Céder ton empire une première fois',ok:()=>S.prestiges>=1},
+ {id:'lv300',t:'Grande ville',d:'300 niveaux de commerces',ok:()=>totalLv()>=300},
+ {id:'md1',t:'Milliardaire',d:'Gagner 1 Md€ dans une partie',ok:()=>S.run.earned>=1e9},
+ {id:'tour',t:'Le sommet',d:'Construire la Tour Empire',ok:()=>lvl('tour')>=1},
+ {id:'her50',t:'Légende',d:'Cumuler 50 points d’héritage',ok:()=>S.heritage>=50},
+];
+const NEWS=[
+ {g:'ble',d:1,t:'Sécheresse dans la Beauce : le blé s’arrache.'},
+ {g:'ble',d:-1,t:'Récolte record, les silos débordent de blé.'},
+ {g:'cafe',d:1,t:'Gel sur les plantations : le café va flamber.'},
+ {g:'cafe',d:-1,t:'Les cargos de café arrivent en masse au port.'},
+ {g:'soie',d:1,t:'Fashion week à Paris : tout le monde veut de la soie.'},
+ {g:'soie',d:-1,t:'Un nouveau tissu synthétique fait de l’ombre à la soie.'},
+ {g:'cuivre',d:1,t:'Boom des câbles électriques, le cuivre grimpe.'},
+ {g:'cuivre',d:-1,t:'Une mine géante ouvre : trop de cuivre sur le marché.'},
+ {g:'safran',d:1,t:'Pénurie de safran avant les fêtes.'},
+ {g:'safran',d:-1,t:'Récolte exceptionnelle de safran, les prix glissent.'},
+ {g:'or',d:1,t:'Inquiétude sur les marchés, l’or rassure.'},
+ {g:'or',d:-1,t:'Les banques revendent leurs réserves d’or.'},
+ {g:null,m:2,dur:30,t:'Jour de fête au village : commerces ×2 pendant 30 s !'},
+ {g:null,m:3,dur:15,t:'Une star passe en ville : commerces ×3 pendant 15 s !'},
+ {g:null,m:.5,dur:20,t:'Grève des livreurs : commerces ×0,5 pendant 20 s.'},
+];
+
+/* ---------- Outils ---------- */
+const SUF=['','k','M','Md','Bn','Bd','Tn','Td','Qn'];
+function fmt(n){
+  if(!isFinite(n))return '∞';
+  const neg=n<0;n=Math.abs(n);let s;
+  if(n<1000) s=n<10?n.toFixed(2):n<100?n.toFixed(1):Math.floor(n).toString();
+  else if(n<1e6) s=Math.floor(n).toLocaleString('fr-FR');
+  else{let i=Math.min(Math.floor(Math.log10(n)/3),SUF.length-1);const v=n/10**(i*3);s=v.toFixed(v<10?2:v<100?1:0)+' '+SUF[i]}
+  return (neg?'−':'')+s.replace('.',',');
+}
+const eur=n=>fmt(n)+' €';
+const randn=()=>Math.sqrt(-2*Math.log(Math.random()||1e-9))*Math.cos(2*Math.PI*Math.random());
+const $=id=>document.getElementById(id);
+const pl=(n,u)=>n>1?(u.endsWith('s')||u.endsWith('x')?u:u+'s'):u;
+
+/* ---------- État ---------- */
+const KEY='petit-empire-v1';
+let S;
+function fresh(k){
+  const s={v:1,cash:50,run:{earned:0},life:k?k.life:0,heritage:k?k.heritage:0,goals:k?k.goals:{},ops:k?k.ops:0,
+    prestiges:k?k.prestiges:0,helpSeen:k?k.helpSeen:false,goods:{},biz:{},upg:{},clock:k?k.clock:25,
+    bestFlip:0,sold:0,nextOp:(k?k.clock:25)+25,nextNews:(k?k.clock:25)+14,boost:{m:1,until:0},mode:1,newGoal:false};
+  for(const g of GOODS){const st={x:(Math.random()-.5)*.5,drift:0,dt:0,inv:0,cost:0,hist:[]};
+    for(let i=0;i<48;i++){stepGood(g,st)} s.goods[g.id]=st}
+  return s;
+}
+function stepGood(g,st){
+  st.x+=-.035*st.x+(st.dt>0?st.drift:0)+randn()*g.vol;
+  if(st.dt>0)st.dt--;
+  st.x=Math.max(-1.25,Math.min(1.25,st.x));
+  st.hist.push(g.base*Math.exp(st.x)); if(st.hist.length>48)st.hist.shift();
+}
+function load(){try{const r=localStorage.getItem(KEY);if(r){const s=JSON.parse(r);if(s&&s.v===1){S=Object.assign(fresh(),s);return true}}}catch(e){}S=fresh();return false}
+function save(){S.t=Date.now();try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+
+/* ---------- Économie ---------- */
+const priceOf=g=>S.goods[g.id].hist[S.goods[g.id].hist.length-1];
+const curFee=()=>fee(S.upg.nego||0)/100;
+const capacity=()=>cap(S.upg.entrepot||0);
+const used=()=>GOODS.reduce((a,g)=>a+S.goods[g.id].inv,0);
+const goalCount=()=>Object.keys(S.goals).length;
+const bizMult=l=>MILES.reduce((m,t)=>l>=t?m*2:m,1);
+const permMult=()=>(1+.1*S.heritage)*(1+.02*goalCount());
+const globalMult=()=>1.5**(S.upg.marketing||0)*permMult()*S.boost.m;
+const sellBonus=()=>1+.05*S.heritage;
+function incomePerSec(){let r=0;for(const b of BIZ){const l=lvl(b.id);if(l)r+=b.rate*l*bizMult(l)}return r*globalMult()}
+function earn(a){S.cash+=a;S.run.earned+=a;S.life+=a}
+const unlockedGoods=()=>GOODS.filter(g=>S.run.earned>=g.unlock||S.goods[g.id].inv>0);
+function bizCost(b,n){const l=lvl(b.id);return b.cost*1.15**l*(1.15**n-1)/.15}
+function bizMax(b){const l=lvl(b.id);return Math.max(0,Math.floor(Math.log(S.cash*.15/(b.cost*1.15**l)+1)/Math.log(1.15)))}
+function bizQty(b){return S.mode==='max'?Math.max(1,bizMax(b)):S.mode}
+
+function buyGood(id,n){
+  const g=GOODS.find(x=>x.id===id),st=S.goods[id],unit=priceOf(g)*(1+curFee());
+  const free=capacity()-used();
+  if(free<=0)return toast('Entrepôt plein. Vends ou agrandis-le.');
+  n=Math.min(n,free,Math.floor(S.cash/unit));
+  if(n<=0)return toast('Pas assez d’argent.');
+  S.cash-=n*unit;st.inv+=n;st.cost+=n*unit;refresh();
+}
+function sellGood(id){
+  const g=GOODS.find(x=>x.id===id),st=S.goods[id];if(!st.inv)return;
+  const rev=st.inv*priceOf(g)*(1-curFee())*sellBonus(),profit=rev-st.cost;
+  S.cash+=rev;if(profit>0){S.run.earned+=profit;S.life+=profit;S.sold++}
+  S.bestFlip=Math.max(S.bestFlip,rev/st.cost);
+  floatTxt((profit>=0?'+':'')+eur(profit),profit>=0?T.good:T.bad);
+  toast(`${st.inv} ${pl(st.inv,g.unit)} de ${g.name.toLowerCase()} vendus : ${profit>=0?'bénéfice':'perte'} ${eur(Math.abs(profit))}`);
+  st.inv=0;st.cost=0;refresh();
+}
+function buyBiz(id){
+  const b=BIZ.find(x=>x.id===id),n=bizQty(b),c=bizCost(b,n);
+  if(c>S.cash)return;
+  const before=bizMult(lvl(id));
+  S.cash-=c;S.biz[id]=lvl(id)+n;
+  if(bizMult(lvl(id))>before)toast(`${b.name} : palier atteint, production ×2 !`);
+  build('biz');
+}
+function buyUpg(id){
+  const u=UPG.find(x=>x.id===id),l=S.upg[id]||0;if(l>=u.max)return;
+  const c=u.cost(l);if(c>S.cash)return;
+  S.cash-=c;S.upg[id]=l+1;toast(`${u.name} niveau ${l+1}`);build('upg');
+}
+function heritageGain(){return Math.floor(Math.sqrt(S.run.earned/1e6))}
+let cedeArmed=0;
+function cede(){
+  const g=heritageGain();if(g<1)return;
+  if(Date.now()-cedeArmed>4000){cedeArmed=Date.now();refresh();return}
+  const keep={life:S.life,heritage:S.heritage+g,goals:S.goals,ops:S.ops,prestiges:S.prestiges+1,helpSeen:true,clock:S.clock};
+  S=fresh(keep);cedeArmed=0;
+  toast(`Empire cédé. +${g} points d’héritage : tout rapporte plus !`);
+  setNews('Héritage',`Nouvelle génération. Bonus permanent : +${S.heritage*10} % sur les commerces.`);
+  rebuildAll();save();
+}
+
+function exportSave(){
+  save();const ta=$('saveCode');
+  ta.value=btoa(unescape(encodeURIComponent(JSON.stringify(S))));
+  ta.select();
+  try{navigator.clipboard.writeText(ta.value).then(()=>toast('Code copié. Garde-le dans tes notes.'),()=>toast('Code prêt : sélectionne-le et copie-le.'))}catch(e){toast('Code prêt : sélectionne-le et copie-le.')}
+}
+let impArmed=0;
+function importSave(){
+  const raw=$('saveCode').value.trim();let s;
+  try{s=JSON.parse(decodeURIComponent(escape(atob(raw))))}catch(e){return toast('Ce code n\u2019est pas valide. Vérifie qu\u2019il est complet.')}
+  if(!s||s.v!==1)return toast('Ce code n\u2019est pas valide.');
+  if(Date.now()-impArmed>4000){impArmed=Date.now();$('impBtn').textContent='Confirmer : remplacer ma partie';return}
+  impArmed=0;S=Object.assign(fresh(),s);save();toast('Partie chargée !');build(tab);
+}
+
+/* ---------- Événements ---------- */
+function fireNews(){
+  const un=new Set(unlockedGoods().map(g=>g.id));
+  const pool=NEWS.filter(n=>n.g===null?totalLv()>0:un.has(n.g));
+  const n=pool[Math.floor(Math.random()*pool.length)];
+  if(n.g){const st=S.goods[n.g];st.drift=n.d*.04;st.dt=22}
+  else S.boost={m:n.m,until:S.clock+n.dur};
+  setNews('Jour '+day(),n.t);
+  S.nextNews=S.clock+35+Math.random()*40;
+}
+function setNews(tag,t){$('newsTag').textContent=tag;$('newsTxt').textContent=t}
+const day=()=>Math.floor(S.clock/120)+1;
+let op=null;
+function spawnOp(){op={fx:.08+Math.random()*.84,until:S.clock+12,born:S.clock};const r=S.upg.reseau||0;S.nextOp=S.clock+(45+Math.random()*45)/(1+.45*r)}
+function opValue(){const r=S.upg.reseau||0;return Math.max(25,incomePerSec()/S.boost.m*40*(1+.6*r)+S.cash*.02)}
+function collectOp(){const v=opValue();earn(v);S.ops++;floatTxt('+'+eur(v),T.gold,op.x,op.y);op=null;toast('Opportunité saisie : +'+eur(v));refresh()}
+function checkGoals(){
+  let any=false;
+  for(const g of GOALS)if(!S.goals[g.id]&&g.ok()){S.goals[g.id]=1;any=true;toast(`★ ${g.t} : +2 % de revenus pour toujours`)}
+  if(any){S.newGoal=true;if(tab==='goals')build('goals')}
+  $('gdot').hidden=!(S.newGoal&&tab!=='goals');
+}
+function applyOffline(sec){
+  if(sec<20)return;
+  S.boost={m:1,until:0};
+  const g=S.upg.gerant||0,eff=Math.min(sec,OFF_H[g]*3600),gain=incomePerSec()*eff*OFF_FRAC[g];
+  for(const gd of GOODS){const n=Math.min(40,Math.floor(eff/1.5));for(let i=0;i<n;i++)stepGood(gd,S.goods[gd.id])}
+  S.clock+=Math.min(eff,600);
+  if(gain>0){earn(gain);toast(`Pendant ton absence : +${eur(gain)}`)}
+}
+
+/* ---------- Interface ---------- */
+let tab='market',refs={},shown={};
+const main=$('main');
+function build(which){
+  if(which!==tab)return;
+  refs={};
+  if(tab==='market')buildMarket();else if(tab==='biz')buildBiz();else if(tab==='upg')buildUpg();else buildGoals();
+  refresh();
+}
+function buildMarket(){
+  const un=unlockedGoods();shown.market=un.length;
+  const next=GOODS.find(g=>!un.includes(g));
+  let h='';
+  if(!S.helpSeen)h+=`<div class="help"><b>Comment devenir riche</b><ol>
+  <li>Achète des produits quand leur prix baisse, revends-les quand il remonte.</li>
+  <li>Lis les nouvelles en haut : elles annoncent les hausses et les chutes.</li>
+  <li>Ouvre des commerces : ils rapportent de l’argent en continu, même hors ligne.</li>
+  <li>Touche les pièces dorées qui apparaissent dans la ville.</li></ol>
+  <button class="btn alt" data-a="help">Compris</button></div>`;
+  h+=`<div class="top"><h2>Marché</h2><span class="pill" id="capTxt" style="margin-left:auto"></span></div>
+  <p class="sub" id="feeTxt"></p>`;
+  for(const g of un)h+=`<div class="row" id="g-${g.id}">
+    <div class="top"><div class="name">${g.name}<small>par ${g.unit}</small></div>
+    <canvas class="spark" id="sp-${g.id}"></canvas>
+    <div class="price"><span id="p-${g.id}"></span><small id="c-${g.id}"></small></div></div>
+    <div class="meta" id="m-${g.id}"></div>
+    <div class="btns"><button class="btn alt" data-a="buy" data-g="${g.id}" data-n="1">+1</button>
+    <button class="btn alt" data-a="buy" data-g="${g.id}" data-n="10">+10</button>
+    <button class="btn" data-a="buy" data-g="${g.id}" data-n="1e15">Max</button>
+    <button class="btn sell" data-a="sell" data-g="${g.id}" id="s-${g.id}">Vendre</button></div></div>`;
+  if(next)h+=`<div class="row locked"><div class="name">${next.name}<small>Se débloque après ${eur(next.unlock)} gagnés</small></div><div class="bar2"><i id="nextBar"></i></div></div>`;
+  main.innerHTML=h;
+  drawSparks();
+}
+function buildBiz(){
+  let vis=BIZ.findIndex(b=>lvl(b.id)===0&&b.cost>S.cash);
+  vis=vis<0?BIZ.length:vis+1;shown.biz=vis;
+  let h=`<div class="top"><h2>Commerces</h2><div class="seg" style="margin-left:auto">
+    ${[1,10,'max'].map(m=>`<button data-a="mode" data-m="${m}" class="${S.mode==m?'on':''}">${m==='max'?'Max':'×'+m}</button>`).join('')}</div></div>
+    <p class="sub">Chaque palier (10, 25, 50, 100…) double la production du commerce.</p>`;
+  BIZ.slice(0,vis).forEach(b=>{h+=`<div class="row">
+    <div class="top"><div class="lv" id="bl-${b.id}"></div><div class="name">${b.name}<small id="br-${b.id}"></small></div></div>
+    <div class="bar2"><i id="bm-${b.id}"></i></div>
+    <button class="btn wide" data-a="biz" data-b="${b.id}" id="bb-${b.id}"></button></div>`});
+  if(vis<BIZ.length)h+=`<div class="row locked"><div class="name">Commerce mystère<small>Économise pour le découvrir</small></div></div>`;
+  main.innerHTML=h;
+}
+function buildUpg(){
+  let h=`<h2>Améliorations</h2><p class="sub">Elles s’appliquent à toute la partie en cours.</p>`;
+  for(const u of UPG){const l=S.upg[u.id]||0,maxed=l>=u.max;
+    h+=`<div class="row"><div class="top"><div class="name">${u.name}<small>${maxed?'Niveau maximum':u.desc(l)}</small></div>
+    <span class="pill" style="margin-left:auto">${l}/${u.max}</span></div>
+    ${maxed?'':`<button class="btn wide" data-a="upg" data-u="${u.id}" id="ub-${u.id}">Acheter · ${eur(u.cost(l))}</button>`}</div>`}
+  main.innerHTML=h;
+}
+function buildGoals(){
+  S.newGoal=false;$('gdot').hidden=true;
+  let h=`<div class="her"><h2>Héritage</h2>
+   <p class="sub">Cède ton empire à la génération suivante : tu repars de zéro, mais chaque point d’héritage donne +10 % sur les commerces et +5 % sur les ventes, pour toujours.</p>
+   <div class="meta">Points : <b>${S.heritage}</b> · Générations : <b>${S.prestiges}</b> · Total gagné : <b>${eur(S.life)}</b></div>
+   <button class="btn wide" data-a="cede" id="cedeBtn"></button></div>
+   <div class="row"><div class="name">Code de sauvegarde<small>Copie ton code pour récupérer ta partie ailleurs, ou colle un code puis charge-le.</small></div>
+   <textarea class="code" id="saveCode" rows="3" placeholder="Ton code apparaîtra ici" aria-label="Code de sauvegarde"></textarea>
+   <div class="btns" style="grid-template-columns:1fr 1fr"><button class="btn alt" data-a="export">Copier mon code</button><button class="btn" data-a="import" id="impBtn">Charger ce code</button></div></div>
+   <h2>Objectifs</h2><p class="sub">${goalCount()}/${GOALS.length} réussis · chacun donne +2 % de revenus à vie.</p>`;
+  for(const g of GOALS){const d=!!S.goals[g.id];
+    h+=`<div class="row goal ${d?'done':''}"><span class="chk">${d?'✓':''}</span><div class="name">${g.t}<small>${g.d}</small></div></div>`}
+  main.innerHTML=h;
+}
+function refresh(){
+  const inc=incomePerSec();
+  $('cash').textContent=eur(S.cash);
+  $('rate').textContent=`${eur(inc)}/s${S.boost.m!==1?' ('+fmt(S.boost.m)+'×)':''} · Jour ${day()}`;
+  if(tab==='market'){
+    if(unlockedGoods().length!==shown.market)return build('market');
+    const c=capacity(),u=used();
+    $('capTxt').textContent=`Entrepôt ${fmt(u)} / ${fmt(c)}`;
+    $('feeTxt').textContent=`Commission ${fee(S.upg.nego||0)} % à l’achat et à la vente${S.heritage?` · ventes +${S.heritage*5} %`:''}.`;
+    const flair=S.upg.flair;
+    for(const g of unlockedGoods()){
+      const st=S.goods[g.id],p=priceOf(g),h=st.hist,prev=h[h.length-2]||p,ch=(p/prev-1)*100;
+      $('p-'+g.id).textContent=eur(p);
+      const ce=$('c-'+g.id);ce.textContent=(ch>=0?'▲ ':'▼ ')+Math.abs(ch).toFixed(1).replace('.',',')+' %';ce.className=ch>=0?'up':'down';
+      let m='';
+      if(st.inv){const val=st.inv*p*(1-curFee())*sellBonus(),pnl=val-st.cost;
+        m+=`<span>Stock <b>${fmt(st.inv)}</b> · payé ${eur(st.cost/st.inv)}</span><span class="${pnl>=0?'up':'down'}"><b class="${pnl>=0?'up':'down'}">${pnl>=0?'+':''}${eur(pnl)}</b> si tu vends</span>`}
+      else m+=`<span>Aucun stock</span>`;
+      if(flair){const e=-.035*st.x+(st.dt>0?st.drift:0),r=p/g.base;
+        m+=`<span class="pill">${e>.008?'↗ en hausse':e<-.008?'↘ en baisse':'→ stable'}</span><span class="pill">${r<.75?'prix bas':r>1.35?'prix haut':'prix normal'}</span>`}
+      const me=$('m-'+g.id);if(me.innerHTML!==m)me.innerHTML=m;
+      $('s-'+g.id).disabled=!st.inv;
+    }
+    const nx=$('nextBar');if(nx){const ng=GOODS.find(g=>!unlockedGoods().includes(g));if(ng)nx.style.width=Math.min(100,S.run.earned/ng.unlock*100)+'%'}
+  } else if(tab==='biz'){
+    let vis=BIZ.findIndex(b=>lvl(b.id)===0&&b.cost>S.cash);vis=vis<0?BIZ.length:vis+1;
+    if(vis>shown.biz)return build('biz');
+    const gm=globalMult();
+    BIZ.slice(0,shown.biz).forEach(b=>{
+      const l=lvl(b.id),n=bizQty(b),c=bizCost(b,n),mult=bizMult(l);
+      $('bl-'+b.id).textContent=l;
+      $('br-'+b.id).textContent=l?`${eur(b.rate*l*mult*gm)}/s${mult>1?' · ×'+mult:''}`:`${eur(b.rate*gm)}/s par unité`;
+      const nextM=MILES.find(t=>t>l)||l,prevM=[0,...MILES].filter(t=>t<=l).pop();
+      $('bm-'+b.id).style.width=(nextM>prevM?(l-prevM)/(nextM-prevM)*100:100)+'%';
+      const bb=$('bb-'+b.id);bb.innerHTML=`${l?'Agrandir':'Ouvrir'} ×${n}<small>${eur(c)}</small>`;bb.disabled=c>S.cash;
+    });
+  } else if(tab==='upg'){
+    for(const u of UPG){const e=$('ub-'+u.id);if(e)e.disabled=u.cost(S.upg[u.id]||0)>S.cash}
+  } else {
+    const g=heritageGain(),b=$('cedeBtn');
+    if(g<1){b.disabled=true;b.innerHTML=`Céder l’empire<small>Disponible après 1 M€ gagnés dans la partie (${eur(S.run.earned)})</small>`}
+    else{b.disabled=false;b.innerHTML=Date.now()-cedeArmed<4000?`Confirmer : tout repart à zéro<small>Touche encore pour +${g} points</small>`:`Céder l’empire<small>+${g} point${g>1?'s':''} d’héritage maintenant</small>`}
+  }
+}
+function rebuildAll(){build(tab)}
+
+main.addEventListener('click',e=>{
+  const b=e.target.closest('[data-a]');if(!b||b.disabled)return;
+  const a=b.dataset.a;
+  if(a==='buy')buyGood(b.dataset.g,+b.dataset.n);
+  else if(a==='sell')sellGood(b.dataset.g);
+  else if(a==='biz')buyBiz(b.dataset.b);
+  else if(a==='upg')buyUpg(b.dataset.u);
+  else if(a==='mode'){S.mode=b.dataset.m==='max'?'max':+b.dataset.m;build('biz')}
+  else if(a==='cede')cede();
+  else if(a==='export')exportSave();
+  else if(a==='import')importSave();
+  else if(a==='help'){S.helpSeen=true;build('market')}
+});
+$('tabs').addEventListener('click',e=>{
+  const b=e.target.closest('[data-tab]');if(!b)return;
+  tab=b.dataset.tab;document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on',t===b));
+  build(tab);window.scrollTo(0,0);
+});
+let toastT;
+function toast(m){const t=$('toast');t.textContent=m;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),2600)}
+
+/* ---------- Dessin ---------- */
+let T={};
+function readTokens(){const cs=getComputedStyle(document.documentElement);for(const k of['sky','night','ground','gold','good','bad','ink','line','panel'])T[k]=cs.getPropertyValue('--'+k).trim()}
+const hex=h=>{h=h.replace('#','');if(h.length===3)h=[...h].map(c=>c+c).join('');return[0,2,4].map(i=>parseInt(h.slice(i,i+2),16))};
+const mix=(a,b,t)=>{const A=hex(a),B=hex(b);return`rgb(${A.map((v,i)=>Math.round(v+(B[i]-v)*t)).join(',')})`};
+function drawSparks(){
+  const dpr=window.devicePixelRatio||1;
+  for(const g of unlockedGoods()){const c=$('sp-'+g.id);if(!c)continue;
+    const w=88,h=32;c.width=w*dpr;c.height=h*dpr;const x=c.getContext('2d');x.setTransform(dpr,0,0,dpr,0,0);
+    const d=S.goods[g.id].hist,mn=Math.min(...d),mx=Math.max(...d),r=mx-mn||1;
+    const col=d[d.length-1]>=d[0]?T.good:T.bad;
+    x.beginPath();d.forEach((v,i)=>{const px=i/(d.length-1)*(w-4)+2,py=h-3-(v-mn)/r*(h-6);i?x.lineTo(px,py):x.moveTo(px,py)});
+    x.strokeStyle=col;x.lineWidth=1.6;x.stroke();
+    x.lineTo(w-2,h);x.lineTo(2,h);x.closePath();x.globalAlpha=.14;x.fillStyle=col;x.fill();x.globalAlpha=1;
+    const ly=h-3-(d[d.length-1]-mn)/r*(h-6);x.beginPath();x.arc(w-2,ly,2.4,0,7);x.fillStyle=col;x.fill();
+  }
+}
+const cv=$('town'),cx=cv.getContext('2d');let CW=0,CH=150;
+function sizeCanvas(){const dpr=window.devicePixelRatio||1;CW=cv.clientWidth;cv.width=CW*dpr;cv.height=CH*dpr;cx.setTransform(dpr,0,0,dpr,0,0)}
+const stars=Array.from({length:40},()=>[Math.random(),Math.random()*.6]);
+const walkers=Array.from({length:30},()=>({x:Math.random(),v:(Math.random()<.5?-1:1)*(.02+Math.random()*.03),c:['#e9845a','#5aa3c9','#d9a441','#8e6fb3','#4f9e8a'][Math.floor(Math.random()*5)]}));
+let floats=[];
+function floatTxt(t,c,x,y){floats.push({t,c,x:x??CW/2,y:y??CH*.45,life:1.4})}
+function draw(dt){
+  const w=CW,h=CH,gy=h-20;
+  const ph=(S.clock%120)/120,light=Math.max(0,Math.min(1,(.5-.5*Math.cos(ph*2*Math.PI))*1.5-.2));
+  const g=cx.createLinearGradient(0,0,0,gy);g.addColorStop(0,mix(T.night,T.sky,light));g.addColorStop(1,mix(T.night,T.sky,Math.min(1,light+.25)));
+  cx.fillStyle=g;cx.fillRect(0,0,w,h);
+  if(light<.6){cx.fillStyle=`rgba(255,255,255,${.8*(1-light/.6)})`;stars.forEach(([sx,sy])=>cx.fillRect(sx*w,sy*gy,1.5,1.5))}
+  const sx=w*(ph<.5?ph*2:(ph-.5)*2),sy=gy-Math.sin((ph<.5?ph*2:(ph-.5)*2)*Math.PI)*(gy-24);
+  cx.beginPath();cx.arc(sx,sy,ph<.5?0:0,0,0);
+  if(light>.15){cx.beginPath();cx.arc(w*(ph*1.6-.3),gy-Math.sin(Math.min(1,Math.max(0,ph*1.6-.3))*Math.PI)*(gy-28),13,0,7);cx.fillStyle='#ffd65a';cx.globalAlpha=light;cx.fill();cx.globalAlpha=1}
+  else{cx.beginPath();cx.arc(w*.82,28,10,0,7);cx.fillStyle='#f3f0dc';cx.fill();cx.beginPath();cx.arc(w*.82+4,25,9,0,7);cx.fillStyle=mix(T.night,T.sky,light);cx.fill()}
+  // bâtiments
+  const n=BIZ.length,sw=w/n,wins=[];
+  BIZ.forEach((b,i)=>{
+    const l=lvl(b.id),x0=i*sw+2,bw=sw-4;
+    if(!l){cx.fillStyle='rgba(0,0,0,.18)';cx.fillRect(x0+bw/2-1,gy-14,2,14);cx.fillStyle='#f2efe6';cx.fillRect(x0+bw/2-8,gy-18,16,8);return}
+    const hmax=(gy-30)*(.38+.62*i/(n-1)),bh=14+hmax*Math.min(1,Math.log10(l+1)/2.2);
+    cx.fillStyle=b.col;cx.fillRect(x0,gy-bh,bw,bh);
+    cx.fillStyle='rgba(0,0,0,.18)';cx.fillRect(x0+bw*.72,gy-bh,bw*.28,bh);
+    if(i<3){cx.beginPath();cx.moveTo(x0-2,gy-bh);cx.lineTo(x0+bw/2,gy-bh-10);cx.lineTo(x0+bw+2,gy-bh);cx.fillStyle='#8a3b2a';cx.fill()}
+    if(i===8){cx.fillStyle=b.col;cx.fillRect(x0+bw/2-1.5,gy-bh-16,3,16);cx.beginPath();cx.arc(x0+bw/2,gy-bh-17,2.5,0,7);cx.fillStyle='#ff5a4a';cx.fill()}
+    if(bizMult(l)>1){cx.fillStyle=T.gold;cx.fillRect(x0+3,gy-bh-7,1.5,7);cx.fillRect(x0+4.5,gy-bh-7,6,4)}
+    for(let ry=gy-bh+6;ry<gy-8;ry+=9)for(let rx=x0+4;rx<x0+bw-6;rx+=7)wins.push([rx,ry,(i*31+ry*7+rx*3)%5]);
+  });
+  cx.fillStyle=T.ground;cx.fillRect(0,gy,w,h-gy);
+  cx.fillStyle='rgba(0,0,0,.12)';cx.fillRect(0,gy+9,w,3);
+  if(light<1){cx.fillStyle=`rgba(5,10,35,${.42*(1-light)})`;cx.fillRect(0,0,w,h)}
+  wins.forEach(([x,y,k])=>{cx.fillStyle=light<.5&&k<3?'#ffd979':light<.5?'rgba(20,30,50,.6)':'rgba(255,255,255,.5)';cx.fillRect(x,y,3.5,4.5)});
+  // passants
+  const nw=Math.min(walkers.length,Math.floor(totalLv()/4)+(totalLv()?1:0));
+  for(let i=0;i<nw;i++){const p=walkers[i];p.x+=p.v*dt;if(p.x<0||p.x>1)p.v*=-1;const px=p.x*w,bob=Math.abs(Math.sin(S.clock*8+i))*1.5;
+    cx.fillStyle=p.c;cx.fillRect(px-2,gy+4-bob,4,6);cx.beginPath();cx.arc(px,gy+2-bob,2.2,0,7);cx.fillStyle='#f1c9a5';cx.fill()}
+  // pièce
+  if(op){if(S.clock>op.until)op=null;else{op.x=op.fx*w;op.y=40+Math.sin((S.clock-op.born)*3)*8;
+    const fade=Math.min(1,(op.until-S.clock)/2);cx.globalAlpha=fade;
+    cx.beginPath();cx.arc(op.x,op.y,18+Math.sin(S.clock*6)*2,0,7);cx.fillStyle='rgba(255,214,90,.3)';cx.fill();
+    cx.beginPath();cx.ellipse(op.x,op.y,13*Math.abs(Math.cos(S.clock*2.5))+2,13,0,0,7);cx.fillStyle='#f4b52a';cx.fill();cx.strokeStyle='#a86d07';cx.lineWidth=2;cx.stroke();
+    cx.fillStyle='#7a4c00';cx.font='900 13px Nunito,sans-serif';cx.textAlign='center';cx.textBaseline='middle';
+    if(Math.abs(Math.cos(S.clock*2.5))>.4)cx.fillText('€',op.x,op.y+1);cx.globalAlpha=1}}
+  floats=floats.filter(f=>(f.life-=dt)>0);
+  floats.forEach(f=>{f.y-=22*dt;cx.globalAlpha=Math.min(1,f.life);cx.font='400 17px "Bagel Fat One",sans-serif';cx.textAlign='center';cx.lineWidth=4;cx.strokeStyle='rgba(0,0,0,.45)';cx.strokeText(f.t,f.x,f.y);cx.fillStyle=f.c;cx.fillText(f.t,f.x,f.y);cx.globalAlpha=1});
+}
+cv.addEventListener('click',e=>{if(!op)return;const r=cv.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top;if(Math.hypot(x-op.x,y-op.y)<30)collectOp()});
+
+/* ---------- Boucle ---------- */
+let lastWall=Date.now(),mAcc=0,uiAcc=0,saveAcc=0,gAcc=0;
+function frame(){
+  const now=Date.now();let dt=(now-lastWall)/1000;lastWall=now;
+  if(dt>5){applyOffline(dt);dt=0;build(tab)}
+  dt=Math.min(dt,.5);
+  S.clock+=dt;
+  if(S.boost.m!==1&&S.clock>S.boost.until)S.boost={m:1,until:0};
+  earn(incomePerSec()*dt);
+  mAcc+=dt;if(mAcc>=1.5){mAcc=0;GOODS.forEach(g=>stepGood(g,S.goods[g.id]));if(tab==='market')drawSparks()}
+  if(S.clock>=S.nextNews)fireNews();
+  if(!op&&S.clock>=S.nextOp)spawnOp();
+  gAcc+=dt;if(gAcc>1){gAcc=0;checkGoals()}
+  uiAcc+=dt;if(uiAcc>.25){uiAcc=0;refresh()}
+  saveAcc+=dt;if(saveAcc>5){saveAcc=0;save()}
+  draw(dt);
+  requestAnimationFrame(frame);
+}
+function start(data){
+  if(data&&data.S)S=data.S;
+  else if(load()&&S.t)applyOffline((Date.now()-S.t)/1000);
+  readTokens();sizeCanvas();build(tab);
+  lastWall=Date.now();requestAnimationFrame(frame);
+}
+addEventListener('resize',sizeCanvas);
+document.addEventListener('visibilitychange',()=>{if(document.hidden)save()});
+try{matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{readTokens();drawSparks()})}catch(e){}
+new MutationObserver(()=>{readTokens();drawSparks()}).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+start({});
+if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+</script>
+
+</body>
+</html>
