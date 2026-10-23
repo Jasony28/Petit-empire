@@ -1,5 +1,5 @@
-// Petit Empire : fonctionne hors ligne
-const CACHE = 'petit-empire-v2';
+// Petit Empire : fonctionne hors ligne, se met à jour quand internet est là
+const CACHE = 'petit-empire-v3';
 const FILES = ['./', 'index.html', 'manifest.json', 'icon-192.png', 'icon-512.png', 'icon-180.png'];
 
 self.addEventListener('install', e => {
@@ -12,15 +12,17 @@ self.addEventListener('activate', e => {
 });
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
-  // Réseau d'abord pour la page (mises à jour), cache sinon ; cache d'abord pour le reste (polices, icônes)
-  if (e.request.mode === 'navigate') {
+  const sameSite = new URL(e.request.url).origin === location.origin;
+  if (sameSite) {
+    // Nos fichiers : réseau d'abord (toujours la dernière version), cache si pas d'internet
     e.respondWith(fetch(e.request).then(r => {
-      const copy = r.clone(); caches.open(CACHE).then(c => c.put('index.html', copy)); return r;
-    }).catch(() => caches.match('index.html')));
-    return;
+      if (r.ok) { const copy = r.clone(); caches.open(CACHE).then(c => c.put(e.request, copy)); }
+      return r;
+    }).catch(() => caches.match(e.request, { ignoreSearch: true }).then(h => h || caches.match('index.html'))));
+  } else {
+    // Polices : cache d'abord
+    e.respondWith(caches.match(e.request).then(hit => hit || fetch(e.request).then(r => {
+      const copy = r.clone(); caches.open(CACHE).then(c => c.put(e.request, copy)); return r;
+    })));
   }
-  e.respondWith(caches.match(e.request).then(hit => hit || fetch(e.request).then(r => {
-    if (r.ok || r.type === 'opaque') { const copy = r.clone(); caches.open(CACHE).then(c => c.put(e.request, copy)); }
-    return r;
-  })));
 });
