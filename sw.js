@@ -1,5 +1,5 @@
 // Petit Empire : fonctionne hors ligne, se met à jour quand internet est là
-const CACHE = 'petit-empire-v13';
+const CACHE = 'petit-empire-v19';
 const FILES = ['./', 'index.html', 'manifest.json', 'icon-192.png', 'icon-512.png', 'icon-180.png', 'privacy.html'];
 // Seuls ces fichiers externes sont gardés pour le hors ligne (polices et bibliothèque Firebase)
 const EXTERNAL = [/^https:\/\/fonts\.(googleapis|gstatic)\.com\//, /^https:\/\/www\.gstatic\.com\/firebasejs\//];

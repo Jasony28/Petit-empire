@@ -47,11 +47,14 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .gear:active{transform:rotate(30deg) scale(.95)}
 .gear.on{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
 .logo{font:400 17px/1.05 var(--display);color:var(--accent);letter-spacing:.01em;min-width:0}
-.logo small{display:block;font:500 11px var(--mono);color:var(--muted);letter-spacing:0;margin-top:3px;white-space:nowrap}
+.price{min-width:0;width:100%;overflow-wrap:anywhere}.price .meta span{white-space:normal}
+.btns.pr{display:grid;grid-template-columns:repeat(5,1fr);gap:4px;margin:6px 0}.btns.pr .btn{padding:6px 2px;font-size:12px;min-width:0}
+.btn small{overflow-wrap:anywhere;white-space:normal}
+.logo small{display:block;font:500 11px var(--mono);color:var(--muted);letter-spacing:0;margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:46vw}
 .cash{margin-left:auto;text-align:right;min-width:0}
 .cash b{display:block;font:400 25px/1 var(--display);font-variant-numeric:tabular-nums;white-space:nowrap;transition:color .3s}
 .cash b.up{color:var(--good)}
-.cash small{font:500 11.5px var(--mono);color:var(--muted);white-space:nowrap}
+.cash small{display:block;font:500 11.5px var(--mono);color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:52vw;margin-left:auto}
 .cash b.neg{color:var(--bad)}
 .townwrap{overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:none}
 .townwrap::-webkit-scrollbar{display:none}
@@ -179,7 +182,8 @@ details.sec>.body{display:flex;flex-direction:column;gap:10px;padding-bottom:4px
 .todo .txt{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .todo .txt small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ev{padding:10px 12px;gap:6px}
-.btns.trade{grid-template-columns:1fr 1fr 1fr 1.35fr;column-gap:6px}
+.btns.trade{grid-template-columns:1fr 1fr 1.15fr 1.1fr 1.4fr;column-gap:5px}
+.btns.trade .btn{padding:10px 2px;font-size:13.5px}
 .btns.trade .sell{margin-left:8px}
 [data-tip]{cursor:help;text-decoration:underline dotted rgba(127,127,127,.6);text-underline-offset:3px}
 @keyframes flash{0%{box-shadow:0 0 0 0 var(--gold)}30%{box-shadow:0 0 0 3px var(--gold)}100%{box-shadow:0 0 0 0 rgba(0,0,0,0)}}
@@ -190,6 +194,10 @@ html:root[data-skin="nuit"]{--bg:#0b0a1f;--panel:#15132e;--ink:#eceaff;--muted:#
 html:root[data-skin="pastel"]{--bg:#fbf3f6;--panel:#ffffff;--ink:#3b3050;--muted:#8a7f9e;--line:#ecdfe8;--chip:#f6ecf3;--sky:#cfe4ff;--night:#5a5f9e;--ground:#bfe3c8;--accent:#e97aa8;--on-accent:#ffffff;--gold:#f3b34c;--good:#3fa98a;--bad:#e05a7a;--warn:#e29a3a;color-scheme:light}
 html:root[data-skin="luxe"]{--bg:#121110;--panel:#1c1a18;--ink:#f3ece0;--muted:#a89d8a;--line:#2f2b26;--chip:#24211e;--sky:#3a3a48;--night:#0c0c12;--ground:#3a4a35;--accent:#d8b45a;--on-accent:#1a1206;--gold:#f0cf7a;--good:#8fcf8a;--bad:#e2725b;--warn:#e6b85a;color-scheme:dark}
 html:root[data-skin="foret"]{--bg:#eef2e6;--panel:#fbfdf6;--ink:#233024;--muted:#5f6f5c;--line:#d5dfc8;--chip:#e6eedb;--sky:#cfe7d8;--night:#1e3a2e;--ground:#8fbf7a;--accent:#3f8a4c;--on-accent:#ffffff;--gold:#c8902a;--good:#2f7d46;--bad:#b9452f;--warn:#b77b1a;color-scheme:light}
+html:root[data-skin="royal"]{--bg:#140c24;--panel:#1e1435;--ink:#f1eaff;--muted:#a898c8;--line:#33275a;--chip:#271b44;--sky:#3b2a6b;--night:#0a0618;--ground:#3a2f5a;--accent:#b48cff;--on-accent:#140826;--gold:#ffd36b;--good:#7fe0a8;--bad:#ff6b8a;--warn:#ffc24a;color-scheme:dark}
+html:root[data-skin="ocean"]{--bg:#eaf5fb;--panel:#ffffff;--ink:#12324a;--muted:#5d7d93;--line:#d3e6f1;--chip:#e1f0f8;--sky:#bfe3f7;--night:#163a5e;--ground:#9fd1c4;--accent:#1f7fb5;--on-accent:#ffffff;--gold:#e0a42a;--good:#1f9e8a;--bad:#d24d4d;--warn:#d68a1a;color-scheme:light}
+html:root[data-skin="sakura"]{--bg:#fff4f6;--panel:#ffffff;--ink:#3d2530;--muted:#8e6f7b;--line:#f3dce3;--chip:#fbe9ee;--sky:#ffe0ea;--night:#4a2b4f;--ground:#b9d9a3;--accent:#d9467a;--on-accent:#ffffff;--gold:#d79b2c;--good:#4f9a5a;--bad:#c9384a;--warn:#cf8a2a;color-scheme:light}
+html:root[data-skin="royal"] .logo{text-shadow:0 0 12px rgba(255,211,107,.35)}
 html:root[data-skin="nuit"] .cash b,html:root[data-skin="nuit"] .logo{text-shadow:0 0 12px rgba(255,79,216,.45)}
 html:root[data-skin="luxe"] .row{border-color:#3a342b}
 #fx{position:fixed;inset:0;pointer-events:none;z-index:30;width:100%;height:100%}
@@ -233,13 +241,14 @@ html:root[data-skin="luxe"] .row{border-color:#3a342b}
 /* ======================================================================
    PETIT EMPIRE — données
    ====================================================================== */
-const VERSION='2.4';
-const MT=15;          // la bourse change toutes les 15 s
+const VERSION='2.6';
+const MT=5;           // la bourse change toutes les 5 s
+const MK=15/MT;        // nombre de mouvements par tranche de 15 s (garde la même volatilité)
 const DAY=180;        // un jour de jeu = 3 minutes
 const SEASON_DAYS=7;  // une saison = 7 jours
 const GOODS=[
  {id:'ble',name:'Blé',unit:'sac',base:12,vol:.09,unlock:0},
- {id:'cafe',name:'Café',unit:'kg',base:60,vol:.1,unlock:600},
+ {id:'cafe',name:'Café',unit:'kg',base:60,vol:.1,unlock:100},
  {id:'soie',name:'Soie',unit:'rouleau',base:260,vol:.11,unlock:8000},
  {id:'cuivre',name:'Cuivre',unit:'lingot',base:1200,vol:.09,unlock:9e4},
  {id:'safran',name:'Safran',unit:'boîte',base:6500,vol:.13,unlock:8e5},
@@ -249,9 +258,9 @@ const GOODS=[
  {id:'puce',name:'Puces électroniques',unit:'caisse',base:5e6,vol:.14,unlock:5e9},
 ];
 const BIZ=[
- {id:'crepe',name:'Stand de crêpes',cost:15,rate:.4,col:'#e9845a',job:'crêpier',part:'La plaque chauffante'},
- {id:'kiosque',name:'Kiosque à journaux',cost:120,rate:2.5,col:'#5aa3c9',job:'vendeur',part:'Le présentoir'},
- {id:'boul',name:'Boulangerie',cost:1100,rate:14,col:'#d9a441',job:'boulanger',part:'Le four'},
+ {id:'crepe',name:'Stand de crêpes',cost:15,rate:1,col:'#e9845a',job:'crêpier',part:'La plaque chauffante'},
+ {id:'kiosque',name:'Kiosque à journaux',cost:120,rate:5,col:'#5aa3c9',job:'vendeur',part:'Le présentoir'},
+ {id:'boul',name:'Boulangerie',cost:1100,rate:25,col:'#d9a441',job:'boulanger',part:'Le four'},
  {id:'brasserie',name:'Brasserie',cost:12000,rate:90,col:'#b85a6a',job:'serveur',part:'La tireuse à bière'},
  {id:'cinema',name:'Cinéma',cost:55000,rate:280,col:'#c46aa0',job:'projectionniste',part:'Le projecteur'},
  {id:'atelier',name:'Atelier textile',cost:1.3e5,rate:600,col:'#7a8fd1',job:'couturier',part:'Une machine à coudre'},
@@ -280,7 +289,9 @@ const INFRA=[
  {id:'parking',name:'Parking',need:'trans',cap:500,cost:4e4,maint:6,max:3,brk:'La barrière du parking est bloquée'},
  {id:'metro',name:'Station de métro',need:'trans',cap:6000,cost:1.2e7,maint:900,max:2,brk:'Un escalator du métro est en panne'},
 ];
-const MILES=[10,25,50,100,150,200,300,400];
+/* Réglages de l'équilibre (testés par simulation) */
+const BAL={emp:.7,form:.1,grow:1.26,mk:1.2,mkCost:[5000,14],cons:1,opCash:0,contract:[1.3,.4],req:1e6,reqX:10,dry:.6,maint:60};
+let MILES=[25,50,100,200,400];
 const cap=l=>20*2**l, fee=l=>[4,3,2,1][l];
 const TAX=[10,8,6,4];
 const OFF_FRAC=[.1,.3,.6,1], OFF_H=[1,3,6,10];
@@ -288,8 +299,8 @@ const UPG=[
  {id:'entrepot',name:'Entrepôt',max:12,cost:l=>150*5**l,desc:l=>`Capacité ${fmt(cap(l))} → ${fmt(cap(l+1))} unités`},
  {id:'flair',name:'Flair du marché',max:1,cost:()=>2500,desc:()=>'Montre la tendance et si le prix est bas ou haut'},
  {id:'nego',name:'Négociateur',max:3,cost:l=>[800,25000,6e5][l],desc:l=>`Commission ${fee(l)} % → ${fee(l+1)} %`},
- {id:'marketing',name:'Campagne publicitaire',max:12,cost:l=>3000*11**l,desc:()=>'Revenus des commerces ×1,5 (salaires aussi)'},
- {id:'formation',name:'Formation du personnel',max:5,cost:l=>4000*9**l,desc:()=>'Employés 20 % plus efficaces'},
+ {id:'marketing',name:'Campagne publicitaire',max:12,cost:l=>BAL.mkCost[0]*BAL.mkCost[1]**l,desc:()=>`Revenus des commerces ×${String(BAL.mk).replace('.',',')} (salaires et consommation aussi)`},
+ {id:'formation',name:'Formation du personnel',max:5,cost:l=>4000*9**l,desc:()=>'Employés 10 % plus efficaces'},
  {id:'rh',name:'Service RH',max:3,cost:l=>[6000,4e5,3e7][l],desc:()=>'Les employés perdent leur bonne humeur 25 % moins vite'},
  {id:'preventif',name:'Entretien préventif',max:4,cost:l=>2000*12**l,desc:()=>'20 % de pannes en moins'},
  {id:'outils',name:'Outils de pro',max:3,cost:l=>[3000,2e5,2e7][l],desc:()=>'Réparations 50 % plus rapides'},
@@ -360,6 +371,9 @@ const UI_SKINS=[
  {id:'foret',n:'Forêt',d:'Vert, bois et nature',c:8,sw:['#eef2e6','#3f8a4c','#c8902a']},
  {id:'nuit',n:'Néon de nuit',d:'Violet, rose et cyan électrique',c:12,sw:['#0b0a1f','#ff4fd8','#3ef0ff']},
  {id:'luxe',n:'Or et charbon',d:'Noir profond et dorures',c:18,sw:['#121110','#d8b45a','#f0cf7a']},
+ {id:'royal',n:'Royal',d:'Pourpre et or des rois',cr:4,sw:['#1b1030','#b48cff','#ffd36b']},
+ {id:'ocean',n:'Océan',d:'Bleu profond et écume',cr:5,sw:['#eaf5fb','#1f7fb5','#2ec4b6']},
+ {id:'sakura',n:'Sakura',d:'Cerisiers en fleurs',cr:6,sw:['#fff4f6','#d9467a','#7aa35a']},
 ];
 const CITY_SKINS=[
  {id:'normal',n:'Naturel',d:'Les couleurs d\u2019origine',c:0,f:'none',sw:['#e2473a','#5aa3c9','#43a047']},
@@ -367,7 +381,20 @@ const CITY_SKINS=[
  {id:'retro',n:'Carte postale',d:'Comme une vieille photo',c:8,f:'sepia(.55) saturate(1.25) contrast(1.05)',sw:['#c9935a','#a98a6a','#d8b37a']},
  {id:'bonbon',n:'Bonbon',d:'Rose, violet et acidulé',c:10,f:'hue-rotate(290deg) saturate(1.4)',sw:['#ff6fae','#b57bff','#ffd16b']},
  {id:'neon',n:'Cyber-ville',d:'Teintes futuristes',c:14,f:'hue-rotate(185deg) saturate(1.8) contrast(1.15)',sw:['#28e0ff','#ff3fd0','#7c4dff']},
+ {id:'dore',n:'Âge d\u2019or',d:'Tout baigne dans une lumière dorée',cr:4,f:'sepia(.35) saturate(1.6) hue-rotate(-12deg) brightness(1.05)',sw:['#f2c14e','#e08a3c','#c9a227']},
+ {id:'glace',n:'Royaume de glace',d:'Une ville bleutée et givrée',cr:5,f:'saturate(.5) hue-rotate(160deg) brightness(1.1)',sw:['#bfe6ff','#8fb8de','#eef8ff']},
+ {id:'nb',n:'Cinéma muet',d:'Noir et blanc élégant',cr:3,f:'grayscale(1) contrast(1.15)',sw:['#222222','#888888','#eeeeee']},
 ];
+const TITLES=[
+ {id:'',n:'Aucun',cr:0},
+ {id:'baron',n:'Baron',cr:3},
+ {id:'comte',n:'Comte',cr:6},
+ {id:'duc',n:'Duc',cr:10},
+ {id:'prince',n:'Prince',cr:15},
+ {id:'roi',n:'Roi',cr:22},
+ {id:'empereur',n:'Empereur',cr:30},
+];
+const crownGain=g=>2+g;
 const CHALLENGES=[
  {id:'c3',t:'Livre 3 commandes de clients',k:'contracts',n:()=>3},
  {id:'trade',t:'Fais du bénéfice au marché',k:'tradeProfit',n:()=>Math.max(500,Math.round(incAll()*300))},
@@ -376,7 +403,7 @@ const CHALLENGES=[
  {id:'ops',t:'Attrape 4 pièces dorées',k:'ops',n:()=>4},
  {id:'sell',t:'Réussis 8 ventes avec bénéfice',k:'sold',n:()=>8},
  {id:'repair',t:'Répare 4 pannes',k:'repairs',n:()=>4},
- {id:'craft',t:'Transforme 40 produits',k:'crafted',n:()=>40,cond:()=>lvl('boul')>0},
+ {id:'craft',t:'Fais consommer 40 marchandises à tes commerces',k:'crafted',n:()=>40},
 ];
 
 /* ---------- accès rapides ---------- */
@@ -398,7 +425,7 @@ const GOALS=[
  {id:'contract1',t:'Livraison express',d:'Livrer une commande de client',ok:()=>S.contractsDone>=1},
  {id:'repair1',t:'Ça roule',d:'Réparer une panne',ok:()=>S.cnt.repairs>=1},
  {id:'boul',t:'Bon pain',d:'Ouvrir une boulangerie',ok:()=>lvl('boul')>=1},
- {id:'craft1',t:'Fait maison',d:'Transformer un premier produit',ok:()=>S.cnt.crafted>=1},
+ {id:'craft1',t:'Fait maison',d:'Faire tourner un commerce avec ses marchandises',ok:()=>S.cnt.crafted>=1},
  {id:'debt',t:'Dans le rouge',d:'Passer sous 0 € (ça arrive aux meilleurs)',ok:()=>S.cash<0},
  {id:'loan',t:'À crédit',d:'Emprunter à la banque du village',ok:()=>S.loan>0},
  {id:'streak3',t:'Habitué',d:'Jouer 3 jours d’affilée',ok:()=>S.streak.n>=3},
@@ -432,8 +459,33 @@ const GOALS=[
  {id:'adj',t:'Bon voisinage',d:'Obtenir +20 % de bonus de voisinage sur un commerce',ok:()=>BIZ.some(b=>lvl(b.id)&&adjOf(b.id)>=1.2)},
  {id:'city2',t:'Expansion',d:'Fonder une deuxième ville',ok:()=>Object.keys(S.cities).length>=2},
  {id:'city4',t:'Empire régional',d:'Posséder les quatre villes',ok:()=>Object.keys(S.cities).length>=4},
- {id:'her50',t:'Légende',d:'Cumuler 50 points d’héritage',ok:()=>S.heritage>=50},
+ {id:'her50',t:'Légende',d:'Cumuler 10 points d’héritage',cr:3,ok:()=>S.heritage>=10},
+ {id:'flip3',t:'Coup du siècle',d:'Revendre au triple de ton prix d’achat',cr:2,ok:()=>S.bestFlip>=3},
+ {id:'sold100',t:'Marchand de quartier',d:'Réussir 100 reventes avec bénéfice',ok:()=>S.cnt.sold>=100},
+ {id:'trade1m',t:'Loup de la bourse',d:'Cumuler 1 M€ de bénéfices en bourse',cr:2,ok:()=>S.cnt.tradeProfit>=1e6},
+ {id:'hires50',t:'Chasseur de têtes',d:'Embaucher 50 personnes au total',ok:()=>S.cnt.hires>=50},
+ {id:'emp5',t:'Employé du mois',d:'Faire monter un employé au niveau 5',ok:()=>forCities(c=>BIZ.some(b=>(c.staff[b.id]||[]).some(e=>e.lv>=5))?1:0)>0},
+ {id:'mgr5',t:'Bien entouré',d:'Avoir 5 gérants en même temps',cr:2,ok:()=>forCities(c=>BIZ.filter(b=>(c.staff[b.id]||[]).some(e=>e.mgr)).length)>=5},
+ {id:'ops100',t:'Collectionneur',d:'Attraper 100 pièces dorées',cr:2,ok:()=>S.ops>=100},
+ {id:'crisis5',t:'Pompier de l’économie',d:'Régler 5 crises',cr:2,ok:()=>S.cnt.crisesFixed>=5},
+ {id:'wins3',t:'Faiseur de rois',d:'Faire élire ton candidat 3 fois',cr:2,ok:()=>S.cnt.wins>=3},
+ {id:'repair50',t:'Garage du coin',d:'Réparer 50 pannes',ok:()=>S.cnt.repairs>=50},
+ {id:'contract50',t:'Logisticien',d:'Livrer 50 commandes',cr:2,ok:()=>S.contractsDone>=50},
+ {id:'daily20',t:'Défi permanent',d:'Réussir 20 défis du jour',cr:2,ok:()=>S.cnt.dailies>=20},
+ {id:'streak7',t:'Fidèle au poste',d:'Jouer 7 jours d’affilée',cr:2,ok:()=>S.streak.n>=7},
+ {id:'streak30',t:'Pilier de la ville',d:'Jouer 30 jours d’affilée',cr:5,ok:()=>S.streak.n>=30},
+ {id:'rival3',t:'Monopole',d:'Racheter 3 concurrents',cr:2,ok:()=>forCities(c=>c.absorbed||0)>=3},
+ {id:'paradis',t:'Paradis urbain',d:'Satisfaction 120 % avec 2 000 visiteurs',cr:2,ok:()=>satisfaction()>=1.2&&visitors()>=2000},
+ {id:'allbiz',t:'Collection complète',d:'Posséder les 13 commerces dans une même partie',cr:3,ok:()=>BIZ.every(b=>forCities(c=>(c.biz[b.id]||0)>0?1:0)>0)},
+ {id:'tour10',t:'Forêt de gratte-ciel',d:'Construire 10 Tours Empire',cr:3,ok:()=>forCities(c=>c.biz.tour||0)>=10},
+ {id:'t1',t:'Mille milliards',d:'Gagner 1 000 Md€ dans une partie',cr:3,ok:()=>S.run.earned>=1e12},
+ {id:'fast',t:'Ascension éclair',d:'Céder ton empire moins de 15 min après le début de la partie',cr:3,ok:()=>S.cnt.fast>=1},
+ {id:'her3',t:'Lignée',d:'Céder ton empire 3 fois',cr:2,ok:()=>S.prestiges>=3},
+ {id:'her10',t:'Dynastie royale',d:'Céder ton empire 10 fois',cr:5,ok:()=>S.prestiges>=10},
+ {id:'style5',t:'Fashionista',d:'Posséder 5 styles',ok:()=>Object.keys(S.skins.ui).length+Object.keys(S.skins.city).length>=5},
+ {id:'noble',t:'Anobli',d:'Obtenir un titre de noblesse',ok:()=>Object.keys(S.titles||{}).length>=1},
 ];
+const goalCr=g=>g.cr||1;
 const NEWS=[
  {g:'ble',d:1,t:'Sécheresse dans la Beauce : le blé s’arrache.'},
  {g:'ble',d:-1,t:'Récolte record, les silos débordent de blé.'},
@@ -572,7 +624,7 @@ const CITIES=[
 ];
 const CITY=id=>CITIES.find(c=>c.id===id)||CITIES[0];
 const GRID=64,GW=8;
-function newCity(id,clock){return {id,biz:{},staff:{},infra:{},broken:[],techs:0,nextBreak:(clock||40)+120,rivals:{},absorbed:0,craft:{},craftAcc:{},buffs:{},open:null,priceWar:0,grid:Array(GRID).fill(null),adj:{}}}
+function newCity(id,clock){return {id,stock:{},supply:{},dry:{},biz:{},staff:{},infra:{},broken:[],techs:0,nextBreak:(clock||40)+120,rivals:{},absorbed:0,craft:{},craftAcc:{},buffs:{},open:null,priceWar:0,price:{},grid:Array(GRID).fill(null),adj:{}}}
 function setS(n){S=n;C=S.cities[S.city]||S.cities.village;MEMO={}}
 function forCities(fn){const keep=C;let r=0;for(const id of Object.keys(S.cities)){C=S.cities[id];const v=fn(C);if(typeof v==='number')r+=v}C=keep;return r}
 let MEMO={};
@@ -581,10 +633,10 @@ function newGood(g){const st={x:(Math.random()-.5)*.5,drift:0,dt:0,inv:0,cost:0,
 function newEmp(){return {id:uid(),n:pick(NAMES),t:wpick(TRAIT_W),lv:1,xp:0,worked:0,mood:75+Math.random()*20,raise:1,mgr:false,ask:false,askUntil:0,known:false,strike:false}}
 function fresh(k){
   const c=k?k.clock:40;
-  const s={v:1,cash:50,run:{earned:0},life:k?k.life:0,heritage:k?k.heritage:0,goals:k?k.goals:{},ops:k?k.ops:0,
-    prestiges:k?k.prestiges:0,helpSeen:k?k.helpSeen:false,contractsDone:k?k.contractsDone:0,
+  const s={v:1,cash:50,run:{earned:0,t0:c},life:k?k.life:0,heritage:k?k.heritage:0,goals:k?k.goals:{},ops:k?k.ops:0,
+    goalCrowns:1,prestiges:k?k.prestiges:0,crowns:k?k.crowns:0,titles:k?k.titles:{},title:k?k.title:'',helpSeen:k?k.helpSeen:false,contractsDone:k?k.contractsDone:0,
     stars:k?k.stars:0,decos:k?k.decos:{},unl:k?k.unl:{},skins:k?k.skins:{ui:{classique:1},city:{normal:1}},streak:k?k.streak:{last:'',n:0},daily:k?k.daily:null,
-    cnt:k?k.cnt:{contracts:0,tradeProfit:0,hires:0,infra:0,ops:0,sold:0,repairs:0,crafted:0,wins:0,crisesFixed:0,dailies:0,moves:0},
+    cnt:k?k.cnt:{fast:0,contracts:0,tradeProfit:0,hires:0,infra:0,ops:0,sold:0,repairs:0,crafted:0,wins:0,crisesFixed:0,dailies:0,moves:0},
     goods:{},upg:{},clock:c,bestFlip:0,sold:0,cities:{village:newCity('village',c)},city:'village',travel:null,view:'rue',isoSeen:1,todoAll:false,todoHide:false,
     nextOp:c+25,nextNews:c+20,nextContract:c+35,contracts:[],boost:{m:1,until:0},mode:1,newGoal:false,
     loan:0,dayIdx:Math.floor(c/DAY),dayStats:{gross:0,trade:0,sal:0,maint:0,int:0},lastDay:null,inDebt:false,mTimer:MT,
@@ -593,7 +645,7 @@ function fresh(k){
   for(const g of GOODS)s.goods[g.id]=newGood(g);
   return s;
 }
-const CITY_KEYS=['biz','staff','infra','broken','techs','nextBreak','rivals','absorbed','craft','craftAcc','buffs','open','priceWar'];
+const CITY_KEYS=['stock','supply','dry','biz','staff','infra','broken','techs','nextBreak','rivals','absorbed','craft','craftAcc','buffs','open','priceWar','price'];
 function migrate(s){
   const f=Object.assign(fresh(),s);
   for(const g of GOODS)if(!f.goods[g.id])f.goods[g.id]=newGood(g);
@@ -602,7 +654,7 @@ function migrate(s){
   for(const k of CITY_KEYS)delete f[k];
   for(const id of Object.keys(f.cities)){
     const c=Object.assign(newCity(id,f.clock),f.cities[id]);f.cities[id]=c;
-    for(const k of['staff','infra','biz','rivals','craft','craftAcc','buffs','adj'])if(!c[k]||typeof c[k]!=='object'||Array.isArray(c[k]))c[k]={};
+    for(const k of['stock','supply','dry','staff','infra','biz','rivals','craft','craftAcc','buffs','adj','price'])if(!c[k]||typeof c[k]!=='object'||Array.isArray(c[k]))c[k]={};
     for(const sid in c.staff){const v=c.staff[sid];if(typeof v==='number')c.staff[sid]=Array.from({length:v},newEmp);else if(!Array.isArray(v))c.staff[sid]=[]}
     if(!Array.isArray(c.broken))c.broken=[];
     if(Array.isArray(c.grid)&&c.grid.length===36){const ng=Array(GRID).fill(null);c.grid.forEach((it,i)=>{if(it)ng[(Math.floor(i/6)+1)*GW+(i%6)+1]=it});c.grid=ng}
@@ -612,6 +664,9 @@ function migrate(s){
   f.travel=null;
   if(f.view==='iso')f.view='rue';
   if(!f.skins||!f.skins.ui)f.skins={ui:{classique:1},city:{normal:1}};
+  if(s.crowns==null)f.crowns=2*(f.prestiges||0)+(f.heritage||0);
+  if(!f.titles||typeof f.titles!=='object')f.titles={};
+  if(!s.goalCrowns){f.crowns=(f.crowns||0)+GOALS.filter(g=>f.goals&&f.goals[g.id]).reduce((a,g)=>a+goalCr(g),0);f.goalCrowns=1}
   if(!f.goalStars){f.stars=(f.stars||0)+Object.keys(f.goals||{}).length;f.goalStars=1}
   f.cnt=Object.assign(fresh().cnt,f.cnt||{});
   if(!f.streak)f.streak={last:'',n:0};
@@ -625,10 +680,10 @@ function migrate(s){
 }
 function stepGood(g,st){
   const tgt=S?(SEASONS[season()].good[g.id]||0):0;
-  st.x+=-.06*(st.x-tgt)+(st.dt>0?st.drift:0)+randn()*g.vol;
+  st.x+=-.06/MK*(st.x-tgt)+(st.dt>0?st.drift/MK:0)+randn()*g.vol/Math.sqrt(MK);
   if(st.dt>0)st.dt--;
   st.x=Math.max(-1.25,Math.min(1.25,st.x));
-  st.hist.push(g.base*Math.exp(st.x)); if(st.hist.length>48)st.hist.shift();
+  st.hist.push(g.base*Math.exp(st.x)); if(st.hist.length>60)st.hist.shift();
 }
 function load(){try{const r=localStorage.getItem(KEY);if(r){const s=JSON.parse(r);if(s&&s.v===1){setS(migrate(s));return true}}}catch(e){console.error(e)}setS(fresh());return false}
 function save(){S.t=Date.now();try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
@@ -645,13 +700,13 @@ const capacity=()=>cap(S.upg.entrepot||0);
 const used=()=>GOODS.reduce((a,g)=>a+S.goods[g.id].inv,0);
 const goalCount=()=>Object.keys(S.goals).length;
 const bizMult=l=>MILES.reduce((m,t)=>l>=t?m*2:m,1);
-const mkMult=()=>1.5**(S.upg.marketing||0);
+const mkMult=()=>BAL.mk**(S.upg.marketing||0);
 const decoBonus=()=>1+DECOS.reduce((a,d)=>a+(S.decos[d.id]?d.b:0),0);
 const permMult=()=>(1+.1*S.heritage)*(1+.02*goalCount())*decoBonus();
 const sellBonus=()=>1+.05*S.heritage;
 const staffMax=b=>lvl(b.id)?Math.min(12,1+Math.floor(lvl(b.id)/10)):0;
 const baseProd=b=>{const l=lvl(b.id);return l?b.rate*l*bizMult(l):0};
-const empEff=()=>1+.2*(S.upg.formation||0);
+const empEff=()=>(1+BAL.form*(S.upg.formation||0))*BAL.emp;
 const empBonusOne=e=>e.mood<25?0:(TRAITS[e.t].b+.05*(e.lv-1))*empEff();
 const empBonus=b=>(C.staff[b.id]||[]).reduce((a,e)=>a+empBonusOne(e),0);
 const hasMgr=b=>(C.staff[b.id]||[]).some(e=>e.mgr);
@@ -673,7 +728,7 @@ function bizLocal(b){
 function visitors(){return memo('v',()=>{let v=0;BIZ.forEach((b,i)=>v+=lvl(b.id)*1.55**i*1.5);v+=totalStaff()*2;return v*(S.law==='tourisme'?1.25:1)})}
 function needCap(n){return memo('n'+n,()=>INFRA.reduce((a,i)=>{if(i.need!==n)return a;let c=Math.max(0,cnt(i.id)-broken('infra',i.id))*i.cap;if(S.law==='ecolo'&&(i.id==='parc'||i.id==='banc'))c*=2;return a+c},0)*(n==='sec'&&S.law==='securite'?1.5:1))}
 function needSat(n){const w=(WEATHER[S.weather].need||{})[n]||1;return Math.min(1.25,(needCap(n)+25)/Math.max(1,visitors()*w))}
-function satisfaction(){return memo('s',()=>NEEDS.reduce((a,n)=>a+needSat(n.id),0)/NEEDS.length)}
+function satisfaction(){return memo('s',()=>NEEDS.reduce((a,n)=>a+needSat(n.id),0)/NEEDS.length*priceMood())}
 function satMult(){const s=satisfaction();return .45+.65*Math.min(s,1)+Math.max(0,s-1)*.8}
 const debtMult=()=>S.cash<0?.7:1;
 const rivalShops=()=>Object.values(C.rivals).reduce((a,r)=>a+(r.shops||0),0);
@@ -682,9 +737,45 @@ const crisisMult=()=>S.crisis?CRISES[S.crisis.id].inc():1;
 const absorbMult=()=>Math.min(1.5,1+.01*C.absorbed);
 let PM=1; // multiplicateur de production commun, recalculé à chaque image
 function calcPM(){PM=mkMult()*permMult()*S.boost.m*satMult()*debtMult()*WEATHER[S.weather].inc*rivalMult()*crisisMult()*absorbMult()*(C.priceWar>S.clock?.8:1);return PM}
-const bizIncome=b=>baseProd(b)*(1+empBonus(b))*bizLocal(b)*PM;
+/* Chaque commerce consomme une marchandise pour produire */
+const INPUT={crepe:'ble',kiosque:'cafe',boul:'ble',brasserie:'cafe',cinema:'cafe',atelier:'soie',hotel:'soie',port:'cuivre',centre:'safran',banque:'or',bourse:'or',aeroport:'parfum',tour:'diamant'};
+const USE_K=.25,STOCK_MIN=10;
+const goodOf=b=>GOODS.find(g=>g.id===INPUT[b.id]);
+const needRate=b=>demand(b)*baseProd(b)*(1+empBonus(b))*(BAL.cons?mkMult():1)*USE_K/goodOf(b).base;
+const stockCap=b=>Math.max(STOCK_MIN,Math.ceil(needRate(b)*600));
+const stockOf=b=>C.stock[b.id]||0;
+const supOf=b=>C.supply[b.id]||(C.supply[b.id]={auto:true,buy:false});
+const isDry=b=>lvl(b.id)>0&&stockOf(b)<=1e-6;
+/* Prix de vente choisi par le joueur (1 = prix normal) */
+const PRICE_K=.7,PRICE_MIN=.5,PRICE_MAX=2.5;
+const refPrice=b=>memo('rp'+b.id,()=>{const g=goodOf(b),h=S.goods[g.id].hist.slice(-24),avg=h.reduce((a,x)=>a+x,0)/Math.max(1,h.length)*cityPrice(g.id);return Math.min(1.4,Math.max(.8,Math.sqrt(avg/g.base)))});
+const priceP=b=>(C.price&&C.price[b.id])||1;
+const priceRatio=b=>priceP(b)/refPrice(b);
+const demand=b=>Math.exp(-PRICE_K*(priceRatio(b)-1));
+const priceMult=b=>priceP(b)*demand(b);
+const MOODS=[[.9,'😍','ravis'],[1.1,'🙂','contents'],[1.35,'😐','râlent un peu'],[1.7,'😠','mécontents'],[99,'🤬','furieux']];
+const custMood=b=>MOODS.find(m=>priceRatio(b)<=m[0]);
+function priceMood(){return memo('pm',()=>{let w=0,a=0;for(const b of BIZ){const l=lvl(b.id);if(!l)continue;w+=l;a+=l*priceRatio(b)}return w?Math.min(1.1,Math.max(.75,1-.3*(a/w-1))):1})}
+function setPrice(id,v){const b=BIZ.find(x=>x.id===id);if(!b)return;C.price=C.price||{};let p=v==='ref'?Math.round(refPrice(b)*20)/20:Math.round((priceP(b)+(+v))*100)/100;C.price[id]=Math.min(PRICE_MAX,Math.max(PRICE_MIN,p));MEMO={};sfx('buy');build('biz')}
+const dryPct=()=>Math.round((1-BAL.dry)*100);
+const bizIncome=b=>(isDry(b)?BAL.dry:1)*priceMult(b)*baseProd(b)*(1+empBonus(b))*bizLocal(b)*PM;
+function moveToStock(b,max){const g=goodOf(b),st=S.goods[g.id],room=stockCap(b)-stockOf(b),n=Math.min(st.inv,room,max==null?Infinity:max);if(n<=0)return 0;const avg=st.cost/st.inv;st.inv-=n;st.cost-=avg*n;if(st.inv<1e-6){st.inv=0;st.cost=0}C.stock[b.id]=stockOf(b)+n;return n}
+const fillCost=b=>{const n=Math.max(0,Math.ceil(stockCap(b)-stockOf(b)));return {n,c:n*priceOf(goodOf(b))*(1+curFee())}};
+function tickSupply(dt){
+  for(const b of BIZ){if(!lvl(b.id))continue;const sp=supOf(b),cap=stockCap(b),g=goodOf(b);
+    if(C.stock[b.id]==null)C.stock[b.id]=cap;
+    if(sp.auto&&stockOf(b)<cap*.5)moveToStock(b);
+    if(sp.buy&&stockOf(b)<cap*.25&&S.cash>0){const n=Math.min(Math.ceil(cap-stockOf(b)),Math.floor(S.cash/(priceOf(g)*1.15)));if(n>0){S.cash-=n*priceOf(g)*1.15;C.stock[b.id]=stockOf(b)+n}}
+    const use=Math.min(stockOf(b),needRate(b)*dt*(broken('biz',b.id)?.2:1));C.stock[b.id]=stockOf(b)-use;S.cnt.crafted+=use;
+    if(stockOf(b)<=1e-6){if(!C.dry[b.id]){C.dry[b.id]=1;setNews('Stock',`${where()}${b.name} n\u2019a plus de ${g.name.toLowerCase()} : il tourne au ralenti (−${dryPct()} % de revenus). Achète-en au marché !`);sfx('alert');vib(50)}}
+    else if(C.dry[b.id])C.dry[b.id]=0;
+  }
+}
+function restock(id){const b=BIZ.find(x=>x.id===id),g=goodOf(b);if(travelling())return;const n=moveToStock(b);if(n<=0)return toast(S.goods[g.id].inv<1?`Plus de ${g.name.toLowerCase()} dans ton entrepôt : achète-en au marché.`:'Le stock est déjà plein.');sfx('buy');toast(`${b.name} : +${fmt(Math.floor(n))} ${pl(n,g.unit)} de ${g.name.toLowerCase()}`)}
+function buySupply(id){const b=BIZ.find(x=>x.id===id),g=goodOf(b);if(travelling())return;const unit=priceOf(g)*(1+curFee()),n=Math.min(Math.ceil(stockCap(b)-stockOf(b)),Math.floor(Math.max(0,S.cash)/unit));if(n<=0)return toast(stockOf(b)>=stockCap(b)?'Le stock est déjà plein.':'Pas assez d\u2019argent.');if(!confirmBig('sup'+id,n*unit,`${fmt(n)} ${pl(n,g.unit)} de ${g.name.toLowerCase()}`))return;S.cash-=n*unit;C.stock[b.id]=stockOf(b)+n;sfx('buy');toast(`${b.name} réapprovisionné : ${fmt(n)} ${pl(n,g.unit)} pour ${eur(n*unit)}`)}
+function setSupply(id,m){const b=BIZ.find(x=>x.id===id),sp=supOf(b);sp[m]=!sp[m];toast(m==='auto'?(sp.auto?'Réappro auto depuis l\u2019entrepôt : activé':'Réappro auto : désactivé'):(sp.buy?'Commande auto au marché (+15 %) : activée':'Commande auto : désactivée'));build('biz')}
 const grossIncome=()=>BIZ.reduce((a,b)=>a+bizIncome(b),0);
-const maintMult=()=>(1+totalLv()/60)*(S.law==='tourisme'?1.25:1)*((S.crisis&&CRISES[S.crisis.id].maint)||1);
+const maintMult=()=>(1+totalLv()/BAL.maint)*(S.law==='tourisme'?1.25:1)*((S.crisis&&CRISES[S.crisis.id].maint)||1);
 const maintenance=()=>INFRA.reduce((a,i)=>a+cnt(i.id)*i.maint,0)*maintMult();
 const techWage=()=>1+totalLv()*.04+grossIncome()*.004;
 const techCost=()=>Math.round(80+grossIncome()*20*1.25**C.techs);
@@ -697,10 +788,11 @@ const incAll=()=>Math.max(GROSS_ALL,grossIncome());
 function allGross(){const r=forCities(()=>{calcPM();return grossIncome()});calcPM();return r}
 function allCosts(){const r=forCities(()=>{calcPM();return salaries()+maintenance()+techPay()})+interest();calcPM();return r}
 const taxRate=()=>Math.max(0,TAX[S.upg.comptable||0]-(S.law==='impots'?4:0))/100;
-const unlockedGoods=()=>GOODS.filter(g=>S.run.earned>=g.unlock||S.goods[g.id].inv>=1);
+const usedGoods=()=>{const u=new Set();for(const id in S.cities){const c=S.cities[id];for(const b of BIZ)if((c.biz[b.id]||0)>0)u.add(INPUT[b.id])}return u};
+const unlockedGoods=()=>{const u=usedGoods();return GOODS.filter(g=>S.run.earned>=g.unlock||S.goods[g.id].inv>=1||u.has(g.id))};
 const bizDisc=()=>.94**(S.upg.immo||0);
-function bizCost(b,n){const l=lvl(b.id);return b.cost*bizDisc()*1.15**l*(1.15**n-1)/.15}
-function bizMax(b){const l=lvl(b.id);return Math.max(0,Math.floor(Math.log(Math.max(0,S.cash)*.15/(b.cost*bizDisc()*1.15**l)+1)/Math.log(1.15)))}
+function bizCost(b,n){const l=lvl(b.id),g=BAL.grow;return b.cost*bizDisc()*g**l*(g**n-1)/(g-1)}
+function bizMax(b){const l=lvl(b.id),g=BAL.grow;return Math.max(0,Math.floor(Math.log(Math.max(0,S.cash)*(g-1)/(b.cost*bizDisc()*g**l)+1)/Math.log(g)))}
 const bizQty=b=>S.mode==='max'?Math.max(1,bizMax(b)):S.mode;
 const hireCost=b=>20+baseProd(b)*mkMult()*25*1.3**stf(b.id);
 const infraCost=i=>i.cost*1.22**cnt(i.id)*(S.law==='travaux'?.7:1);
@@ -747,7 +839,7 @@ function buyBiz(id){
   if(c>S.cash)return;
   if(!confirmBig('b'+id,c,`${b.name} ×${n}`))return;
   const before=bizMult(lvl(id));
-  S.cash-=c;C.biz[id]=lvl(id)+n;sfx('buy');
+  const wasNew=!lvl(id);S.cash-=c;C.biz[id]=lvl(id)+n;sfx('buy');if(wasNew){C.stock[id]=Math.ceil(stockCap(b)*.4);setNews('Stock',`${b.name} ouvert avec un petit stock de ${goodOf(b).name.toLowerCase()}. Pense à en racheter au marché !`)}
   if(bizMult(lvl(id))>before){toast(`${b.name} : palier atteint, production ×2 !`);sfx('level');celebrate()}
   else if(lvl(id)%10===0)toast(`${b.name} : une place de plus pour embaucher`);
   build('biz');
@@ -786,16 +878,20 @@ function buyUpg(id){
 function buyDeco(id){const d=DECOS.find(x=>x.id===id);if(S.decos[id]||S.stars<d.c)return;S.stars-=d.c;S.decos[id]=1;sfx('level');toast(`${d.n} installée ! +${Math.round(d.b*100)} % de revenus pour toujours.`);build('goals')}
 function useSkin(kind,id){
   const list=kind==='ui'?UI_SKINS:CITY_SKINS,k=list.find(x=>x.id===id),own=S.skins[kind];if(!k)return;
-  if(!own[id]){if(S.stars<k.c)return toast(`Il te faut ${k.c} étoiles.`);S.stars-=k.c;own[id]=1;sfx('level');celebrate();toast(`Style « ${k.n} » débloqué !`)}
+  if(!own[id]){if(k.cr){if((S.crowns||0)<k.cr)return toast(`Il te faut ${k.cr} couronnes ♛.`);S.crowns-=k.cr}else{if(S.stars<k.c)return toast(`Il te faut ${k.c} étoiles.`);S.stars-=k.c}own[id]=1;sfx('level');celebrate();toast(`Style « ${k.n} » débloqué !`)}
   if(kind==='ui')SET.skin=id;else SET.cskin=id;saveSet();applyTheme();BC.key='';build(tab);
 }
+const canPay=k=>k.cr?(S.crowns||0)>=k.cr:S.stars>=(k.c||0);
+const priceTag=k=>k.cr?k.cr+' ♛':k.c+' ★';
+function useTitle(id){const t=TITLES.find(x=>x.id===id);if(!t)return;S.titles=S.titles||{};if(t.cr&&!S.titles[id]){if((S.crowns||0)<t.cr)return toast(`Il te faut ${t.cr} couronnes ♛.`);S.crowns-=t.cr;S.titles[id]=1;sfx('level');celebrate();toast(`Tu es maintenant ${t.n} !`)}S.title=id;save();build(tab)}
+const titleName=()=>{const t=TITLES.find(x=>x.id===S.title);return t&&t.id?t.n:''};
 function toggleCraft(id){C.craft[id]=!C.craft[id];build('market')}
 /* ---------- commandes ---------- */
 function genContract(){
   const un=unlockedGoods(),g=pick(un);
   const budget=Math.max(150,(Math.max(0,S.cash)+incAll()*120)*(.25+Math.random()*.6));
   const qty=Math.max(3,Math.min(Math.floor(capacity()*.6),Math.round(budget/g.base)));
-  const reward=qty*g.base*(1.45+Math.random()*.6)*(1+.25*(S.upg.vip||0));
+  const reward=qty*g.base*(BAL.contract[0]+Math.random()*BAL.contract[1])*(1+.25*(S.upg.vip||0));
   const c={id:'c'+uid(),g:g.id,qty,reward,until:S.clock+300+Math.random()*300,who:pick(CLIENTS)};
   S.contracts.push(c);S.nextContract=S.clock+80+Math.random()*80;
   setNews('Commande',`${c.who} veut ${qty} ${pl(qty,g.unit)} de ${g.name.toLowerCase()}. Regarde le marché !`);
@@ -816,7 +912,7 @@ const buyoutCost=rid=>Math.round(C.rivals[rid].shops*(grossIncome()*30+500)*(1+.
 function rivalAction(rid,a){
   const r=C.rivals[rid],R=RIVALS.find(x=>x.id===rid);if(!r)return;
   if(a==='war'){const c=Math.round(grossIncome()*90+200);if(c>S.cash)return toast('Pas assez d’argent.');S.cash-=c;r.shops=Math.floor(r.shops*.6);C.priceWar=S.clock+60;sfx('alert');toast(`Guerre des prix contre ${R.n} : ses boutiques reculent, mais tes revenus baissent de 20 % pendant 1 min.`)}
-  else if(a==='spy'){const c=Math.round(grossIncome()*45+100);if(c>S.cash)return toast('Pas assez d’argent.');S.cash-=c;const g=pick(unlockedGoods());const st=S.goods[g.id];st.drift=.12;st.dt=5;setNews('Espion',`Ton espion chez ${R.n} : ils vont acheter tout le ${g.name.toLowerCase()} de la région. Le prix va monter !`);toast('Rapport de ton espion dans les nouvelles.')}
+  else if(a==='spy'){const c=Math.round(grossIncome()*45+100);if(c>S.cash)return toast('Pas assez d’argent.');S.cash-=c;const g=pick(unlockedGoods());const st=S.goods[g.id];st.drift=.12;st.dt=Math.round(5*MK);setNews('Espion',`Ton espion chez ${R.n} : ils vont acheter tout le ${g.name.toLowerCase()} de la région. Le prix va monter !`);toast('Rapport de ton espion dans les nouvelles.')}
   else if(a==='buy'){const c=buyoutCost(rid);if(c>S.cash)return toast('Pas assez d’argent.');if(!confirmBig('r'+rid,c,`Racheter ${R.n}`))return;S.cash-=c;C.absorbed+=r.shops;toast(`Tu as racheté ${r.shops} boutiques de ${R.n} ! +${r.shops} % de revenus.`);r.shops=0;r.bought=(r.bought||0)+1;r.pause=S.dayIdx+5;sfx('level')}
   build('city');
 }
@@ -834,15 +930,16 @@ function runElection(){
   newElection();
 }
 /* ---------- héritage ---------- */
-const heritageReq=()=>1e6*3**(S.prestiges||0);
+const heritageReq=()=>BAL.req*BAL.reqX**(S.prestiges||0);
 function heritageGain(){const r=heritageReq();return S.run.earned<r?0:Math.max(1,Math.floor(Math.sqrt(S.run.earned/r)))}
 let cedeArmed=0;
 function cede(){
   const g=heritageGain();if(g<1)return;
+  const quick=S.run.t0!=null&&S.clock-S.run.t0<900;
   if(Date.now()-cedeArmed>4000){cedeArmed=Date.now();refresh();return}
-  const keep={life:S.life,heritage:S.heritage+g,goals:S.goals,ops:S.ops,prestiges:S.prestiges+1,helpSeen:true,clock:S.clock,contractsDone:S.contractsDone,stars:S.stars,decos:S.decos,skins:S.skins,unl:S.unl,streak:S.streak,daily:S.daily,cnt:S.cnt};
-  setS(fresh(keep));cedeArmed=0;newElection();
-  toast(`Empire cédé. +${g} points d’héritage : tout rapporte plus !`);sfx('level');celebrate();
+  const keep={life:S.life,heritage:S.heritage+g,goals:S.goals,ops:S.ops,prestiges:S.prestiges+1,crowns:(S.crowns||0)+crownGain(g),titles:S.titles||{},title:S.title||'',helpSeen:true,clock:S.clock,contractsDone:S.contractsDone,stars:S.stars,decos:S.decos,skins:S.skins,unl:S.unl,streak:S.streak,daily:S.daily,cnt:S.cnt};
+  setS(fresh(keep));if(quick)S.cnt.fast=(S.cnt.fast||0)+1;cedeArmed=0;newElection();
+  toast(`Empire cédé. +${g} point${g>1?'s':''} d’héritage et +${crownGain(g)} couronnes ♛ pour la boutique de styles !`);sfx('level');celebrate();
   setNews('Héritage',`Nouvelle génération. Bonus permanent : +${S.heritage*10} % sur les commerces.`);
   build(tab);save();pushCloud(true);
 }
@@ -856,7 +953,7 @@ function fireNews(){
   S.nextNews=S.clock+50+Math.random()*40;
   if(!pool.length)return;
   const n=pick(pool);
-  if(n.g){const st=S.goods[n.g];st.drift=n.d*.1;st.dt=6;setNews('Jour '+day(),n.t+' (dans les prochaines minutes)')}
+  if(n.g){const st=S.goods[n.g];st.drift=n.d*.1;st.dt=Math.round(6*MK);setNews('Jour '+day(),n.t+' (dans les prochaines minutes)')}
   else if(n.m){S.boost={m:n.m,until:S.clock+n.dur};setNews('Jour '+day(),n.t);if(n.m>1)sfx('coin')}
   else if(n.cost){const a=n.cost();if(a<1)return;S.cash-=a;setNews('Jour '+day(),`${n.t} : −${eur(a)}.`);toast(`${n.t} : −${eur(a)}`);sfx('bad')}
   else setNews('Ville',n.t);
@@ -864,7 +961,7 @@ function fireNews(){
 function setNews(tag,t){$('newsTag').textContent=tag;$('newsTxt').textContent=t}
 let op=null;
 function spawnOp(){op={fx:.05+Math.random()*.9,until:S.clock+12,born:S.clock};const r=S.upg.reseau||0;S.nextOp=S.clock+(45+Math.random()*45)/(1+.45*r)}
-function opValue(){const r=S.upg.reseau||0;return Math.max(25,incAll()/S.boost.m*40*(1+.6*r)+Math.max(0,S.cash)*.02)}
+function opValue(){const r=S.upg.reseau||0;return Math.max(25,incAll()/S.boost.m*40*(1+.6*r)+Math.max(0,S.cash)*BAL.opCash)}
 function collectOp(){const v=opValue();earn(v);S.ops++;S.cnt.ops++;{const r=cv.getBoundingClientRect();coinsTo(r.left+op.x-$('townwrap').scrollLeft,r.top+op.y,8)}floatTxt('+'+eur(v),T.gold,op.x,op.y);op=null;sfx('coin');vib(25);toast('Pièce dorée : +'+eur(v));refresh()}
 function startCrisis(){
   const pool=Object.keys(CRISES).filter(k=>!CRISES[k].cond||CRISES[k].cond());
@@ -955,7 +1052,12 @@ function applyOffline(sec){
   if(sec<20)return;
   S.boost={m:1,until:0};S.crisis=null;S.special=null;calcPM();
   const g=S.upg.gerant||0,eff=Math.min(sec,OFF_H[g]*3600),f=OFF_FRAC[g];
-  const gross=allGross()*eff*f,cst=allCosts()*eff*f;
+  let gross=0;const cst=allCosts()*eff*f;
+  forCities(()=>{calcPM();for(const b of BIZ){if(!lvl(b.id))continue;if(C.stock[b.id]==null)C.stock[b.id]=stockCap(b);const sp=supOf(b),g=goodOf(b),need=needRate(b)*eff,inc=priceMult(b)*baseProd(b)*(1+empBonus(b))*bizLocal(b)*PM;
+    if(need<=0)continue;let have=stockOf(b);if(sp.auto){const take=Math.min(S.goods[g.id].inv,need-have);if(take>0){const avg=S.goods[g.id].cost/S.goods[g.id].inv;S.goods[g.id].inv-=take;S.goods[g.id].cost-=avg*take;have+=take}}
+    if(sp.buy&&have<need){const unit=priceOf(g)*1.15,n=Math.min(need-have,Math.max(0,S.cash)/unit);S.cash-=n*unit;have+=n}
+    const r=Math.min(1,have/need);gross+=inc*eff*f*(BAL.dry+(1-BAL.dry)*r);C.stock[b.id]=Math.max(0,have-need*r);S.cnt.crafted+=need*r}});
+  C=activeC();calcPM();
   S.cash+=gross-cst;S.run.earned+=gross;S.life+=gross;
   const n=Math.min(30,Math.floor(eff/MT));
   for(const gd of GOODS)for(let i=0;i<n;i++)stepGood(gd,S.goods[gd.id]);
@@ -998,12 +1100,12 @@ function checkUnlocks(silent){if(!S.unl)S.unl={};for(const u of UNLOCKS)if(!S.un
 function checkGoals(){
   checkUnlocks();
   let any=false;
-  for(const g of GOALS)if(!S.goals[g.id]&&g.ok()){S.goals[g.id]=1;S.stars++;any=true;toast(`★ ${g.t} : +2 % de revenus et +1 étoile`);sfx('level');celebrate()}
+  for(const g of GOALS)if(!S.goals[g.id]&&g.ok()){S.goals[g.id]=1;S.stars++;any=true;S.crowns=(S.crowns||0)+goalCr(g);toast(`★ ${g.t} : +2 % de revenus, +1 étoile et +${goalCr(g)} ♛`);sfx('level');celebrate()}
   if(any){S.newGoal=true;if(tab==='goals')build('goals')}
   const dailyReady=S.daily&&!S.daily.done&&dailyProg()>=S.daily.n;
   $('gdot').hidden=!((S.newGoal||dailyReady)&&tab!=='goals');
   $('cdot').hidden=!(satisfaction()<.7||S.cash<0||C.broken.some(x=>x.kind==='infra'))||tab==='city';
-  $('bdot').hidden=!(BIZ.some(b=>(C.staff[b.id]||[]).some(e=>e.ask||e.strike))||C.broken.some(x=>x.kind==='biz'))||tab==='biz';
+  $('bdot').hidden=!(BIZ.some(b=>isDry(b)||(C.staff[b.id]||[]).some(e=>e.ask||e.strike))||C.broken.some(x=>x.kind==='biz'))||tab==='biz';
   $('mdot').hidden=!(S.contracts.length&&tab!=='market');
 }
 
@@ -1161,21 +1263,16 @@ function buildMarket(){
     <div class="meta" id="m-${g.id}"></div>
     <div class="btns trade"><button class="btn alt" data-a="buy" data-g="${g.id}" data-n="1">+1</button>
     <button class="btn alt" data-a="buy" data-g="${g.id}" data-n="10">+10</button>
+    <button class="btn alt" data-a="buy" data-g="${g.id}" data-n="100">+100</button>
     <button class="btn" data-a="buy" data-g="${g.id}" data-n="1e15">Max</button>
     <button class="btn sell" data-a="sell" data-g="${g.id}" id="s-${g.id}">Vendre</button></div></div>`;
   if(next)h+=`<div class="row locked"><div class="name">${next.name}<small>Se débloque après ${eur(next.unlock)} gagnés</small></div><div class="bar2"><i id="nextBar"></i></div></div>`;
-  const rec=RECIPES.filter(r=>lvl(r.biz)&&un.some(g=>g.id===r.from));
-  if(rec.length){h+=`<h3>Transformation</h3><p class="sub">Tes commerces transforment tes matières premières et revendent le produit fini plus cher, automatiquement.</p>`;
-    for(const r of rec){const g=GOODS.find(x=>x.id===r.from),b=BIZ.find(x=>x.id===r.biz);
-      h+=`<div class="row ${C.craft[r.id]?'gold':''}"><div class="top"><div class="name">${r.name}<small>${g.name} → ${r.name.toLowerCase()} (${b.name.toLowerCase()}) · vendu ${fmt(r.mult)} fois le prix du ${g.name.toLowerCase()}</small></div></div>
-      <div class="meta" id="rm-${r.id}"></div>
-      <button class="btn ${C.craft[r.id]?'alt':'sell'} wide" data-a="craft" data-r="${r.id}">${C.craft[r.id]?'Arrêter la transformation':'Lancer la transformation'}</button></div>`}}
   main.innerHTML=h;
   drawSparks();
 }
 /* ---------- commerces ---------- */
 function visibleBiz(){let v=BIZ.findIndex(b=>lvl(b.id)===0&&b.cost*bizDisc()>S.cash);return v<0?BIZ.length:v+1}
-const empSig=()=>BIZ.map(b=>(C.staff[b.id]||[]).map(e=>e.id+(e.ask?'a':'')+(e.mgr?'m':'')+(e.known?'k':'')+(e.lv>=5?'5':'')+(e.strike?'s':'')).join('.')).join('|')+C.open+C.broken.map(x=>x.id).join()+BIZ.map(b=>lvl(b.id)?1:0).join('')+season();
+const empSig=()=>BIZ.map(b=>isDry(b)?1:0).join('')+BIZ.map(b=>{const s=C.supply[b.id];return s?(s.auto?1:0)+''+(s.buy?1:0):'-'}).join('')+BIZ.map(b=>(C.staff[b.id]||[]).map(e=>e.id+(e.ask?'a':'')+(e.mgr?'m':'')+(e.known?'k':'')+(e.lv>=5?'5':'')+(e.strike?'s':'')).join('.')).join('|')+C.open+C.broken.map(x=>x.id).join()+BIZ.map(b=>lvl(b.id)?1:0).join('')+season();
 function buildBiz(){
   const vis=visibleBiz();shown.biz=vis;shown.emp=empSig();
   let h=`<div class="top"><h2>Commerces</h2><div class="seg" style="margin-left:auto">
@@ -1184,10 +1281,14 @@ function buildBiz(){
   BIZ.slice(0,vis).forEach(b=>{const l=lvl(b.id),list=C.staff[b.id]||[],brk=C.broken.find(x=>x.kind==='biz'&&x.ref===b.id),sm=SEASONS[season()].biz[b.id];
     h+=`<div class="row ${brk?'alert':''}">
     <div class="top"><div class="lv" id="bl-${b.id}"></div><div class="name">${b.name}<small id="br-${b.id}"></small></div>
-      ${brk?'<span class="pill bad" style="margin-left:auto">En panne</span>':sm&&l?`<span class="pill" style="margin-left:auto">${SEASONS[season()].ic} ${sm>1?'+':'−'}${Math.round(Math.abs(sm-1)*100)} %</span>`:''}</div>
+      ${isDry(b)?`<span class="pill bad" style="margin-left:auto">À sec −${dryPct()} %</span>`:brk?'<span class="pill bad" style="margin-left:auto">En panne</span>':sm&&l?`<span class="pill" style="margin-left:auto">${SEASONS[season()].ic} ${sm>1?'+':'−'}${Math.round(Math.abs(sm-1)*100)} %</span>`:''}</div>
     <div class="bar2"><i id="bm-${b.id}"></i></div>
     <button class="btn wide" data-a="biz" data-b="${b.id}" id="bb-${b.id}"></button>
     ${brk?`<button class="btn danger wide" data-a="rush" data-x="${brk.id}" id="rb-${brk.id}"></button>`:''}
+    ${l?`<div class="staff"><div class="meta" id="sk-${b.id}"></div><div class="bar2" id="skw-${b.id}"><i id="skb-${b.id}"></i></div>
+      <div class="btns two"><button class="btn alt" data-a="restock" data-b="${b.id}" id="skr-${b.id}">Depuis l\u2019entrepôt</button><button class="btn" data-a="bsupply" data-b="${b.id}" id="skp-${b.id}"></button></div>
+      <div class="price"><div class="meta" id="pr-${b.id}"></div><p class="sub" style="margin:4px 0 0;white-space:normal;text-align:left">Moins cher : plus de clients et une ville plus heureuse, mais moins d\u2019argent par vente. Plus cher : l\u2019inverse.</p><div class="btns pr"><button class="btn alt sm" data-a="price" data-b="${b.id}" data-v="-0.1">−10 %</button><button class="btn alt sm" data-a="price" data-b="${b.id}" data-v="-0.05">−5 %</button><button class="btn sm" data-a="price" data-b="${b.id}" data-v="ref">Conseillé</button><button class="btn alt sm" data-a="price" data-b="${b.id}" data-v="0.05">+5 %</button><button class="btn alt sm" data-a="price" data-b="${b.id}" data-v="0.1">+10 %</button></div></div>
+      <div class="seg"><button data-a="supmode" data-b="${b.id}" data-m="auto" class="${supOf(b).auto?'on':''}">Réappro auto</button><button data-a="supmode" data-b="${b.id}" data-m="buy" class="${supOf(b).buy?'on':''}">Commande auto +15 %</button></div></div>`:''}
     ${l&&unlocked('staff')?`<div class="staff"><div class="meta" id="bs-${b.id}"></div>
       <div class="btns two"><button class="btn alt" data-a="hire" data-b="${b.id}" id="bh-${b.id}"></button>
       <button class="btn alt" data-a="team" data-b="${b.id}">${C.open===b.id?'Masquer l’équipe':`Voir l’équipe (${list.length})`}${list.some(e=>e.ask||e.strike)?' ⚠':''}</button></div>
@@ -1278,24 +1379,27 @@ function buildGoals(){
    <details class="sec" data-sec="deco"><summary>Décorations <span class="pill gold">${S.stars} ★</span></summary><div class="body"><p class="sub">Les étoiles viennent des objectifs, des défis et de la série de connexion. Les décorations restent pour toujours.</p>`;
   for(const d of DECOS){const own=!!S.decos[d.id];h+=`<div class="row ${own?'gold':''}"><div class="top"><div class="name">${d.n}<small>+${Math.round(d.b*100)} % de revenus pour toujours</small></div>
     ${own?'<span class="pill gold" style="margin-left:auto">Installée</span>':`<button class="btn sm" style="margin-left:auto" data-a="deco" data-d="${d.id}" ${S.stars<d.c?'disabled':''}>${d.c} ★</button>`}</div></div>`}
-  h+=`</div></details><details class="sec" data-sec="styles"><summary>Styles</summary><div class="body"><h3>Interface</h3>`;
+  h+=`</div></details><details class="sec" data-sec="styles"><summary>Styles <span class="pill gold">${S.crowns||0} ♛</span></summary><div class="body"><p class="sub">Étoiles ★ : <b>${S.stars}</b> · Couronnes ♛ : <b>${S.crowns||0}</b>. Chaque héritage rapporte au moins 3 couronnes, et chaque objectif réussi en donne aussi.</p><h3>Interface</h3>`;
   for(const k of UI_SKINS){const own=!!S.skins.ui[k.id],on=SET.skin===k.id;h+=`<div class="row skinrow ${on?'on':''}"><div class="top"><span class="swatch">${k.sw.map(c=>`<i style="background:${c}"></i>`).join('')}</span><div class="name">${k.n}<small>${k.d}</small></div>
-    <button class="btn ${own?(on?'sell':'alt'):''} sm" style="margin-left:auto" data-a="skin" data-k="ui" data-s="${k.id}" ${!own&&S.stars<k.c?'disabled':''}>${on?'Utilisé':own?'Utiliser':k.c+' ★'}</button></div></div>`}
+    <button class="btn ${own?(on?'sell':'alt'):''} sm" style="margin-left:auto" data-a="skin" data-k="ui" data-s="${k.id}" ${!own&&!canPay(k)?'disabled':''}>${on?'Utilisé':own?'Utiliser':priceTag(k)}</button></div></div>`}
   h+=`<h3>Ville</h3>`;
   for(const k of CITY_SKINS){const own=!!S.skins.city[k.id],on=SET.cskin===k.id;h+=`<div class="row skinrow ${on?'on':''}"><div class="top"><span class="swatch">${k.sw.map(c=>`<i style="background:${c}"></i>`).join('')}</span><div class="name">${k.n}<small>${k.d}</small></div>
-    <button class="btn ${own?(on?'sell':'alt'):''} sm" style="margin-left:auto" data-a="skin" data-k="city" data-s="${k.id}" ${!own&&S.stars<k.c?'disabled':''}>${on?'Utilisé':own?'Utiliser':k.c+' ★'}</button></div></div>`}
+    <button class="btn ${own?(on?'sell':'alt'):''} sm" style="margin-left:auto" data-a="skin" data-k="city" data-s="${k.id}" ${!own&&!canPay(k)?'disabled':''}>${on?'Utilisé':own?'Utiliser':priceTag(k)}</button></div></div>`}
+  h+=`<h3>Titre de noblesse</h3><p class="sub">Affiché sous le nom du jeu. Les couronnes ♛ se gagnent en cédant ton empire.</p>`;
+  for(const t of TITLES){const own=!t.cr||(S.titles||{})[t.id],on=(S.title||'')===t.id;h+=`<div class="row skinrow ${on?'on':''}"><div class="top"><div class="name">${t.id?'♛ '+t.n:t.n}</div><button class="btn ${own?(on?'sell':'alt'):''} sm" style="margin-left:auto" data-a="title" data-t="${t.id}" ${!own&&(S.crowns||0)<t.cr?'disabled':''}>${on?'Utilisé':own?'Utiliser':t.cr+' ♛'}</button></div></div>`}
   h+=`</div></details><div class="her"><h2>Héritage</h2>
    <p class="sub">Cède ton empire à la génération suivante : tu repars de zéro, mais chaque point d’héritage donne +10 % sur les commerces et +5 % sur les ventes, pour toujours.</p>
-   <div class="meta">Points : <b>${S.heritage}</b> · Générations : <b>${S.prestiges}</b> · Total gagné : <b>${eur(S.life)}</b></div>
-   <p class="sub">Seuil actuel : <b>${eur(heritageReq())}</b> gagnés dans la partie. Il est multiplié par 3 à chaque héritage.</p>
+   <div class="meta">Points : <b>${S.heritage}</b> · Couronnes : <b>${S.crowns||0} ♛</b> · Générations : <b>${S.prestiges}</b> · Total gagné : <b>${eur(S.life)}</b></div>
+   <p class="sub">Seuil actuel : <b>${eur(heritageReq())}</b> gagnés dans la partie. Il est multiplié par 10 à chaque héritage.</p>
    <button class="btn wide" data-a="cede" id="cedeBtn"></button></div>
    <details class="sec" data-sec="lb"><summary>Classement</summary><div class="body"><div class="row" id="lb"></div></div></details>
    <div class="row"><div class="name">Sauvegarde en ligne<small id="cloudTxt"></small></div>
    ${cloud.user?`<div class="btns two"><button class="btn" data-a="cpush">Sauvegarder</button><button class="btn alt" data-a="cout">Se déconnecter</button></div>`:`<div id="gsiBtn" class="gsi"></div><button class="btn wide" data-a="cin" id="gsiFallback">Se connecter avec Google</button>`}</div>
-   <h2>Objectifs</h2><p class="sub">${goalCount()}/${GOALS.length} réussis · chacun donne +2 % de revenus et 1 étoile.</p>`;
+   <h2>Objectifs</h2><p class="sub">${goalCount()}/${GOALS.length} réussis · chacun donne +2 % de revenus, 1 étoile et des couronnes ♛.</p>`;
   const todoG=GOALS.filter(g=>!S.goals[g.id]),doneG=GOALS.filter(g=>S.goals[g.id]);
-  for(const g of todoG.slice(0,6))h+=`<div class="row goal"><span class="chk"></span><div class="name">${g.t}<small>${g.d}</small></div></div>`;
-  if(todoG.length>6)h+=`<details class="sec" data-sec="gmore"><summary>Encore ${todoG.length-6} objectifs</summary><div class="body">${todoG.slice(6).map(g=>`<div class="row goal"><span class="chk"></span><div class="name">${g.t}<small>${g.d}</small></div></div>`).join('')}</div></details>`;
+  const gRow=g=>`<div class="row goal"><span class="chk"></span><div class="name">${g.t}<small>${g.d}</small></div><span class="pill gold" style="margin-left:auto">+${goalCr(g)} ♛</span></div>`;
+  for(const g of todoG.slice(0,6))h+=gRow(g);
+  if(todoG.length>6)h+=`<details class="sec" data-sec="gmore"><summary>Encore ${todoG.length-6} objectifs</summary><div class="body">${todoG.slice(6).map(gRow).join('')}</div></details>`;
   if(doneG.length)h+=`<details class="sec goalsdone" data-sec="gdone"><summary>Réussis <span class="pill">${doneG.length}</span></summary><div class="body">${doneG.map(g=>`<div class="row goal done"><span class="chk">✓</span><div class="name">${g.t}<small>${g.d}</small></div></div>`).join('')}</div></details>`;
   main.innerHTML=h;
   renderLB();loadLB();
@@ -1344,7 +1448,7 @@ function setBar(wrapId,barId,v){const w=$(wrapId),b=$(barId);if(!w||!b)return;b.
 function refresh(){
   C=activeC();calcPM();
   const gross=grossIncome(),net=GROSS_ALL-COSTS_ALL;
-  $('cityName').textContent=S.travel?`En route vers ${CITY(S.travel.to).n}`:CITY(S.city).n;
+  $('cityName').textContent=(titleName()?'♛ '+titleName()+' · ':'')+(S.travel?`En route vers ${CITY(S.travel.to).n}`:CITY(S.city).n);
   renderTip();renderTodo();renderSheet();updPlanInfo();
   $('cash').classList.toggle('neg',S.cash<0);
   $('rate').textContent=`${sgn(net)}/s${S.boost.m!==1?' (×'+fmt(S.boost.m)+')':''} · ${WEATHER[S.weather].ic} ${SEASONS[season()].n} · J${day()}`;
@@ -1367,7 +1471,8 @@ function refresh(){
       if(st.inv>=1){const val=st.inv*p*(1-curFee())*sellBonus(),pnl=val-st.cost;
         m+=`<span>Stock <b>${fmt(Math.floor(st.inv))}</b> · payé ${eur(st.cost/st.inv)}</span><span><b class="${pnl>=0?'up':'down'}">${sgn(pnl)}</b> si tu vends</span>`}
       else m+=`<span>Aucun stock</span>`;
-      if(flair){const tgt=SEASONS[season()].good[g.id]||0,e=-.06*(st.x-tgt)+(st.dt>0?st.drift:0),r=p/g.base;
+      const users=BIZ.filter(b=>INPUT[b.id]===g.id&&lvl(b.id));if(users.length){const r=users.reduce((a,b)=>a+needRate(b),0)*60,dry=users.some(isDry);m+=`<span class="${dry?'down':''}">Pour ${users.map(b=>b.name.toLowerCase()).join(', ')} · ${fmt(Math.round(r*10)/10)}/min${dry?' · à sec !':''}</span>`}
+      if(flair){const tgt=SEASONS[season()].good[g.id]||0,e=-.06/MK*(st.x-tgt)+(st.dt>0?st.drift/MK:0),r=p/g.base;
         m+=`<span class="pill">${e>.015?'↗ en hausse':e<-.015?'↘ en baisse':'→ stable'}</span><span class="pill">${r<.75?'prix bas':r>1.35?'prix haut':'prix normal'}</span>`}
       const me=$('m-'+g.id);if(me.innerHTML!==m)me.innerHTML=m;
       const sb=$('s-'+g.id),lk=st.inv>=1&&locked(st);sb.disabled=st.inv<1||lk;const sl=lk?`Bloqué<small>${Math.ceil(S.mTimer)} s</small>`:'Vendre';if(sb.innerHTML!==sl)sb.innerHTML=sl;
@@ -1387,6 +1492,12 @@ function refresh(){
       const nextM=MILES.find(t=>t>l)||l,prevM=[0,...MILES].filter(t=>t<=l).pop();
       $('bm-'+b.id).style.width=(nextM>prevM?(l-prevM)/(nextM-prevM)*100:100)+'%';
       const bb=$('bb-'+b.id);bb.innerHTML=`${l?'Agrandir':'Ouvrir'} ×${n}<small>${eur(c)}</small>`;bb.disabled=c>S.cash;
+      const sk=$('sk-'+b.id);if(sk){const g=goodOf(b),st=stockOf(b),cap=stockCap(b),r=needRate(b),left=r>0?st/r:0,fc=fillCost(b),wh=S.goods[g.id].inv;
+        const m=`<span>Stock <b class="${st<=0?'down':''}">${fmt(Math.floor(st))}/${fmt(cap)}</b> ${pl(2,g.unit)} de ${g.name.toLowerCase()}</span><span>${st>0?`encore <b>${mmss(left)}</b>`:`<b class="down">vide : revenus −${dryPct()} %</b>`}</span><span>${fmt(Math.round(r*600)/10)}/min</span>`;
+        if(sk.innerHTML!==m)sk.innerHTML=m;$('skb-'+b.id).style.width=Math.min(100,st/cap*100)+'%';$('skw-'+b.id).className='bar2 '+(st/cap>.5?'good':st/cap>.2?'mid':'bad');
+        const rb2=$('skr-'+b.id);rb2.innerHTML=`Depuis l\u2019entrepôt<small>${fmt(Math.floor(wh))} dispo</small>`;rb2.disabled=wh<1||st>=cap;
+        const pb2=$('skp-'+b.id);pb2.innerHTML=`Acheter et remplir<small>${fc.n?eur(fc.c):'plein'}</small>`;pb2.disabled=!fc.n||S.cash<priceOf(g)}
+      const pr=$('pr-'+b.id);if(pr){const md=custMood(b),pm=priceMult(b),dm=demand(b),pmo=priceMood(),pc=x=>(x>=1?'+':'−')+Math.round(Math.abs(x-1)*100)+' %',m=`<span>Prix <b>${Math.round(priceP(b)*100)} %</b></span><span>conseillé <b>${Math.round(refPrice(b)*20)*5} %</b></span><span>${md[1]} clients ${md[2]}</span><span>clients <b class="${dm>=1?'up':'down'}">${pc(dm)}</b></span><span>revenus <b class="${pm>=1?'up':'down'}">${pc(pm)}</b></span><span>satisfaction ville <b class="${pmo>=1?'up':'down'}">${pc(pmo)}</b></span>`;if(pr.innerHTML!==m)pr.innerHTML=m}
       const bs=$('bs-'+b.id);if(bs){const list=C.staff[b.id]||[],s=list.length,mx=staffMax(b),grev=list.filter(e=>e.strike).length;
         const m=`<span>Personnel <b>${s}/${mx}</b></span><span>Clients <b class="up">+${Math.round(empBonus(b)*100)} %</b></span><span>Salaires <b class="${s?'down':''}">−${eur(salaryOf(b))}/s</b></span>${grev?`<span><b class="down">${grev} en grève</b></span>`:''}`;
         if(bs.innerHTML!==m)bs.innerHTML=m;
@@ -1447,7 +1558,7 @@ function refresh(){
       const b=$('dBtn');b.disabled=S.daily.done||p<n;b.innerHTML=S.daily.done?'Défi réussi ✓':p>=n?`Récupérer ${eur(Math.max(500,gross*600))} et 3 ★`:'Pas encore terminé'}
     const g=heritageGain(),b=$('cedeBtn');
     if(g<1){b.disabled=true;b.innerHTML=`Céder l’empire<small>Disponible après ${eur(heritageReq())} gagnés dans la partie (${eur(S.run.earned)})</small>`}
-    else{b.disabled=false;b.innerHTML=Date.now()-cedeArmed<4000?`Confirmer : tout repart à zéro<small>Touche encore pour +${g} points</small>`:`Céder l’empire<small>+${g} point${g>1?'s':''} d’héritage maintenant</small>`}
+    else{b.disabled=false;b.innerHTML=Date.now()-cedeArmed<4000?`Confirmer : tout repart à zéro<small>Touche encore pour +${g} points et +${crownGain(g)} ♛</small>`:`Céder l’empire<small>+${g} point${g>1?'s':''} d’héritage et +${crownGain(g)} ♛ maintenant</small>`}
   } else if(tab==='settings'){updCloudTxt()}
 }
 /* ---------- clics ---------- */
@@ -1457,13 +1568,13 @@ const ACTIONS={
  fire:d=>fireEmp(d.e),promote:d=>promote(d.e),raise:d=>answerRaise(d.e,true),noraise:d=>answerRaise(d.e,false),
  infra:d=>buyInfra(d.i),unfra:d=>sellInfra(d.i),tech:hireTech,untech:fireTech,rush:d=>rush(d.x),
  rwar:d=>rivalAction(d.r,'war'),rspy:d=>rivalAction(d.r,'spy'),rbuy:d=>rivalAction(d.r,'buy'),
- vote:d=>vote(+d.i),donate,borrow,repay,upg:d=>buyUpg(d.u),deco:d=>buyDeco(d.d),daily:claimDaily,
+ vote:d=>vote(+d.i),donate,borrow,repay,upg:d=>buyUpg(d.u),deco:d=>buyDeco(d.d),title:d=>useTitle(d.t),daily:claimDaily,
  mode:d=>{S.mode=d.m==='max'?'max':+d.m;build('biz')},cede,export:exportSave,import:importSave,
  cin:signIn,cpush:()=>pushCloud(false),cout:signOutCloud,cdel:deleteCloud,
  skin:d=>useSkin(d.k,d.s),
  fixcrisis:fixCrisis,special:d=>answerSpecial(+d.i),
  travel:d=>travelTo(d.c),found:d=>foundCity(d.c),go:d=>goTab(d.t),gobiz:d=>{C.open=d.b;closeSheet();goTab('biz')},closesheet:()=>closeSheet(),
- sheet:d=>openSheet(d.b),movestart:d=>{ISO.move=+d.x;closeSheet();ISO.sel=null;updPlanInfo(true);toast('Touche la case où tu veux le mettre')},movecancel:()=>{ISO.move=null;updPlanInfo(true)},buildhere:d=>buildHere(d.k,d.id,+d.x),todoall:()=>{S.todoAll=!S.todoAll;todoSig=''},todohide:()=>{S.todoHide=!S.todoHide;todoSig=''},
+ sheet:d=>openSheet(d.b),restock:d=>restock(d.b),bsupply:d=>buySupply(d.b),supmode:d=>setSupply(d.b,d.m),price:d=>setPrice(d.b,d.v),movestart:d=>{ISO.move=+d.x;closeSheet();ISO.sel=null;updPlanInfo(true);toast('Touche la case où tu veux le mettre')},movecancel:()=>{ISO.move=null;updPlanInfo(true)},buildhere:d=>buildHere(d.k,d.id,+d.x),todoall:()=>{S.todoAll=!S.todoAll;todoSig=''},todohide:()=>{S.todoHide=!S.todoHide;todoSig=''},
  help:()=>{S.helpSeen=true;build('market')},tuto:()=>{S.helpSeen=false;goTab('market')},reset:resetAll,
  set:d=>{const v=d.v==='true'?true:d.v==='false'?false:d.v;SET[d.k]=v;saveSet();applyVol();if(d.k==='theme')applyTheme();if(d.k==='musicOn'&&v)audioInit();build('settings')},
 };
@@ -1848,7 +1959,7 @@ function drawStreet(dt){
     if(bizMult(l)>1){R('#6b4a2b',x+5,top+2,1,8);poly('#f2b53a',[x+6,top+2,x+13,top+4,x+6,top+6])}
     const list=C.staff[b.id]||[],brk=broken('biz',b.id);
     if(brk&&!low)for(let k=0;k<3;k++){const t=(TIME*.6+k/3)%1;circ(`rgba(90,90,90,${.55*(1-t)})`,x+sw*.65+Math.sin(t*6+k)*3,top+10-t*20,3+t*5)}
-    const iss=brk?'brk':list.some(e=>e.ask)?'ask':list.some(e=>e.strike)?'strike':null;
+    const iss=brk?'brk':isDry(b)?'dry':list.some(e=>e.ask)?'ask':list.some(e=>e.strike)?'strike':null;
     if(iss)bubbles.push({x:x+sw/2,y:top-6,t:iss,bid:b.id});
   });
   // fanions
@@ -1895,10 +2006,10 @@ function drawStreet(dt){
   if(wt==='canicule'&&!low){cx.fillStyle='rgba(255,170,60,.07)';cx.fillRect(0,0,w,h)}
   // bulles d'alerte
   BUB=bubbles;const bob=low?0:Math.sin(TIME*4)*2;
-  for(const q of bubbles){const y=q.y+bob,col=q.t==='brk'?'#e53935':q.t==='ask'?'#e0a10e':'#78909c';
+  for(const q of bubbles){const y=q.y+bob,col=q.t==='brk'?'#e53935':q.t==='dry'?'#3d6fb0':q.t==='ask'?'#e0a10e':'#78909c';
     cx.fillStyle='rgba(0,0,0,.2)';cx.beginPath();cx.arc(q.x+1,y+1.5,10,0,7);cx.fill();
     poly('#fff',[q.x-4,y+8,q.x,y+13,q.x+4,y+8]);circ('#fff',q.x,y,10);cx.lineWidth=2.5;cx.strokeStyle=col;cx.beginPath();cx.arc(q.x,y,10,0,7);cx.stroke();
-    tiny(q.t==='brk'?'!':q.t==='ask'?'€':'Zz',q.x,y+.5,col,q.t==='strike'?9:12)}
+    tiny(q.t==='brk'?'!':q.t==='dry'?'∅':q.t==='ask'?'€':'Zz',q.x,y+.5,col,q.t==='strike'?9:12)}
   // pastille de satisfaction
   const sat=satisfaction(),pillT=`☺ ${pct(Math.min(sat,1.25))} · ${fmt(Math.round(visitors()))} visiteurs`;cx.font='800 11px Nunito,sans-serif';const pw=cx.measureText(pillT).width+18;
   cx.fillStyle='rgba(10,16,30,.45)';cx.beginPath();if(cx.roundRect)cx.roundRect(sl+8,8,pw,22,11);else cx.rect(sl+8,8,pw,22);cx.fill();
@@ -2225,7 +2336,7 @@ function drawPlan(){
       cx.fillStyle='#fff';cx.font=`900 ${Math.max(8,Math.round(cs*.17))}px Nunito,sans-serif`;cx.fillText(SHORT[b.id],x+s/2,y+s*.13);
       cx.font=`400 ${Math.round(cs*.26)}px "Bagel Fat One",sans-serif`;cx.textAlign='left';cx.fillText(lvl(b.id),x+4,y+s*.82);cx.textAlign='center';
       const m=adjOf(b.id);if(Math.abs(m-1)>.005){const t=(m>1?'+':'−')+Math.round(Math.abs(m-1)*100)+'%';cx.font=`800 ${Math.max(8,Math.round(cs*.16))}px Nunito,sans-serif`;const tw=cx.measureText(t).width+6;cx.fillStyle=m>1?'#1f8456':'#c03b32';cx.fillRect(x+s-tw-2,y+s*.7,tw,cs*.22);cx.fillStyle='#fff';cx.fillText(t,x+s-tw/2-2,y+s*.7+cs*.11)}
-      const list=C.staff[b.id]||[];if(brk||list.some(e=>e.ask||e.strike)){cx.beginPath();cx.arc(x+s-5,y+5,4.5,0,7);cx.fillStyle=brk?'#e53935':'#f2b53a';cx.fill()}
+      const list=C.staff[b.id]||[];if(brk||isDry(b)||list.some(e=>e.ask||e.strike)){cx.beginPath();cx.arc(x+s-5,y+5,4.5,0,7);cx.fillStyle=brk?'#e53935':isDry(b)?'#3d6fb0':'#f2b53a';cx.fill()}
     }else{const I=INFRA.find(q=>q.id===it.id);
       cx.fillStyle='#e8eee9';cx.fillRect(x,y,s,s);{const sc=cs/24;cx.save();cx.translate(x+s/2,y+s*.84);cx.scale(sc,sc);drawInfra(I.id,0,0,[],!!brk);cx.restore()}
       cx.fillStyle='#2b3a40';cx.font=`800 ${Math.max(8,Math.round(cs*.16))}px Nunito,sans-serif`;cx.textAlign='left';cx.fillText('×'+cnt(I.id),x+4,y+s*.14);cx.textAlign='center';
@@ -2273,7 +2384,7 @@ function renderSheet(force){
   const el=$('sheet');if(!SHEET){el.hidden=true;return}
   if(typeof SHEET==='object')return renderTileSheet(force);
   const b=BIZ.find(x=>x.id===SHEET),l=lvl(b.id),list=C.staff[b.id]||[],brk=C.broken.find(x=>x.kind==='biz'&&x.ref===b.id);
-  const sig=[b.id,C.id,l,brk?brk.id:'',list.map(e=>e.id+(e.ask?1:0)+(e.strike?1:0)).join(),C.techs,S.mode].join('|');
+  const sig=[b.id,C.id,l,isDry(b)?1:0,Math.floor(stockOf(b)),brk?brk.id:'',list.map(e=>e.id+(e.ask?1:0)+(e.strike?1:0)).join(),C.techs,S.mode].join('|');
   if(sig===sheetSig&&!force){const t=$('shInc');if(t)t.textContent=l?`${eur(bizIncome(b))}/s · ${list.length} employé${list.length>1?'s':''} · voisins ${adjOf(b.id)>=1?'+':'−'}${Math.round(Math.abs(adjOf(b.id)-1)*100)} %`:'';updCosts(el);return}
   sheetSig=sig;let h=`<div class="top"><div class="name">${b.name}${l?` · niv ${l}`:''}<small id="shInc"></small></div><button class="btn alt sm" style="margin-left:auto" data-a="closesheet">Fermer</button></div>`;
   if(!l){h+=`<p class="sub">Terrain libre à ${CITY(C.id).n}. ${b.name} rapporte ${eur(b.rate*PM*(CITY(C.id).biz[b.id]||1))}/s par niveau.</p>${costBtn('wide','biz',{b:b.id},`Ouvrir ×${bizQty(b)}`,bizCost(b,bizQty(b)))}`}
@@ -2282,6 +2393,8 @@ function renderSheet(force){
     if(brk){issues++;h+=`<div class="emp"><div class="who"><b>⚠ ${brk.label} : en panne</b><small>${C.techs?'Un technicien va s’en occuper':'Aucun technicien dans cette ville'}</small></div><div class="act">${costBtn('danger sm','rush',{x:brk.id},'Urgence',rushCost(brk))}${C.techs?'':costBtn('alt sm','tech',{},'Technicien',techCost())}</div></div>`}
     for(const e of list.filter(e=>e.ask)){issues++;h+=`<div class="emp"><div class="who"><b>${e.n} demande une augmentation</b><small>niv ${e.lv} · humeur ${Math.round(e.mood)} %</small></div><div class="act"><button class="btn sell sm" data-a="raise" data-e="${e.id}">Augmenter</button><button class="btn alt sm" data-a="noraise" data-e="${e.id}">Refuser</button></div></div>`}
     const st=list.filter(e=>e.strike);if(st.length){issues++;h+=`<div class="emp"><div class="who"><b>${st.map(e=>e.n).join(', ')} en grève</b><small>Ils sont payés mais ne travaillent plus</small></div><div class="act">${costBtn('sm','prime',{b:b.id},'Prime',salaryOf(b)*90+20)}</div></div>`}
+    {const g=goodOf(b),st=stockOf(b),cap=stockCap(b);if(st<cap*.25)issues++;
+     h+=`<div class="emp"><div class="who"><b>${st<=0?'⚠ À sec : ':''}Stock de ${g.name.toLowerCase()} ${fmt(Math.floor(st))}/${fmt(cap)}</b><small>${st>0?`encore ${mmss(st/Math.max(1e-9,needRate(b)))}`:'Plus de revenus tant que le stock est vide'}</small></div><div class="act">${S.goods[g.id].inv>=1?`<button class="btn alt sm" data-a="restock" data-b="${b.id}">Entrepôt</button>`:''}${costBtn('sm','bsupply',{b:b.id},'Remplir',fillCost(b).c)}</div></div>`}
     if(!issues)h+=`<p class="sub">Tout va bien ici.</p>`;
     const gi=C.grid.findIndex(g=>g&&g.t==='b'&&g.id===b.id);
     h+=`<div class="btns ${S.view==='iso'&&gi>=0?'three':'two'}">${costBtn('','biz',{b:b.id},`Agrandir ×${bizQty(b)}`,bizCost(b,bizQty(b)))}<button class="btn alt" data-a="gobiz" data-b="${b.id}">Équipe</button>${S.view==='iso'&&gi>=0?`<button class="btn alt" data-a="movestart" data-x="${gi}">Déplacer</button>`:''}</div>`;
@@ -2299,6 +2412,8 @@ function todos(){
   for(const c of S.contracts){const st=S.goods[c.g],g=GOODS.find(x=>x.id===c.g),left=c.until-S.clock;
     if(st.inv>=c.qty)L.push({k:'c'+c.id,t:`Livre ${c.who}`,s:`${c.qty} ${pl(c.qty,g.unit)} de ${g.name.toLowerCase()} · reste ${mmss(left)}`,b:[['sell sm','deliver',{c:c.id},`Livrer ${eur(c.reward)}`,null]]});
     else if(left<150)L.push({k:'w'+c.id,hot:1,t:`${c.who} attend sa commande`,s:`Il manque ${fmt(Math.ceil(c.qty-st.inv))} ${pl(c.qty-st.inv,g.unit)} de ${g.name.toLowerCase()} · reste ${mmss(left)}`,b:[['alt sm','go',{t:'market'},'Marché',null]]})}
+  for(const b of BIZ){if(!lvl(b.id))continue;const st=stockOf(b),cap=stockCap(b),g=goodOf(b);if(st>cap*.15)continue;const wh=S.goods[g.id].inv>=1;
+    L.push({k:'sk'+b.id+(st<=0?'0':'1'),hot:st<=0,t:st<=0?`${b.name} est à sec`:`${b.name} : stock bas`,s:`${g.name} : ${fmt(Math.floor(st))}/${fmt(cap)}${st<=0?` · revenus −${dryPct()} %`:''}`,b:[...(wh?[['alt sm','restock',{b:b.id},'Entrepôt',null]]:[]),['sm','bsupply',{b:b.id},'Remplir',fillCost(b).c]]})}
   for(const x of C.broken)L.push({k:'b'+x.id,hot:!C.techs,t:`${x.label} : en panne`,s:C.techs?'Un technicien est dessus':'Aucun technicien pour réparer',b:[['danger sm','rush',{x:x.id},'Urgence',rushCost(x)],...(C.techs?[]:[['alt sm','tech',{},'Technicien',techCost()]])]});
   for(const b of BIZ){const list=C.staff[b.id]||[];
     for(const e of list.filter(e=>e.ask))L.push({k:'a'+e.id,t:`${e.n} veut une augmentation`,s:`${b.name} · il attend ta réponse`,b:[['sell sm','raise',{e:e.id},'Oui',null],['alt sm','noraise',{e:e.id},'Non',null]]});
@@ -2313,7 +2428,9 @@ function todos(){
 }
 function nextTip(){
   const free=BIZ.find(b=>!lvl(b.id));const first=BIZ.find(b=>lvl(b.id));
-  if(!first)return {t:'Ouvre ton premier stand de crêpes : il rapporte de l\u2019argent en continu.',b:['go','biz','Commerces']};
+  if(!first)return {t:'Ouvre ton premier stand de crêpes : il transforme du blé en argent.',b:['go','biz','Commerces']};
+  {const d=BIZ.find(b=>isDry(b));if(d)return {t:`${d.name} n\u2019a plus de ${goodOf(d).name.toLowerCase()} : achète-en au marché pour qu\u2019il retrouve tous ses revenus.`,b:['go','market','Marché']}}
+  {const lo=BIZ.find(b=>lvl(b.id)&&stockOf(b)<stockCap(b)*.3&&!supOf(b).buy);if(lo&&S.goods[goodOf(lo).id].inv<1)return {t:`Le stock de ${goodOf(lo).name.toLowerCase()} de ${lo.name.toLowerCase()} baisse : achète-en quand le prix est bas.`,b:['go','market','Marché']}}
   if(lvl('crepe')<10&&bizCost(BIZ[0],1)<=S.cash)return {t:'Agrandis ton stand de crêpes jusqu\u2019au niveau 10 : sa production double.',b:['go','biz','Commerces']};
   for(const g of unlockedGoods()){const st=S.goods[g.id];if(st.inv>=1){const val=st.inv*priceOf(g)*(1-curFee())*sellBonus();if(val>st.cost*1.12&&!locked(st))return {t:`Ton ${g.name.toLowerCase()} vaut plus que ce que tu l\u2019as payé : tu peux le vendre avec bénéfice.`,b:['go','market','Marché']}}}
   if(unlocked('city')&&satisfaction()<.8){const n=NEEDS.slice().sort((a,b)=>needSat(a.id)-needSat(b.id))[0];return {t:`Tes visiteurs manquent de ${n.name.toLowerCase()} : ajoute un équipement dans l\u2019onglet Ville.`,b:['go','city','Ville']}}
@@ -2380,7 +2497,7 @@ function step(dt){
   if(S.travel&&S.clock>=S.travel.until)arrive();
   let gross=0,sal=0,mt=0;
   forCities(()=>{calcPM();gross+=grossIncome();sal+=salaries()+techPay();mt+=maintenance();
-    if(S.clock>=C.nextBreak)spawnBreak();tickRepairs(dt);tickCraft(dt)});
+    if(S.clock>=C.nextBreak)spawnBreak();tickRepairs(dt);tickSupply(dt)});
   C=activeC();calcPM();
   const it=interest();GROSS_ALL=gross;COSTS_ALL=sal+mt+it;
   earn(gross*dt);S.cash-=COSTS_ALL*dt;
@@ -2407,7 +2524,7 @@ function animCash(dt){
   const el=$('cash');if(DISP==null||!isFinite(DISP))DISP=S.cash;
   const d=S.cash-DISP;if(d>Math.max(1,Math.abs(DISP)*.002))cashFlash=.6;
   DISP+=d*Math.min(1,dt*7);if(Math.abs(S.cash-DISP)<Math.max(.005,Math.abs(S.cash)*5e-5))DISP=S.cash;
-  const t=eur(DISP);if(el.textContent!==t)el.textContent=t;
+  const t=eur(DISP);if(el.textContent!==t){el.textContent=t;el.style.fontSize=t.length>11?(11/t.length).toFixed(3)+'em':''}
   cashFlash=Math.max(0,cashFlash-dt);el.classList.toggle('up',cashFlash>0&&S.cash>=0);
 }
 function frame(){
