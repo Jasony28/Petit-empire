@@ -67,6 +67,7 @@ body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset
 .todo .act{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end}
 .sheet{position:fixed;left:0;right:0;bottom:calc(58px + env(safe-area-inset-bottom,0px));z-index:7;background:var(--panel);border-top:1px solid var(--line);border-radius:18px 18px 0 0;box-shadow:0 -8px 30px rgba(0,0,0,.25);max-height:62vh;overflow:auto;display:flex;flex-direction:column;gap:8px;padding:14px max(16px,env(safe-area-inset-right,0px)) 14px max(16px,env(safe-area-inset-left,0px))}
 .cities{display:flex;flex-wrap:wrap;gap:6px}
+.gsi{display:flex;justify-content:center;min-height:0}.gsi:empty{display:none}
 .cities .btn.on{outline:3px solid var(--gold)}
 .news{display:flex;gap:8px;align-items:baseline;padding-block:8px;border-bottom:1px solid var(--line);background:var(--chip);font-size:13px;min-height:36px}
 .news .tag{font:500 11px var(--mono);color:var(--accent);text-transform:uppercase;letter-spacing:.06em;flex:none}
@@ -178,6 +179,7 @@ textarea.code{width:100%;font:500 12px/1.35 var(--mono);background:var(--chip);c
 <div class="sheet" id="sheet" hidden></div>
 <div class="toast" id="toast"></div>
 
+<script src="https://accounts.google.com/gsi/client" async defer onload="window.gsiLoaded&&gsiLoaded()"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
@@ -185,7 +187,7 @@ textarea.code{width:100%;font:500 12px/1.35 var(--mono);background:var(--chip);c
 /* ======================================================================
    PETIT EMPIRE — données
    ====================================================================== */
-const VERSION='2.1';
+const VERSION='2.1.2';
 const MT=15;          // la bourse change toutes les 15 s
 const DAY=180;        // un jour de jeu = 3 minutes
 const SEASON_DAYS=7;  // une saison = 7 jours
@@ -417,8 +419,8 @@ const SPECIALS={
    opts:[{t:'Préparer la suite',cost:()=>incAll()*30+500,go:()=>{S.boost={m:3,until:S.clock+45};buff('hotel',2,DAY);return 'La star adore ! Commerces ×3 pendant 45 s et hôtel ×2 pendant 1 jour.'}},{t:'Refuser',go:()=>'La star est allée ailleurs.'}]},
  inspecteur:{n:'Un inspecteur des impôts',d:'Il veut voir tes comptes. Avec un comptable, tout sera en règle.',cond:()=>S.run.earned>1e4,
    opts:[{t:'Montrer les comptes',go:()=>{if(S.upg.comptable)return 'Ton comptable a tout préparé : aucun problème.';const f=Math.max(0,S.cash)*.05;S.cash-=f;return `Quelques erreurs dans tes comptes : amende de ${eur(f)}.`}}]},
- collection:{n:'Un collectionneur',d:'Il veut racheter ton plus gros stock à 2,2 fois le prix du marché.',cond:()=>GOODS.some(g=>S.goods[g.id].inv>=1),
-   opts:[{t:'Vendre',go:()=>{const g=GOODS.filter(g=>S.goods[g.id].inv>=1).sort((a,b)=>S.goods[b.id].inv*priceOf(b)-S.goods[a.id].inv*priceOf(a))[0];if(!g)return 'Tu n’as plus de stock.';const st=S.goods[g.id],rev=st.inv*priceOf(g)*2.2,p=rev-st.cost;S.cash+=rev;addTrade(p);st.inv=0;st.cost=0;return `Vendu ! ${eur(rev)} (bénéfice ${eur(p)}).`}},{t:'Garder',go:()=>'Tu as gardé ton stock.'}]},
+ collection:{n:'Un collectionneur',d:'Il veut racheter ton plus gros stock à 2,2 fois le prix du marché.',cond:()=>GOODS.some(g=>S.goods[g.id].inv>=1&&!locked(S.goods[g.id])),
+   opts:[{t:'Vendre',go:()=>{const g=GOODS.filter(g=>S.goods[g.id].inv>=1&&!locked(S.goods[g.id])).sort((a,b)=>S.goods[b.id].inv*priceOf(b)-S.goods[a.id].inv*priceOf(a))[0];if(!g)return 'Tu n’as plus de stock.';const st=S.goods[g.id],rev=st.inv*priceOf(g)*2.2,p=rev-st.cost;S.cash+=rev;addTrade(p);st.inv=0;st.cost=0;return `Vendu ! ${eur(rev)} (bénéfice ${eur(p)}).`}},{t:'Garder',go:()=>'Tu as gardé ton stock.'}]},
  mariage:{n:'Un mariage',d:'Les mariés commandent 300 pains à ta boulangerie.',cond:()=>lvl('boul')>=5,
    opts:[{t:'Accepter',cost:()=>incAll()*15+100,go:()=>{const r=incAll()*60+600;earn(r);return `Les mariés sont ravis : ${eur(r)} !`}},{t:'Refuser',go:()=>'Ils iront chez un concurrent.'}]},
 };
@@ -656,10 +658,12 @@ function buyGood(id,n){
   n=Math.min(n,free,Math.floor(Math.max(0,S.cash)/unit));
   if(n<=0)return toast('Pas assez d’argent.');
   if(!confirmBig('g'+id+n,n*unit,`${fmt(n)} ${pl(n,g.unit)}`))return;
-  S.cash-=n*unit;st.inv+=n;st.cost+=n*unit;sfx('buy');refresh();
+  S.cash-=n*unit;st.inv+=n;st.cost+=n*unit;st.lock=S.tick||0;sfx('buy');refresh();
 }
+const locked=st=>st.lock!=null&&st.lock===(S.tick||0);
 function sellGood(id){
   if(travelling())return;
+  if(locked(S.goods[id]))return toast(`Tu viens d\u2019acheter : revente possible au prochain cours, dans ${Math.ceil(S.mTimer)} s.`);
   const g=GOODS.find(x=>x.id===id),st=S.goods[id];if(st.inv<1)return;
   const rev=st.inv*priceOf(g)*(1-curFee())*sellBonus(),profit=rev-st.cost;
   S.cash+=rev;addTrade(profit);
@@ -756,7 +760,8 @@ function runElection(){
   newElection();
 }
 /* ---------- héritage ---------- */
-function heritageGain(){return Math.floor(Math.sqrt(S.run.earned/1e6))}
+const heritageReq=()=>1e6*3**(S.prestiges||0);
+function heritageGain(){const r=heritageReq();return S.run.earned<r?0:Math.max(1,Math.floor(Math.sqrt(S.run.earned/r)))}
 let cedeArmed=0;
 function cede(){
   const g=heritageGain();if(g<1)return;
@@ -981,15 +986,36 @@ function renderLB(){
   if(!cloud.lb){el.innerHTML='<p class="sub">Chargement du classement…</p>';return}
   el.innerHTML=`<div class="lb">${cloud.lb.map((r,i)=>`<span class="mut">${i+1}</span><span class="${r.uid===cloud.user.uid?'me':''}">${esc(r.name||'Joueur')}${r.heritage?` <span class="pill">${r.heritage} ♛</span>`:''}</span><span class="mut">${eur(r.life||0)}</span>`).join('')}</div>`;
 }
+/* Connexion avec le bouton officiel Google (fonctionne dans l'appli installée) */
+const GSI_CLIENT='764220516582-2r8evr9h5dmrbhijd686dvkj1bcle28k.apps.googleusercontent.com';
+let gsiReady=false;
+function gsiInit(){
+  if(gsiReady)return true;
+  if(!(window.google&&google.accounts&&google.accounts.id))return false;
+  try{google.accounts.id.initialize({client_id:GSI_CLIENT,callback:onGsi,use_fedcm_for_prompt:true,use_fedcm_for_button:true,auto_select:false,cancel_on_tap_outside:true,itp_support:true});gsiReady=true}catch(e){return false}
+  return true;
+}
+function onGsi(r){
+  if(!fbAuth||!r||!r.credential)return toast('Connexion impossible : vérifie ta connexion internet.');
+  fbAuth.signInWithCredential(firebase.auth.GoogleAuthProvider.credential(r.credential)).then(()=>{toast('Connecté avec Google !');sfx('level')}).catch(e=>toast(authMsg(e)));
+}
+function renderGsi(){
+  const el=$('gsiBtn'),fb=$('gsiFallback');if(!el||cloud.user)return;
+  if(!gsiInit())return;
+  const dark=document.documentElement.dataset.theme==='dark'||(!document.documentElement.dataset.theme&&matchMedia('(prefers-color-scheme: dark)').matches);
+  try{el.innerHTML='';google.accounts.id.renderButton(el,{theme:dark?'filled_black':'outline',size:'large',text:'signin_with',shape:'pill',locale:'fr',width:Math.min(360,Math.max(220,el.clientWidth||300))});if(fb)fb.hidden=true}catch(e){}
+}
+window.gsiLoaded=()=>{if(tab==='goals'||tab==='settings')renderGsi()};
 function signIn(){
   if(!fbAuth)return toast('Connexion impossible : vérifie ta connexion internet.');
+  if(gsiInit()){try{google.accounts.id.prompt();return}catch(e){}}
   const p=new firebase.auth.GoogleAuthProvider();
   fbAuth.signInWithPopup(p).catch(e=>{
     if(['auth/popup-blocked','auth/operation-not-supported-in-this-environment','auth/cancelled-popup-request'].includes(e.code))fbAuth.signInWithRedirect(p);
     else if(e.code!=='auth/popup-closed-by-user')toast(authMsg(e));
   });
 }
-async function signOutCloud(){await pushCloud(true);await fbAuth.signOut();toast('Déconnecté. Ta partie reste aussi sur ce téléphone.')}
+async function signOutCloud(){await pushCloud(true);await fbAuth.signOut();try{google.accounts.id.disableAutoSelect()}catch(e){}toast('Déconnecté. Ta partie reste aussi sur ce téléphone.')}
 let delArmed=0;
 async function deleteCloud(){
   if(!cloud.user)return;
@@ -1013,6 +1039,7 @@ function build(which){
   if(which!==tab)return;
   C=activeC();MEMO={};ensureGrid();calcPM();
   ({market:buildMarket,biz:buildBiz,city:buildCity,upg:buildUpg,goals:buildGoals,settings:buildSettings})[tab]();
+  if(tab==='goals'||tab==='settings')renderGsi();
   refresh();
 }
 /* ---------- bannière : crise et visiteur spécial ---------- */
@@ -1174,10 +1201,11 @@ function buildGoals(){
   h+=`<div class="her"><h2>Héritage</h2>
    <p class="sub">Cède ton empire à la génération suivante : tu repars de zéro, mais chaque point d’héritage donne +10 % sur les commerces et +5 % sur les ventes, pour toujours.</p>
    <div class="meta">Points : <b>${S.heritage}</b> · Générations : <b>${S.prestiges}</b> · Total gagné : <b>${eur(S.life)}</b></div>
+   <p class="sub">Seuil actuel : <b>${eur(heritageReq())}</b> gagnés dans la partie. Il est multiplié par 3 à chaque héritage.</p>
    <button class="btn wide" data-a="cede" id="cedeBtn"></button></div>
    <h2>Classement</h2><div class="row" id="lb"></div>
    <div class="row"><div class="name">Sauvegarde en ligne<small id="cloudTxt"></small></div>
-   ${cloud.user?`<div class="btns two"><button class="btn" data-a="cpush">Sauvegarder</button><button class="btn alt" data-a="cout">Se déconnecter</button></div>`:`<button class="btn wide" data-a="cin">Se connecter avec Google</button>`}</div>
+   ${cloud.user?`<div class="btns two"><button class="btn" data-a="cpush">Sauvegarder</button><button class="btn alt" data-a="cout">Se déconnecter</button></div>`:`<div id="gsiBtn" class="gsi"></div><button class="btn wide" data-a="cin" id="gsiFallback">Se connecter avec Google</button>`}</div>
    <h2>Objectifs</h2><p class="sub">${goalCount()}/${GOALS.length} réussis · chacun donne +2 % de revenus à vie.</p>`;
   for(const g of GOALS){const d=!!S.goals[g.id];
     h+=`<div class="row goal ${d?'done':''}"><span class="chk">${d?'✓':''}</span><div class="name">${g.t}<small>${g.d}</small></div></div>`}
@@ -1205,7 +1233,7 @@ function buildSettings(){
    <button class="btn alt wide" data-a="tuto">Revoir le tutoriel</button></div>
   <h3>Compte</h3>
   <div class="row"><div class="name">Compte Google<small id="cloudTxt"></small></div>
-   ${cloud.user?`<div class="btns two"><button class="btn alt" data-a="cout">Se déconnecter</button><button class="btn danger" data-a="cdel">Supprimer mes données</button></div>`:`<button class="btn wide" data-a="cin">Se connecter avec Google</button>`}
+   ${cloud.user?`<div class="btns two"><button class="btn alt" data-a="cout">Se déconnecter</button><button class="btn danger" data-a="cdel">Supprimer mes données</button></div>`:`<div id="gsiBtn" class="gsi"></div><button class="btn wide" data-a="cin" id="gsiFallback">Se connecter avec Google</button>`}
    <p class="sub">Supprimer tes données efface ta sauvegarde en ligne et ta place au classement. Ta partie reste sur ce téléphone.</p></div>
   <div class="row"><div class="name">Code de sauvegarde<small>Copie ton code pour récupérer ta partie ailleurs, ou colle un code puis charge-le.</small></div>
    <textarea class="code" id="saveCode" rows="3" placeholder="Ton code apparaîtra ici" aria-label="Code de sauvegarde"></textarea>
@@ -1252,7 +1280,7 @@ function refresh(){
       if(flair){const tgt=SEASONS[season()].good[g.id]||0,e=-.06*(st.x-tgt)+(st.dt>0?st.drift:0),r=p/g.base;
         m+=`<span class="pill">${e>.015?'↗ en hausse':e<-.015?'↘ en baisse':'→ stable'}</span><span class="pill">${r<.75?'prix bas':r>1.35?'prix haut':'prix normal'}</span>`}
       const me=$('m-'+g.id);if(me.innerHTML!==m)me.innerHTML=m;
-      $('s-'+g.id).disabled=st.inv<1;
+      const sb=$('s-'+g.id),lk=st.inv>=1&&locked(st);sb.disabled=st.inv<1||lk;const sl=lk?`Bloqué<small>${Math.ceil(S.mTimer)} s</small>`:'Vendre';if(sb.innerHTML!==sl)sb.innerHTML=sl;
     }
     for(const r of RECIPES){const el=$('rm-'+r.id);if(!el)continue;const st=S.goods[r.from],g=GOODS.find(x=>x.id===r.from);
       const rate=r.per*lvl(r.biz)*(1+.1*stf(r.biz));
@@ -1328,7 +1356,7 @@ function refresh(){
       $('dBar').style.width=Math.min(100,p/n*100)+'%';
       const b=$('dBtn');b.disabled=S.daily.done||p<n;b.innerHTML=S.daily.done?'Défi réussi ✓':p>=n?`Récupérer ${eur(Math.max(500,gross*600))} et 3 ★`:'Pas encore terminé'}
     const g=heritageGain(),b=$('cedeBtn');
-    if(g<1){b.disabled=true;b.innerHTML=`Céder l’empire<small>Disponible après 1 M€ gagnés dans la partie (${eur(S.run.earned)})</small>`}
+    if(g<1){b.disabled=true;b.innerHTML=`Céder l’empire<small>Disponible après ${eur(heritageReq())} gagnés dans la partie (${eur(S.run.earned)})</small>`}
     else{b.disabled=false;b.innerHTML=Date.now()-cedeArmed<4000?`Confirmer : tout repart à zéro<small>Touche encore pour +${g} points</small>`:`Céder l’empire<small>+${g} point${g>1?'s':''} d’héritage maintenant</small>`}
   } else if(tab==='settings'){updCloudTxt()}
 }
@@ -1699,7 +1727,7 @@ function step(dt){
   if(S.cash<0&&!S.inDebt){S.inDebt=true;setNews('Alerte','Tu es dans le rouge ! Tes commerces tournent à 70 %. Licencie, retire des équipements ou vends du stock.');sfx('alert');vib([60,40,60])}
   else if(S.cash>=0&&S.inDebt)S.inDebt=false;
   S.mTimer-=dt;
-  if(S.mTimer<=0){S.mTimer=MT;GOODS.forEach(g=>stepGood(g,S.goods[g.id]));if(tab==='market'){drawSparks();sfx('tick')}}
+  if(S.mTimer<=0){S.mTimer=MT;S.tick=(S.tick||0)+1;GOODS.forEach(g=>stepGood(g,S.goods[g.id]));if(tab==='market'){drawSparks();sfx('tick')}}
   if(Math.floor(S.clock/DAY)>S.dayIdx)endDay();
   if(S.clock>=S.nextNews)fireNews();
   if(!op&&S.clock>=S.nextOp)spawnOp();
