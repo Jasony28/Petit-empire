@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="theme-color" content="#1f3354">
 <meta name="description" content="Jeu de gestion : achète, revends et fais grandir ta ville.">
-<link rel="manifest" href="manifest.webmanifest">
+<link rel="manifest" href="manifest.json">
 <link rel="icon" href="icon-192.png">
 <link rel="apple-touch-icon" href="icon-180.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -116,6 +116,9 @@ textarea.code{width:100%;font:500 12px/1.35 var(--mono);background:var(--chip);c
 </nav>
 <div class="toast" id="toast"></div>
 
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script>
 /* ---------- Données du jeu ---------- */
 const GOODS=[
@@ -295,6 +298,52 @@ function importSave(){
   impArmed=0;S=Object.assign(fresh(),s);save();toast('Partie chargée !');build(tab);
 }
 
+/* ---------- Sauvegarde en ligne (Firebase) ---------- */
+const FB_CFG={apiKey:"AIzaSyC0SRYd2aJ3ME5i9kyDaY_AnnWg7k6OJeY",authDomain:"petit-empire.firebaseapp.com",projectId:"petit-empire",storageBucket:"petit-empire.firebasestorage.app",messagingSenderId:"764220516582",appId:"1:764220516582:web:0128cfd09c9d0263f83327"};
+const cloud={user:null,last:0,busy:false};
+let fbAuth=null,fbDb=null;
+function authMsg(e){
+  if(e&&e.code==='auth/unauthorized-domain')return 'Domaine non autorisé : ajoute jasony28.github.io dans Firebase.';
+  if(e&&e.code==='auth/network-request-failed')return 'Pas de connexion internet.';
+  return 'Connexion impossible ('+((e&&e.code)||'erreur')+').';
+}
+function initCloud(){
+  if(!window.firebase)return;
+  try{firebase.initializeApp(FB_CFG);fbAuth=firebase.auth();fbDb=firebase.firestore()}catch(e){return}
+  fbAuth.getRedirectResult().catch(e=>toast(authMsg(e)));
+  fbAuth.onAuthStateChanged(async u=>{cloud.user=u;if(u)await pullCloud();if(tab==='goals')build('goals')});
+}
+async function pullCloud(){
+  try{
+    const d=await fbDb.collection('saves').doc(cloud.user.uid).get();
+    if(d.exists){const c=JSON.parse(d.data().data);
+      if(c&&c.v===1&&(c.life||0)>(S.life||0)+.5){S=Object.assign(fresh(),c);save();cloud.last=Date.now();build(tab);toast('Partie récupérée depuis ton compte Google');return}}
+    await pushCloud(true);
+  }catch(e){toast('Sauvegarde en ligne indisponible pour le moment.')}
+}
+async function pushCloud(silent){
+  if(!cloud.user||cloud.busy)return;
+  cloud.busy=true;
+  try{save();await fbDb.collection('saves').doc(cloud.user.uid).set({data:JSON.stringify(S),life:S.life,updated:firebase.firestore.FieldValue.serverTimestamp()});
+    cloud.last=Date.now();if(!silent)toast('Partie sauvegardée en ligne');updCloudTxt()}
+  catch(e){if(!silent)toast(e&&e.code==='permission-denied'?'Accès refusé : vérifie les règles Firestore.':'Échec de la sauvegarde en ligne. Vérifie ta connexion.')}
+  cloud.busy=false;
+}
+function signIn(){
+  if(!fbAuth)return toast('Connexion impossible : vérifie ta connexion internet.');
+  const p=new firebase.auth.GoogleAuthProvider();
+  fbAuth.signInWithPopup(p).catch(e=>{
+    if(['auth/popup-blocked','auth/operation-not-supported-in-this-environment','auth/cancelled-popup-request'].includes(e.code))fbAuth.signInWithRedirect(p);
+    else if(e.code!=='auth/popup-closed-by-user')toast(authMsg(e));
+  });
+}
+async function signOutCloud(){await pushCloud(true);await fbAuth.signOut();toast('Déconnecté. Ta partie reste aussi sur ce téléphone.')}
+function updCloudTxt(){
+  const t=$('cloudTxt');if(!t)return;
+  t.textContent=cloud.user?`Connecté : ${cloud.user.displayName||cloud.user.email}${cloud.last?' · sauvegardé à '+new Date(cloud.last).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}):''}. Sauvegarde automatique chaque minute.`
+    :(fbAuth?'Connecte-toi pour retrouver ta partie sur n\u2019importe quel appareil.':'Indisponible hors ligne.');
+}
+
 /* ---------- Événements ---------- */
 function fireNews(){
   const un=new Set(unlockedGoods().map(g=>g.id));
@@ -387,6 +436,8 @@ function buildGoals(){
    <p class="sub">Cède ton empire à la génération suivante : tu repars de zéro, mais chaque point d’héritage donne +10 % sur les commerces et +5 % sur les ventes, pour toujours.</p>
    <div class="meta">Points : <b>${S.heritage}</b> · Générations : <b>${S.prestiges}</b> · Total gagné : <b>${eur(S.life)}</b></div>
    <button class="btn wide" data-a="cede" id="cedeBtn"></button></div>
+   <div class="row"><div class="name">Sauvegarde en ligne<small id="cloudTxt"></small></div>
+   ${cloud.user?`<div class="btns" style="grid-template-columns:1fr 1fr"><button class="btn" data-a="cpush">Sauvegarder</button><button class="btn alt" data-a="cout">Se déconnecter</button></div>`:`<button class="btn wide" data-a="cin">Se connecter avec Google</button>`}</div>
    <div class="row"><div class="name">Code de sauvegarde<small>Copie ton code pour récupérer ta partie ailleurs, ou colle un code puis charge-le.</small></div>
    <textarea class="code" id="saveCode" rows="3" placeholder="Ton code apparaîtra ici" aria-label="Code de sauvegarde"></textarea>
    <div class="btns" style="grid-template-columns:1fr 1fr"><button class="btn alt" data-a="export">Copier mon code</button><button class="btn" data-a="import" id="impBtn">Charger ce code</button></div></div>
@@ -434,6 +485,7 @@ function refresh(){
   } else if(tab==='upg'){
     for(const u of UPG){const e=$('ub-'+u.id);if(e)e.disabled=u.cost(S.upg[u.id]||0)>S.cash}
   } else {
+    updCloudTxt();
     const g=heritageGain(),b=$('cedeBtn');
     if(g<1){b.disabled=true;b.innerHTML=`Céder l’empire<small>Disponible après 1 M€ gagnés dans la partie (${eur(S.run.earned)})</small>`}
     else{b.disabled=false;b.innerHTML=Date.now()-cedeArmed<4000?`Confirmer : tout repart à zéro<small>Touche encore pour +${g} points</small>`:`Céder l’empire<small>+${g} point${g>1?'s':''} d’héritage maintenant</small>`}
@@ -451,6 +503,9 @@ main.addEventListener('click',e=>{
   else if(a==='mode'){S.mode=b.dataset.m==='max'?'max':+b.dataset.m;build('biz')}
   else if(a==='cede')cede();
   else if(a==='export')exportSave();
+  else if(a==='cin')signIn();
+  else if(a==='cpush')pushCloud(false);
+  else if(a==='cout')signOutCloud();
   else if(a==='import')importSave();
   else if(a==='help'){S.helpSeen=true;build('market')}
 });
@@ -529,7 +584,7 @@ function draw(dt){
 cv.addEventListener('click',e=>{if(!op)return;const r=cv.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top;if(Math.hypot(x-op.x,y-op.y)<30)collectOp()});
 
 /* ---------- Boucle ---------- */
-let lastWall=Date.now(),mAcc=0,uiAcc=0,saveAcc=0,gAcc=0;
+let cloudAcc=0,lastWall=Date.now(),mAcc=0,uiAcc=0,saveAcc=0,gAcc=0;
 function frame(){
   const now=Date.now();let dt=(now-lastWall)/1000;lastWall=now;
   if(dt>5){applyOffline(dt);dt=0;build(tab)}
@@ -543,6 +598,7 @@ function frame(){
   gAcc+=dt;if(gAcc>1){gAcc=0;checkGoals()}
   uiAcc+=dt;if(uiAcc>.25){uiAcc=0;refresh()}
   saveAcc+=dt;if(saveAcc>5){saveAcc=0;save()}
+  cloudAcc+=dt;if(cloudAcc>60){cloudAcc=0;pushCloud(true)}
   draw(dt);
   requestAnimationFrame(frame);
 }
@@ -553,10 +609,11 @@ function start(data){
   lastWall=Date.now();requestAnimationFrame(frame);
 }
 addEventListener('resize',sizeCanvas);
-document.addEventListener('visibilitychange',()=>{if(document.hidden)save()});
+document.addEventListener('visibilitychange',()=>{if(document.hidden){save();pushCloud(true)}});
 try{matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{readTokens();drawSparks()})}catch(e){}
 new MutationObserver(()=>{readTokens();drawSparks()}).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
 start({});
+initCloud();
 if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
 </script>
 
