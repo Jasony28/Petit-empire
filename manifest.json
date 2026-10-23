@@ -2,7 +2,7 @@
   "id": "./?app=petit-empire-2",
   "name": "Petit Empire",
   "short_name": "Petit Empire",
-  "description": "Jeu de gestion : achète, revends et fais grandir ta ville.",
+  "description": "Jeu de gestion : achète et revends au marché, ouvre des commerces, embauche, équipe ta ville et bats tes concurrents.",
   "lang": "fr",
   "start_url": "./?app=petit-empire-2",
   "scope": "./",
@@ -29,5 +29,12 @@
       "type": "image/png",
       "purpose": "maskable"
     }
-  ]
+  ],
+  "categories": [
+    "games",
+    "business",
+    "simulation"
+  ],
+  "dir": "ltr",
+  "prefer_related_applications": false
 }

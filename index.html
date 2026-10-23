@@ -12,69 +12,113 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Petit Empire">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}img{max-width:100%}[hidden]{display:none!important}html{-webkit-text-size-adjust:100%}</style>
 <title>Petit Empire</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Nunito:wght@500;700;800;900&family=DM+Mono:wght@500&display=swap">
 <style>
-/* Layout: one-screen phone game — sticky cash bar, a living 2D town, news strip, scrolling panel, fixed bottom tabs */
+/* Layout: one-screen phone game — sticky cash bar, a living 2D town, news strip, event banners, scrolling panel, fixed bottom tabs */
 :root{
   --bg:#e7f0ec; --panel:#ffffff; --ink:#1b2932; --muted:#566a74; --line:#d0dedd; --chip:#eef5f2;
   --sky:#bfe0ef; --night:#1f3354; --ground:#8dbd86;
-  --accent:#d4512a; --on-accent:#ffffff; --gold:#e09d14; --good:#1f8456; --bad:#c03b32;
+  --accent:#d4512a; --on-accent:#ffffff; --gold:#e09d14; --good:#1f8456; --bad:#c03b32; --warn:#c77a0a;
   --display:"Bagel Fat One","Arial Rounded MT Bold",system-ui,sans-serif;
   --body:"Nunito",system-ui,-apple-system,"Segoe UI",sans-serif;
   --mono:"DM Mono",ui-monospace,Menlo,Consolas,monospace;
+  padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
   --bg:#0e171c; --panel:#16232a; --ink:#e5eef0; --muted:#93a8b1; --line:#283a43; --chip:#1d2d35;
   --sky:#3d6f8f; --night:#0b1529; --ground:#3f6b45;
-  --accent:#f07a4c; --on-accent:#1d0d05; --gold:#f2b53a; --good:#4cc487; --bad:#f06c62; color-scheme:dark}}
+  --accent:#f07a4c; --on-accent:#1d0d05; --gold:#f2b53a; --good:#4cc487; --bad:#f06c62; --warn:#f0a440; color-scheme:dark}}
 :root[data-theme="dark"]{
   --bg:#0e171c; --panel:#16232a; --ink:#e5eef0; --muted:#93a8b1; --line:#283a43; --chip:#1d2d35;
   --sky:#3d6f8f; --night:#0b1529; --ground:#3f6b45;
-  --accent:#f07a4c; --on-accent:#1d0d05; --gold:#f2b53a; --good:#4cc487; --bad:#f06c62; color-scheme:dark}
+  --accent:#f07a4c; --on-accent:#1d0d05; --gold:#f2b53a; --good:#4cc487; --bad:#f06c62; --warn:#f0a440; color-scheme:dark}
 *{box-sizing:border-box}
-body{background:var(--bg);color:var(--ink);font:500 15px/1.4 var(--body);-webkit-tap-highlight-color:transparent}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:500 15px/1.4 var(--body);-webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--panel)}
 .wrap{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
 .bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:5;background:var(--panel);border-bottom:1px solid var(--line)}
-.bar .wrap{display:flex;align-items:center;gap:12px;padding-block:10px}
-.logo{font:400 19px/1 var(--display);color:var(--accent);letter-spacing:.01em}
+.bar .wrap{display:flex;align-items:center;gap:10px;padding-block:10px}
+.gear{border:1px solid var(--line);background:var(--chip);color:var(--ink);width:38px;height:38px;border-radius:12px;font-size:19px;cursor:pointer;flex:none}
+.gear.on{background:var(--accent);color:var(--on-accent);border-color:var(--accent)}
+.logo{font:400 17px/1.05 var(--display);color:var(--accent);letter-spacing:.01em;min-width:0}
+.logo small{display:block;font:500 11px var(--mono);color:var(--muted);letter-spacing:0;margin-top:3px;white-space:nowrap}
 .cash{margin-left:auto;text-align:right;min-width:0}
 .cash b{display:block;font:400 24px/1 var(--display);font-variant-numeric:tabular-nums;white-space:nowrap}
-.cash small{font:500 12px var(--mono);color:var(--muted)}
-.town{position:relative}
-#town{display:block;width:100%;height:150px;touch-action:manipulation}
+.cash small{font:500 11.5px var(--mono);color:var(--muted);white-space:nowrap}
+.cash b.neg{color:var(--bad)}
+.townwrap{overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.townwrap::-webkit-scrollbar{display:none}
+#town{display:block;height:170px;touch-action:pan-x}
+.townbox{position:relative}
+.viewbtn{position:absolute;right:max(8px,env(safe-area-inset-right,0px));bottom:30px;border:0;border-radius:10px;padding:6px 10px;font:800 12px var(--body);background:rgba(0,0,0,.45);color:#fff;cursor:pointer}
+.planinfo{padding-block:8px;font-size:13px;background:var(--chip);border-bottom:1px solid var(--line);color:var(--ink)}
+.planinfo b{font-weight:900}
+#todo:not(:empty){padding-top:12px}
+.todo{display:flex;flex-direction:column;gap:6px;background:var(--chip);border:1px solid var(--line);border-radius:14px;padding:10px}
+.todo .head{display:flex;align-items:center;gap:8px;font-weight:900}
+.todo .head .sp{margin-left:auto;display:flex;gap:4px}
+.todo .item{display:flex;gap:8px;align-items:center;padding:8px 10px;border-radius:12px;background:var(--panel);border:1px solid var(--line)}
+.todo .item.hot{border-color:var(--bad)}
+.todo .txt{flex:1;min-width:0;font-size:13.5px;font-weight:800}
+.todo .txt small{display:block;font-weight:600;font-size:12px;color:var(--muted)}
+.todo .act{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end}
+.sheet{position:fixed;left:0;right:0;bottom:calc(58px + env(safe-area-inset-bottom,0px));z-index:7;background:var(--panel);border-top:1px solid var(--line);border-radius:18px 18px 0 0;box-shadow:0 -8px 30px rgba(0,0,0,.25);max-height:62vh;overflow:auto;display:flex;flex-direction:column;gap:8px;padding:14px max(16px,env(safe-area-inset-right,0px)) 14px max(16px,env(safe-area-inset-left,0px))}
+.cities{display:flex;flex-wrap:wrap;gap:6px}
+.cities .btn.on{outline:3px solid var(--gold)}
 .news{display:flex;gap:8px;align-items:baseline;padding-block:8px;border-bottom:1px solid var(--line);background:var(--chip);font-size:13px;min-height:36px}
 .news .tag{font:500 11px var(--mono);color:var(--accent);text-transform:uppercase;letter-spacing:.06em;flex:none}
+#banner{display:flex;flex-direction:column;gap:8px}
+#banner:not(:empty){padding-top:12px}
+.ev{border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:8px;border:2px solid var(--bad);background:var(--panel)}
+.ev.special{border-color:var(--gold)}
 main{padding-block:14px 96px;display:flex;flex-direction:column;gap:10px}
-h2{font:400 20px/1.1 var(--display);margin:4px 0 0;text-wrap:balance}
+h2{font:400 20px/1.1 var(--display);margin:6px 0 0;text-wrap:balance}
+h3{font:800 12px var(--mono);text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:8px 0 0}
 .sub{color:var(--muted);font-size:13px;margin:0}
 .row{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px;display:flex;flex-direction:column;gap:8px}
+.row.alert{border-color:var(--bad)}
+.row.gold{border-color:var(--gold)}
 .top{display:flex;align-items:center;gap:10px}
 .name{font-weight:900;font-size:16px;min-width:0}
 .name small{display:block;font-weight:600;font-size:12px;color:var(--muted)}
 .price{margin-left:auto;text-align:right;font:500 16px var(--mono);font-variant-numeric:tabular-nums;white-space:nowrap}
 .price small{display:block;font-size:12px}
-.up{color:var(--good)} .down{color:var(--bad)} .mut{color:var(--muted)}
+.up{color:var(--good)} .down{color:var(--bad)} .mut{color:var(--muted)} .warn{color:var(--warn)}
 canvas.spark{width:88px;height:32px;flex:none}
 .meta{display:flex;flex-wrap:wrap;gap:6px 12px;font-size:12.5px;color:var(--muted)}
 .meta b{color:var(--ink);font-weight:800}
-.pill{display:inline-block;padding:2px 8px;border-radius:99px;background:var(--chip);font:500 11.5px var(--mono);color:var(--ink)}
+.pill{display:inline-block;padding:2px 8px;border-radius:99px;background:var(--chip);font:500 11.5px var(--mono);color:var(--ink);white-space:nowrap}
+.pill.bad{background:var(--bad);color:var(--on-accent)}
+.pill.gold{background:var(--gold);color:#2a1a00}
 .btns{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.btns.two{grid-template-columns:1fr 1fr}
+.btns.three{grid-template-columns:1fr 1fr 1fr}
+.btns.one{grid-template-columns:1fr}
 .btn{font:800 14px var(--body);border:0;border-radius:10px;padding:10px 8px;background:var(--accent);color:var(--on-accent);cursor:pointer;touch-action:manipulation}
 .btn.alt{background:var(--chip);color:var(--ink);border:1px solid var(--line)}
 .btn.sell{background:var(--good);color:var(--on-accent)}
+.btn.danger{background:var(--bad);color:var(--on-accent)}
+.btn.sm{padding:7px 10px;font-size:13px}
 .btn:disabled{opacity:.38;cursor:default}
-.btn:focus-visible,.tab:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.btn:focus-visible,.tab:focus-visible,.gear:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
 .btn.wide{width:100%;font-size:15px;padding:12px}
 .btn small{display:block;font:500 12px var(--mono);opacity:.9}
-.seg{display:flex;gap:4px;background:var(--chip);border:1px solid var(--line);border-radius:10px;padding:3px;align-self:flex-start}
+.seg{display:flex;gap:4px;background:var(--chip);border:1px solid var(--line);border-radius:10px;padding:3px;align-self:flex-start;flex-wrap:wrap}
 .seg button{border:0;background:none;font:800 13px var(--body);color:var(--muted);padding:6px 12px;border-radius:7px;cursor:pointer}
 .seg button.on{background:var(--panel);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.12)}
 .lv{font:400 22px/1 var(--display);color:var(--accent);min-width:42px;text-align:center}
 .bar2{height:6px;border-radius:9px;background:var(--chip);overflow:hidden}
 .bar2 i{display:block;height:100%;background:var(--gold);width:0}
+.bar2.good i{background:var(--good)} .bar2.mid i{background:var(--warn)} .bar2.bad i{background:var(--bad)}
+.staff{border-top:1px dashed var(--line);padding-top:8px;display:flex;flex-direction:column;gap:8px}
+.emp{display:flex;align-items:center;gap:8px;padding:8px;border-radius:10px;background:var(--chip)}
+.emp .who{min-width:0;flex:1;font-size:13.5px}
+.emp .who b{font-weight:900}
+.emp .who small{display:block;color:var(--muted);font:500 11.5px var(--mono)}
+.emp .act{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end}
 .locked{opacity:.55;border-style:dashed}
 .goal{flex-direction:row;align-items:center}
 .goal .chk{width:28px;height:28px;border-radius:50%;flex:none;display:grid;place-items:center;background:var(--chip);border:2px solid var(--line);font-weight:900;color:var(--on-accent)}
@@ -82,93 +126,250 @@ canvas.spark{width:88px;height:32px;flex:none}
 .help{background:var(--chip);border:1px solid var(--line);border-radius:14px;padding:12px 14px;font-size:14px}
 .help ol{margin:6px 0 8px;padding-left:20px}
 .help li{margin:3px 0}
-.tabs{position:fixed;left:0;right:0;bottom:0;z-index:6;background:var(--panel);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(4,1fr);padding-bottom:env(safe-area-inset-bottom,0px);padding-left:max(8px,env(safe-area-inset-left,0px));padding-right:max(8px,env(safe-area-inset-right,0px))}
-.tab{border:0;background:none;color:var(--muted);font:800 12.5px var(--body);padding:10px 2px 12px;cursor:pointer;position:relative}
-.tab .ic{display:block;font-size:19px;line-height:1.2}
-.tab.on{color:var(--accent)}
-.tab .dot{position:absolute;top:8px;right:28%;width:8px;height:8px;border-radius:50%;background:var(--gold)}
-.toast{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 70px);transform:translate(-50%,-20px);opacity:0;transition:.25s;z-index:20;background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-weight:800;font-size:14px;max-width:calc(100% - 32px);text-align:center;pointer-events:none}
-.toast.show{opacity:1;transform:translate(-50%,0)}
+.tick{display:flex;align-items:center;gap:10px;font:500 12px var(--mono);color:var(--muted)}
+.tick .bar2{flex:1}
+.need{display:grid;grid-template-columns:82px 1fr 48px;align-items:center;gap:8px;font-size:13px;font-weight:700}
+.need span:last-child{font:500 12px var(--mono);text-align:right}
+.big{margin-left:auto;font:400 28px/1 var(--display)}
+.fin{display:grid;grid-template-columns:1fr auto;gap:4px 12px;font-size:14px}
+.fin span:nth-child(even){font:500 14px var(--mono);text-align:right;font-variant-numeric:tabular-nums}
+.fin .tot{font-weight:900;border-top:1px solid var(--line);padding-top:4px}
+canvas.chart{width:100%;height:130px;display:block}
+.lb{display:grid;grid-template-columns:28px 1fr auto;gap:6px 10px;font-size:14px;align-items:center}
+.lb .me{color:var(--accent);font-weight:900}
+.set{display:flex;align-items:center;gap:12px;justify-content:space-between;flex-wrap:wrap}
+.set label{font-weight:800}
+.set input[type=range]{flex:1;min-width:140px;accent-color:var(--accent)}
 textarea.code{width:100%;font:500 12px/1.35 var(--mono);background:var(--chip);color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:8px;resize:vertical;word-break:break-all}
 .her{background:var(--panel);border:2px solid var(--gold);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:8px}
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:6;background:var(--panel);border-top:1px solid var(--line);display:grid;grid-template-columns:repeat(5,1fr);padding-bottom:env(safe-area-inset-bottom,0px);padding-left:max(4px,env(safe-area-inset-left,0px));padding-right:max(4px,env(safe-area-inset-right,0px))}
+.tab{border:0;background:none;color:var(--muted);font:800 11.5px var(--body);padding:9px 0 11px;cursor:pointer;position:relative;min-width:0}
+.tab .ic{display:block;font-size:18px;line-height:1.2}
+.tab.on{color:var(--accent)}
+.tab .dot{position:absolute;top:7px;right:24%;width:8px;height:8px;border-radius:50%;background:var(--gold)}
+.tab .dot.red{background:var(--bad)}
+.toast{position:fixed;left:50%;top:calc(env(safe-area-inset-top,0px) + 70px);transform:translate(-50%,-20px);opacity:0;transition:.25s;z-index:20;background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:12px;font-weight:800;font-size:14px;max-width:calc(100% - 32px);text-align:center;pointer-events:none}
+.toast.show{opacity:1;transform:translate(-50%,0)}
 @media (prefers-reduced-motion: reduce){.toast{transition:none}}
 </style>
-
 </head>
 <body>
 <header class="bar"><div class="wrap">
-  <div class="logo">Petit<br>Empire</div>
+  <button class="gear" id="gear" aria-label="Paramètres">⚙︎</button>
+  <div class="logo">Petit Empire<small id="cityName">Petit-Bourg</small></div>
   <div class="cash"><b id="cash">50 €</b><small id="rate">0 €/s · Jour 1</small></div>
 </div></header>
 
-<div class="town">
-  <canvas id="town" aria-label="Ta ville : chaque commerce acheté apparaît comme un bâtiment"></canvas>
-  <div class="news wrap" id="news"><span class="tag" id="newsTag">Jour 1</span><span id="newsTxt">Bienvenue ! Ouvre ton premier stand de crêpes ou achète du blé quand il est bas.</span></div>
-</div>
+<div class="townbox" id="townbox"><div class="townwrap" id="townwrap"><canvas id="town" aria-label="Ta ville : touche un bâtiment pour voir ses chiffres"></canvas></div><button class="viewbtn" id="viewBtn">▦ Plan</button></div>
+<div class="planinfo wrap" id="planInfo" hidden></div>
+<div class="news wrap"><span class="tag" id="newsTag">Jour 1</span><span id="newsTxt">Bienvenue ! Ouvre ton premier stand de crêpes ou achète du blé quand il est bas.</span></div>
+<div class="wrap" id="banner"></div>
+<div class="wrap" id="todo"></div>
 
 <main class="wrap" id="main"></main>
 
 <nav class="tabs" id="tabs">
-  <button class="tab on" data-tab="market"><span class="ic">⚖︎</span>Marché</button>
-  <button class="tab" data-tab="biz"><span class="ic">⌂</span>Commerces</button>
+  <button class="tab on" data-tab="market"><span class="ic">⚖︎</span>Marché<span class="dot" id="mdot" hidden></span></button>
+  <button class="tab" data-tab="biz"><span class="ic">⌂</span>Commerces<span class="dot red" id="bdot" hidden></span></button>
+  <button class="tab" data-tab="city"><span class="ic">♣︎</span>Ville<span class="dot red" id="cdot" hidden></span></button>
   <button class="tab" data-tab="upg"><span class="ic">⚒︎</span>Améliorer</button>
   <button class="tab" data-tab="goals"><span class="ic">★</span>Objectifs<span class="dot" id="gdot" hidden></span></button>
 </nav>
+<div class="sheet" id="sheet" hidden></div>
 <div class="toast" id="toast"></div>
 
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script>
-/* ---------- Données du jeu ---------- */
+/* ======================================================================
+   PETIT EMPIRE — données
+   ====================================================================== */
+const VERSION='2.1';
+const MT=15;          // la bourse change toutes les 15 s
+const DAY=180;        // un jour de jeu = 3 minutes
+const SEASON_DAYS=7;  // une saison = 7 jours
 const GOODS=[
- {id:'ble',name:'Blé',unit:'sac',base:12,vol:.055,unlock:0},
- {id:'cafe',name:'Café',unit:'kg',base:60,vol:.065,unlock:600},
- {id:'soie',name:'Soie',unit:'rouleau',base:260,vol:.075,unlock:8000},
- {id:'cuivre',name:'Cuivre',unit:'lingot',base:1200,vol:.06,unlock:9e4},
- {id:'safran',name:'Safran',unit:'boîte',base:6500,vol:.095,unlock:8e5},
- {id:'or',name:'Or',unit:'once',base:34000,vol:.05,unlock:8e6},
+ {id:'ble',name:'Blé',unit:'sac',base:12,vol:.09,unlock:0},
+ {id:'cafe',name:'Café',unit:'kg',base:60,vol:.1,unlock:600},
+ {id:'soie',name:'Soie',unit:'rouleau',base:260,vol:.11,unlock:8000},
+ {id:'cuivre',name:'Cuivre',unit:'lingot',base:1200,vol:.09,unlock:9e4},
+ {id:'safran',name:'Safran',unit:'boîte',base:6500,vol:.13,unlock:8e5},
+ {id:'or',name:'Or',unit:'once',base:34000,vol:.08,unlock:8e6},
+ {id:'parfum',name:'Parfum rare',unit:'flacon',base:1.6e5,vol:.11,unlock:7e7},
+ {id:'diamant',name:'Diamant',unit:'pierre',base:9e5,vol:.1,unlock:6e8},
+ {id:'puce',name:'Puces électroniques',unit:'caisse',base:5e6,vol:.14,unlock:5e9},
 ];
 const BIZ=[
- {id:'crepe',name:'Stand de crêpes',cost:15,rate:.4,col:'#e9845a'},
- {id:'kiosque',name:'Kiosque à journaux',cost:120,rate:2.5,col:'#5aa3c9'},
- {id:'boul',name:'Boulangerie',cost:1100,rate:14,col:'#d9a441'},
- {id:'brasserie',name:'Brasserie',cost:12000,rate:90,col:'#b85a6a'},
- {id:'atelier',name:'Atelier textile',cost:1.3e5,rate:600,col:'#7a8fd1'},
- {id:'port',name:'Port marchand',cost:1.4e6,rate:4200,col:'#4f9e8a'},
- {id:'banque',name:'Banque',cost:2e7,rate:32000,col:'#c9b78f'},
- {id:'bourse',name:'Bourse',cost:3e8,rate:2.6e5,col:'#8e6fb3'},
- {id:'tour',name:'Tour Empire',cost:5e9,rate:2.4e6,col:'#6c7f8c'},
+ {id:'crepe',name:'Stand de crêpes',cost:15,rate:.4,col:'#e9845a',job:'crêpier',part:'La plaque chauffante'},
+ {id:'kiosque',name:'Kiosque à journaux',cost:120,rate:2.5,col:'#5aa3c9',job:'vendeur',part:'Le présentoir'},
+ {id:'boul',name:'Boulangerie',cost:1100,rate:14,col:'#d9a441',job:'boulanger',part:'Le four'},
+ {id:'brasserie',name:'Brasserie',cost:12000,rate:90,col:'#b85a6a',job:'serveur',part:'La tireuse à bière'},
+ {id:'cinema',name:'Cinéma',cost:55000,rate:280,col:'#c46aa0',job:'projectionniste',part:'Le projecteur'},
+ {id:'atelier',name:'Atelier textile',cost:1.3e5,rate:600,col:'#7a8fd1',job:'couturier',part:'Une machine à coudre'},
+ {id:'hotel',name:'Hôtel',cost:6e5,rate:2000,col:'#d98b4f',job:'réceptionniste',part:'L’ascenseur'},
+ {id:'port',name:'Port marchand',cost:1.4e6,rate:4200,col:'#4f9e8a',job:'docker',part:'Une grue'},
+ {id:'centre',name:'Centre commercial',cost:7e6,rate:13000,col:'#5f8fb0',job:'vendeur',part:'Les escalators'},
+ {id:'banque',name:'Banque',cost:2e7,rate:32000,col:'#c9b78f',job:'guichetier',part:'Le distributeur'},
+ {id:'bourse',name:'Bourse',cost:3e8,rate:2.6e5,col:'#8e6fb3',job:'trader',part:'Les serveurs informatiques'},
+ {id:'aeroport',name:'Aéroport',cost:1.6e9,rate:9e5,col:'#7f9aa6',job:'agent',part:'Le tapis à bagages'},
+ {id:'tour',name:'Tour Empire',cost:5e9,rate:2.4e6,col:'#6c7f8c',job:'gardien',part:'La climatisation'},
+];
+const NEEDS=[{id:'hyg',name:'Hygiène'},{id:'sec',name:'Sécurité'},{id:'conf',name:'Confort'},{id:'trans',name:'Transport'}];
+const INFRA=[
+ {id:'poubelle',name:'Poubelles',need:'hyg',cap:25,cost:40,maint:.03,max:8,brk:'Une poubelle déborde'},
+ {id:'wc',name:'Toilettes publiques',need:'hyg',cap:70,cost:250,maint:.15,max:5,brk:'Des toilettes sont bouchées'},
+ {id:'nettoyage',name:'Service de nettoyage',need:'hyg',cap:900,cost:1.2e5,maint:12,max:3,brk:'Une balayeuse est en panne'},
+ {id:'hopital',name:'Hôpital',need:'hyg',cap:12000,cost:6e7,maint:2500,max:2,brk:'Le scanner de l’hôpital est en panne'},
+ {id:'lampe',name:'Lampadaires',need:'sec',cap:35,cost:90,maint:.06,max:8,brk:'Un lampadaire a grillé'},
+ {id:'camera',name:'Caméras',need:'sec',cap:250,cost:8000,maint:1.2,max:4,brk:'Une caméra ne filme plus'},
+ {id:'police',name:'Commissariat',need:'sec',cap:2500,cost:2.5e6,maint:180,max:2,brk:'La voiture de police est en panne'},
+ {id:'banc',name:'Bancs',need:'conf',cap:20,cost:30,maint:.02,max:8,brk:'Un banc est cassé'},
+ {id:'fontaine',name:'Fontaine',need:'conf',cap:160,cost:3500,maint:.8,max:3,brk:'La pompe de la fontaine fuit'},
+ {id:'parc',name:'Parc',need:'conf',cap:1200,cost:3e5,maint:30,max:4,brk:'L’arrosage du parc est en panne'},
+ {id:'stade',name:'Stade',need:'conf',cap:15000,cost:1.5e8,maint:6000,max:1,brk:'Les projecteurs du stade sont grillés'},
+ {id:'bus',name:'Arrêt de bus',need:'trans',cap:60,cost:400,maint:.3,max:4,brk:'Un bus est en panne'},
+ {id:'parking',name:'Parking',need:'trans',cap:500,cost:4e4,maint:6,max:3,brk:'La barrière du parking est bloquée'},
+ {id:'metro',name:'Station de métro',need:'trans',cap:6000,cost:1.2e7,maint:900,max:2,brk:'Un escalator du métro est en panne'},
 ];
 const MILES=[10,25,50,100,150,200,300,400];
 const cap=l=>20*2**l, fee=l=>[4,3,2,1][l];
+const TAX=[10,8,6,4];
 const OFF_FRAC=[.1,.3,.6,1], OFF_H=[1,3,6,10];
 const UPG=[
  {id:'entrepot',name:'Entrepôt',max:12,cost:l=>150*5**l,desc:l=>`Capacité ${fmt(cap(l))} → ${fmt(cap(l+1))} unités`},
  {id:'flair',name:'Flair du marché',max:1,cost:()=>2500,desc:()=>'Montre la tendance et si le prix est bas ou haut'},
  {id:'nego',name:'Négociateur',max:3,cost:l=>[800,25000,6e5][l],desc:l=>`Commission ${fee(l)} % → ${fee(l+1)} %`},
- {id:'marketing',name:'Campagne publicitaire',max:12,cost:l=>3000*11**l,desc:()=>'Revenus des commerces ×1,5'},
- {id:'gerant',name:'Gérant de nuit',max:3,cost:l=>[5000,3e5,2e7][l],desc:l=>`Gains hors ligne ${OFF_FRAC[l]*100} % sur ${OFF_H[l]} h → ${OFF_FRAC[l+1]*100} % sur ${OFF_H[l+1]} h`},
- {id:'reseau',name:"Réseau d'informateurs",max:3,cost:l=>[2e4,2e6,2e8][l],desc:()=>'Pièces d’opportunité plus fréquentes et plus riches'},
+ {id:'marketing',name:'Campagne publicitaire',max:12,cost:l=>3000*11**l,desc:()=>'Revenus des commerces ×1,5 (salaires aussi)'},
+ {id:'formation',name:'Formation du personnel',max:5,cost:l=>4000*9**l,desc:()=>'Employés 20 % plus efficaces'},
+ {id:'rh',name:'Service RH',max:3,cost:l=>[6000,4e5,3e7][l],desc:()=>'Les employés perdent leur bonne humeur 25 % moins vite'},
+ {id:'preventif',name:'Entretien préventif',max:4,cost:l=>2000*12**l,desc:()=>'20 % de pannes en moins'},
+ {id:'outils',name:'Outils de pro',max:3,cost:l=>[3000,2e5,2e7][l],desc:()=>'Réparations 50 % plus rapides'},
+ {id:'comptable',name:'Comptable',max:3,cost:l=>[1e4,1e6,1e8][l],desc:l=>`Impôts ${TAX[l]} % → ${TAX[l+1]} % des revenus`},
+ {id:'immo',name:'Agent immobilier',max:5,cost:l=>5e4*15**l,desc:()=>'Commerces 6 % moins chers'},
+ {id:'vip',name:'Clients VIP',max:3,cost:l=>[3e4,3e6,3e8][l],desc:()=>'Commandes payées 25 % de plus'},
+ {id:'gerant',name:'Gérant de nuit',max:3,cost:l=>[5000,3e5,2e7][l],desc:l=>`Hors ligne ${OFF_FRAC[l]*100} % sur ${OFF_H[l]} h → ${OFF_FRAC[l+1]*100} % sur ${OFF_H[l+1]} h`},
+ {id:'jet',name:'Jet privé',max:2,cost:l=>[2e7,5e9][l],desc:l=>`Voyage entre tes villes : ${[20,10,3][l]} s → ${[20,10,3][l+1]} s`},
+ {id:'reseau',name:"Réseau d'informateurs",max:3,cost:l=>[2e4,2e6,2e8][l],desc:()=>'Pièces dorées plus fréquentes et plus riches'},
 ];
-const lvl=id=>S.biz[id]||0;
+const NAMES=['Léa','Hugo','Inès','Lucas','Chloé','Nathan','Manon','Théo','Jade','Louis','Emma','Noah','Sarah','Yanis','Zoé','Adam','Camille','Malik','Julie','Enzo','Nora','Sami','Lina','Tom','Maëlle','Rayan','Clara','Gabin','Anaïs','Mehdi','Elif','Bastien','Amina','Kevin','Lou','Diego'];
+const TRAITS={
+ bosseur:{n:'Bosseur',b:.4,w:1.15,x:1,m:1,wt:2},
+ flemmard:{n:'Flemmard',b:.1,w:.7,x:.6,m:.6,wt:2},
+ souriant:{n:'Souriant',b:.32,w:1,x:1,m:.8,wt:2},
+ ambitieux:{n:'Ambitieux',b:.3,w:1.05,x:1.8,m:1.3,wt:1.5},
+ fidele:{n:'Fidèle',b:.25,w:1,x:1,m:.35,wt:1.5},
+ voleur:{n:'Voleur',b:.3,w:1,x:1,m:1,wt:1},
+};
+const TRAIT_W=Object.fromEntries(Object.entries(TRAITS).map(([k,v])=>[k,v.wt]));
+const CLIENTS=['Madame Lefèvre','Le restaurant du port','L’hôtel des Arts','Un marchand belge','La coopérative','Monsieur Dubois','Une boutique de luxe','Le chef étoilé','La mairie','Un collectionneur'];
+const SEASONS=[
+ {n:'Printemps',ic:'✿',biz:{boul:1.15,atelier:1.15,crepe:1.1},good:{}},
+ {n:'Été',ic:'☀',biz:{crepe:1.4,hotel:1.4,port:1.2,cinema:.9},good:{soie:.2,safran:-.15,cafe:-.1}},
+ {n:'Automne',ic:'❦',biz:{centre:1.25,cinema:1.15,crepe:.9},good:{cuivre:.15,ble:.1}},
+ {n:'Hiver',ic:'❄',biz:{crepe:.7,cinema:1.4,brasserie:1.3,hotel:.85},good:{ble:.3,cafe:.2,or:.1}},
+];
+const WEATHER={
+ soleil:{n:'Soleil',ic:'☀',inc:1.05},
+ nuages:{n:'Nuageux',ic:'☁',inc:1},
+ pluie:{n:'Pluie',ic:'☂',inc:.85},
+ orage:{n:'Orage',ic:'⚡',inc:.75},
+ neige:{n:'Neige',ic:'❄',inc:.85,need:{trans:2}},
+ canicule:{n:'Canicule',ic:'♨',inc:1,need:{hyg:1.6}},
+};
+const WEATHER_W=[{soleil:3,nuages:3,pluie:3,orage:1},{soleil:5,nuages:2,pluie:1,orage:1,canicule:2},{soleil:2,nuages:3,pluie:4,orage:2},{soleil:1,nuages:3,pluie:1,neige:4}];
+const RIVALS=[
+ {id:'dupont',n:'Groupe Dupont',col:'#b84040',at:5000},
+ {id:'mega',n:'MégaShop',col:'#3f6fd1',at:5e5},
+ {id:'luxor',n:'Luxor & Fils',col:'#9a5fd6',at:5e7},
+];
+const PROGRAMS={
+ impots:{n:'Moins d’impôts',d:'Impôts −4 points'},
+ travaux:{n:'Grands travaux',d:'Équipements 30 % moins chers'},
+ tourisme:{n:'Tourisme',d:'Visiteurs +25 %, mais entretien +25 %'},
+ ecolo:{n:'Écologie',d:'Parcs et bancs comptent double, port et atelier −15 %'},
+ securite:{n:'Ordre et sécurité',d:'Sécurité ×1,5 et plus de cambriolages'},
+ commerce:{n:'Petit commerce',d:'Crêpes, kiosque, boulangerie et brasserie +30 %'},
+};
+const CANDIDATES=['Mme Martin','M. Bernard','Mme Petit','M. Robert','Mme Richard','M. Durand','Mme Moreau','M. Laurent'];
+const RECIPES=[
+ {id:'pain',name:'Pain',from:'ble',biz:'boul',mult:2.2,per:.25},
+ {id:'expresso',name:'Expresso',from:'cafe',biz:'brasserie',mult:2,per:.12},
+ {id:'vetement',name:'Vêtements',from:'soie',biz:'atelier',mult:2.3,per:.05},
+ {id:'bijou',name:'Bijoux',from:'or',biz:'centre',mult:1.9,per:.01},
+ {id:'gadget',name:'Gadgets',from:'puce',biz:'aeroport',mult:1.8,per:.003},
+];
+const DECOS=[
+ {id:'fanions',n:'Guirlande de fanions',c:5,b:.01},
+ {id:'statue',n:'Ta statue en bronze',c:15,b:.02},
+ {id:'fontaine_or',n:'Fontaine dorée',c:25,b:.03},
+ {id:'feux',n:'Feu d’artifice chaque soir',c:40,b:.04},
+ {id:'toits',n:'Toits en or',c:60,b:.05},
+];
+const CHALLENGES=[
+ {id:'c3',t:'Livre 3 commandes de clients',k:'contracts',n:()=>3},
+ {id:'trade',t:'Fais du bénéfice au marché',k:'tradeProfit',n:()=>Math.max(500,Math.round(incAll()*300))},
+ {id:'hire',t:'Embauche 3 personnes',k:'hires',n:()=>3},
+ {id:'infra',t:'Installe 5 équipements',k:'infra',n:()=>5},
+ {id:'ops',t:'Attrape 4 pièces dorées',k:'ops',n:()=>4},
+ {id:'sell',t:'Réussis 8 ventes avec bénéfice',k:'sold',n:()=>8},
+ {id:'repair',t:'Répare 4 pannes',k:'repairs',n:()=>4},
+ {id:'craft',t:'Transforme 40 produits',k:'crafted',n:()=>40,cond:()=>lvl('boul')>0},
+];
+
+/* ---------- accès rapides ---------- */
+const lvl=id=>C.biz[id]||0;
+const emps=id=>C.staff[id]||(C.staff[id]=[]);
+const stf=id=>(C.staff[id]||[]).length;
+const cnt=id=>C.infra[id]||0;
 const totalLv=()=>BIZ.reduce((a,b)=>a+lvl(b.id),0);
+const totalStaff=()=>BIZ.reduce((a,b)=>a+stf(b.id),0);
+const totalInfra=()=>INFRA.reduce((a,i)=>a+cnt(i.id),0);
+const broken=(kind,ref)=>C.broken.filter(x=>x.kind===kind&&x.ref===ref).length;
 const GOALS=[
  {id:'sell1',t:'Première affaire',d:'Revendre un produit avec bénéfice',ok:()=>S.sold>0},
  {id:'k1',t:'Premier millier',d:'Gagner 1 000 € dans la partie',ok:()=>S.run.earned>=1e3},
  {id:'crepe10',t:'Roi de la crêpe',d:'Avoir 10 stands de crêpes',ok:()=>lvl('crepe')>=10},
+ {id:'staff1',t:'Premier salarié',d:'Embaucher un employé',ok:()=>totalStaff()>=1},
+ {id:'wc',t:'Besoin pressant',d:'Installer des toilettes publiques',ok:()=>cnt('wc')>=1},
  {id:'flip2',t:'Coup de maître',d:'Revendre au double de ton prix d’achat',ok:()=>S.bestFlip>=2},
+ {id:'contract1',t:'Livraison express',d:'Livrer une commande de client',ok:()=>S.contractsDone>=1},
+ {id:'repair1',t:'Ça roule',d:'Réparer une panne',ok:()=>S.cnt.repairs>=1},
  {id:'boul',t:'Bon pain',d:'Ouvrir une boulangerie',ok:()=>lvl('boul')>=1},
+ {id:'craft1',t:'Fait maison',d:'Transformer un premier produit',ok:()=>S.cnt.crafted>=1},
+ {id:'debt',t:'Dans le rouge',d:'Passer sous 0 € (ça arrive aux meilleurs)',ok:()=>S.cash<0},
+ {id:'loan',t:'À crédit',d:'Emprunter à la banque du village',ok:()=>S.loan>0},
+ {id:'streak3',t:'Habitué',d:'Jouer 3 jours d’affilée',ok:()=>S.streak.n>=3},
  {id:'k100',t:'Cent mille',d:'Gagner 100 000 €',ok:()=>S.run.earned>=1e5},
+ {id:'cinema',t:'Séance de 20 h',d:'Ouvrir un cinéma',ok:()=>lvl('cinema')>=1},
+ {id:'manager',t:'Promotion',d:'Nommer un gérant',ok:()=>BIZ.some(b=>(C.staff[b.id]||[]).some(e=>e.mgr))},
+ {id:'rival1',t:'Concurrence déloyale',d:'Racheter un concurrent',ok:()=>C.absorbed>0},
+ {id:'vote',t:'Citoyen engagé',d:'Faire élire ton candidat',ok:()=>S.cnt.wins>=1},
  {id:'ent5',t:'Grand stock',d:'Entrepôt au niveau 5',ok:()=>(S.upg.entrepot||0)>=5},
+ {id:'sat',t:'Ville modèle',d:'Satisfaction 100 % avec 500 visiteurs',ok:()=>satisfaction()>=1&&visitors()>=500},
+ {id:'infra25',t:'Urbaniste',d:'25 équipements dans la ville',ok:()=>totalInfra()>=25},
  {id:'lv100',t:'Quartier animé',d:'100 niveaux de commerces au total',ok:()=>totalLv()>=100},
+ {id:'crisis',t:'Sang-froid',d:'Régler une crise',ok:()=>S.cnt.crisesFixed>=1},
+ {id:'staff25',t:'Patron',d:'25 employés au total',ok:()=>totalStaff()>=25},
+ {id:'contract10',t:'Fournisseur officiel',d:'Livrer 10 commandes',ok:()=>S.contractsDone>=10},
+ {id:'repair10',t:'Mécano',d:'Réparer 10 pannes',ok:()=>S.cnt.repairs>=10},
+ {id:'daily5',t:'Défi relevé',d:'Réussir 5 défis du jour',ok:()=>S.cnt.dailies>=5},
  {id:'m1',t:'Millionnaire',d:'Gagner 1 M€',ok:()=>S.run.earned>=1e6},
- {id:'ops10',t:'Œil de lynx',d:'Attraper 10 pièces d’opportunité',ok:()=>S.ops>=10},
+ {id:'ops10',t:'Œil de lynx',d:'Attraper 10 pièces dorées',ok:()=>S.ops>=10},
+ {id:'seasons',t:'Une année complète',d:'Vivre les quatre saisons',ok:()=>day()>4*SEASON_DAYS},
  {id:'port',t:'Larguez les amarres',d:'Ouvrir le port marchand',ok:()=>lvl('port')>=1},
+ {id:'deco3',t:'Décorateur',d:'Acheter 3 décorations',ok:()=>Object.keys(S.decos).length>=3},
  {id:'her1',t:'Dynastie',d:'Céder ton empire une première fois',ok:()=>S.prestiges>=1},
  {id:'lv300',t:'Grande ville',d:'300 niveaux de commerces',ok:()=>totalLv()>=300},
+ {id:'staff100',t:'Grand employeur',d:'100 employés au total',ok:()=>totalStaff()>=100},
  {id:'md1',t:'Milliardaire',d:'Gagner 1 Md€ dans une partie',ok:()=>S.run.earned>=1e9},
+ {id:'aeroport',t:'Décollage',d:'Ouvrir un aéroport',ok:()=>lvl('aeroport')>=1},
  {id:'tour',t:'Le sommet',d:'Construire la Tour Empire',ok:()=>lvl('tour')>=1},
+ {id:'puce',t:'High-tech',d:'Débloquer les puces électroniques',ok:()=>S.run.earned>=5e9},
+ {id:'plan',t:'Urbaniste en herbe',d:'Déplacer un bâtiment sur le plan de la ville',ok:()=>S.cnt.moves>=1},
+ {id:'adj',t:'Bon voisinage',d:'Obtenir +20 % de bonus de voisinage sur un commerce',ok:()=>BIZ.some(b=>lvl(b.id)&&adjOf(b.id)>=1.2)},
+ {id:'city2',t:'Expansion',d:'Fonder une deuxième ville',ok:()=>Object.keys(S.cities).length>=2},
+ {id:'city4',t:'Empire régional',d:'Posséder les quatre villes',ok:()=>Object.keys(S.cities).length>=4},
  {id:'her50',t:'Légende',d:'Cumuler 50 points d’héritage',ok:()=>S.heritage>=50},
 ];
 const NEWS=[
@@ -184,105 +385,543 @@ const NEWS=[
  {g:'safran',d:-1,t:'Récolte exceptionnelle de safran, les prix glissent.'},
  {g:'or',d:1,t:'Inquiétude sur les marchés, l’or rassure.'},
  {g:'or',d:-1,t:'Les banques revendent leurs réserves d’or.'},
- {g:null,m:2,dur:30,t:'Jour de fête au village : commerces ×2 pendant 30 s !'},
- {g:null,m:3,dur:15,t:'Une star passe en ville : commerces ×3 pendant 15 s !'},
- {g:null,m:.5,dur:20,t:'Grève des livreurs : commerces ×0,5 pendant 20 s.'},
+ {g:'parfum',d:1,t:'Une star lance la mode du parfum rare.'},
+ {g:'parfum',d:-1,t:'Des contrefaçons inondent le marché du parfum.'},
+ {g:'diamant',d:1,t:'Mariage royal : les diamants s’envolent.'},
+ {g:'diamant',d:-1,t:'Les diamants de synthèse font chuter les prix.'},
+ {g:'puce',d:1,t:'Pénurie mondiale de puces électroniques !'},
+ {g:'puce',d:-1,t:'Nouvelles usines de puces : surproduction.'},
+ {m:2,dur:30,t:'Jour de fête au village : commerces ×2 pendant 30 s !'},
+ {m:3,dur:15,t:'Une star passe en ville : commerces ×3 pendant 15 s !'},
+ {m:.5,dur:20,t:'Grève des livreurs : commerces ×0,5 pendant 20 s.'},
+ {m:2,dur:40,t:'Un car de touristes s’arrête : commerces ×2 pendant 40 s !',cond:()=>needSat('trans')>=1&&visitors()>60},
+ {cost:()=>maintenance()*150,t:'Tempête cette nuit : réparations des équipements',cond:()=>totalInfra()>0&&(S.weather==='orage'||S.weather==='pluie')},
+ {cost:()=>incAll()*60,t:'Contrôle sanitaire : amende pour manque d’hygiène',cond:()=>needSat('hyg')<.8&&visitors()>60},
+ {cost:()=>incAll()*45,t:'Cambriolage dans un commerce : pertes',cond:()=>needSat('sec')<.8&&visitors()>60&&S.law!=='securite'},
+ {info:1,t:'Les visiteurs cherchent des toilettes… La satisfaction baisse.',cond:()=>needSat('hyg')<.7},
+ {info:1,t:'Les rues sont sombres le soir, les clients ont peur de sortir.',cond:()=>needSat('sec')<.7},
+ {info:1,t:'Pas un banc pour s’asseoir : les visiteurs repartent vite.',cond:()=>needSat('conf')<.7},
+ {info:1,t:'Embouteillages en ville : les clients n’arrivent pas jusqu’à tes commerces.',cond:()=>needSat('trans')<.7},
 ];
+const CRISES={
+ krach:{n:'Krach boursier',d:'Les marchés s’effondrent, tes clients dépensent moins.',dur:150,inc:()=>.8,fix:'Rassurer les investisseurs',cost:()=>incAll()*60+500,start:()=>GOODS.forEach(g=>{const st=S.goods[g.id];st.x=Math.max(-1.25,st.x-.6)})},
+ epidemie:{n:'Épidémie de grippe',d:'Les visiteurs restent chez eux. Un hôpital limite les dégâts.',dur:180,inc:()=>cnt('hopital')?.85:.55,fix:'Campagne de vaccination',cost:()=>incAll()*90+800,cond:()=>visitors()>200},
+ panne:{n:'Panne de courant',d:'Tout le quartier est plongé dans le noir.',dur:90,inc:()=>.5,fix:'Louer un générateur',cost:()=>incAll()*40+300},
+ rats:{n:'Invasion de rats',d:'L’hygiène laisse à désirer, les clients fuient.',dur:240,inc:()=>.75,fix:'Appeler la dératisation',cost:()=>incAll()*50+400,cond:()=>needSat('hyg')<.9},
+ inondation:{n:'Inondation',d:'Les rues sont sous l’eau, l’entretien coûte trois fois plus.',dur:120,inc:()=>.7,maint:3,fix:'Appeler les pompiers',cost:()=>incAll()*45+400,cond:()=>S.weather==='pluie'||S.weather==='orage'},
+};
+const SPECIALS={
+ critique:{n:'Un critique gastronomique',d:'Il veut goûter ta brasserie. Une bonne note attire du monde pendant 2 jours.',cond:()=>lvl('brasserie')>0,
+   opts:[{t:'L’inviter',cost:()=>incAll()*20+200,go:()=>{const ok=Math.random()<.25+.35*Math.min(1,satisfaction())+.1*Math.min(3,stf('brasserie'));buff('brasserie',ok?1.5:.75,(ok?2:1)*DAY);return ok?'Critique élogieuse ! Brasserie ×1,5 pendant 2 jours.':'Critique sévère… Brasserie ×0,75 pendant 1 jour.'}},{t:'Ignorer',go:()=>'Le critique est reparti.'}]},
+ star:{n:'Une star de cinéma',d:'Elle cherche une suite pour la nuit. Tout le monde voudra la voir.',cond:()=>lvl('hotel')>0,
+   opts:[{t:'Préparer la suite',cost:()=>incAll()*30+500,go:()=>{S.boost={m:3,until:S.clock+45};buff('hotel',2,DAY);return 'La star adore ! Commerces ×3 pendant 45 s et hôtel ×2 pendant 1 jour.'}},{t:'Refuser',go:()=>'La star est allée ailleurs.'}]},
+ inspecteur:{n:'Un inspecteur des impôts',d:'Il veut voir tes comptes. Avec un comptable, tout sera en règle.',cond:()=>S.run.earned>1e4,
+   opts:[{t:'Montrer les comptes',go:()=>{if(S.upg.comptable)return 'Ton comptable a tout préparé : aucun problème.';const f=Math.max(0,S.cash)*.05;S.cash-=f;return `Quelques erreurs dans tes comptes : amende de ${eur(f)}.`}}]},
+ collection:{n:'Un collectionneur',d:'Il veut racheter ton plus gros stock à 2,2 fois le prix du marché.',cond:()=>GOODS.some(g=>S.goods[g.id].inv>=1),
+   opts:[{t:'Vendre',go:()=>{const g=GOODS.filter(g=>S.goods[g.id].inv>=1).sort((a,b)=>S.goods[b.id].inv*priceOf(b)-S.goods[a.id].inv*priceOf(a))[0];if(!g)return 'Tu n’as plus de stock.';const st=S.goods[g.id],rev=st.inv*priceOf(g)*2.2,p=rev-st.cost;S.cash+=rev;addTrade(p);st.inv=0;st.cost=0;return `Vendu ! ${eur(rev)} (bénéfice ${eur(p)}).`}},{t:'Garder',go:()=>'Tu as gardé ton stock.'}]},
+ mariage:{n:'Un mariage',d:'Les mariés commandent 300 pains à ta boulangerie.',cond:()=>lvl('boul')>=5,
+   opts:[{t:'Accepter',cost:()=>incAll()*15+100,go:()=>{const r=incAll()*60+600;earn(r);return `Les mariés sont ravis : ${eur(r)} !`}},{t:'Refuser',go:()=>'Ils iront chez un concurrent.'}]},
+};
 
-/* ---------- Outils ---------- */
+/* ======================================================================
+   Outils
+   ====================================================================== */
 const SUF=['','k','M','Md','Bn','Bd','Tn','Td','Qn'];
 function fmt(n){
   if(!isFinite(n))return '∞';
   const neg=n<0;n=Math.abs(n);let s;
-  if(n<1000) s=n<10?n.toFixed(2):n<100?n.toFixed(1):Math.floor(n).toString();
-  else if(n<1e6) s=Math.floor(n).toLocaleString('fr-FR');
+  if(n<1000) s=Number.isInteger(n)?String(n):n<10?n.toFixed(2):n<100?n.toFixed(1):Math.floor(n).toString();
+  else if(n<1e6||(SET.longNum&&n<1e18)) s=Math.floor(n).toLocaleString('fr-FR');
   else{let i=Math.min(Math.floor(Math.log10(n)/3),SUF.length-1);const v=n/10**(i*3);s=v.toFixed(v<10?2:v<100?1:0)+' '+SUF[i]}
   return (neg?'−':'')+s.replace('.',',');
 }
 const eur=n=>fmt(n)+' €';
+const sgn=n=>(n>=0?'+':'')+eur(n);
 const randn=()=>Math.sqrt(-2*Math.log(Math.random()||1e-9))*Math.cos(2*Math.PI*Math.random());
+const pick=a=>a[Math.floor(Math.random()*a.length)];
+const wpick=o=>{const t=Object.values(o).reduce((a,b)=>a+b,0);let r=Math.random()*t;for(const k in o){r-=o[k];if(r<=0)return k}return Object.keys(o)[0]};
 const $=id=>document.getElementById(id);
-const pl=(n,u)=>n>1?(u.endsWith('s')||u.endsWith('x')?u:u+'s'):u;
+const pl=(n,u)=>n>1&&u!=='kg'?(u.endsWith('s')||u.endsWith('x')?u:u+'s'):u;
+const mmss=s=>{s=Math.max(0,Math.ceil(s));return Math.floor(s/60)+':'+String(s%60).padStart(2,'0')};
+const pct=x=>Math.round(x*100)+' %';
+const uid=()=>Math.random().toString(36).slice(2,9);
+const todayStr=(d=new Date())=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 
-/* ---------- État ---------- */
+/* ======================================================================
+   Paramètres (gardés à part, jamais remis à zéro)
+   ====================================================================== */
+const SET_KEY='petit-empire-settings';
+const SET_DEF={sfx:.7,music:.35,musicOn:true,vib:true,theme:'auto',anim:'full',longNum:false,confirm:true,cloudAuto:true};
+let SET=Object.assign({},SET_DEF);
+try{Object.assign(SET,JSON.parse(localStorage.getItem(SET_KEY)||'{}'))}catch(e){}
+function saveSet(){try{localStorage.setItem(SET_KEY,JSON.stringify(SET))}catch(e){}}
+function applyTheme(){const r=document.documentElement;if(SET.theme==='auto')delete r.dataset.theme;else r.dataset.theme=SET.theme;readTokens();drawSparks()}
+const lowAnim=()=>SET.anim==='low';
+const vib=ms=>{if(SET.vib&&navigator.vibrate)try{navigator.vibrate(ms)}catch(e){}};
+
+/* ---------- Son et musique (synthétisés, aucun fichier) ---------- */
+let AC=null,sfxG=null,musG=null,musNext=0,musStep=0;
+function audioInit(){
+  if(AC){if(AC.state==='suspended')AC.resume();return}
+  try{AC=new (window.AudioContext||window.webkitAudioContext)()}catch(e){return}
+  sfxG=AC.createGain();musG=AC.createGain();sfxG.connect(AC.destination);musG.connect(AC.destination);applyVol();
+}
+function applyVol(){if(!AC)return;sfxG.gain.value=SET.sfx*.5;musG.gain.value=SET.musicOn?SET.music*.22:0}
+function tone(f,t0,d,type='triangle',v=.5,f2){if(!AC)return;const o=AC.createOscillator(),g=AC.createGain();o.type=type;o.frequency.setValueAtTime(f,t0);if(f2)o.frequency.exponentialRampToValueAtTime(f2,t0+d);g.gain.setValueAtTime(0,t0);g.gain.linearRampToValueAtTime(v,t0+.01);g.gain.exponentialRampToValueAtTime(.001,t0+d);o.connect(g);g.connect(sfxG);o.start(t0);o.stop(t0+d+.05)}
+function sfx(k){
+  if(!AC||SET.sfx<=0||document.hidden)return;const t=AC.currentTime;
+  if(k==='coin'){tone(988,t,.08,'square',.25);tone(1319,t+.07,.22,'square',.25)}
+  else if(k==='buy'){tone(523,t,.09,'triangle',.4)}
+  else if(k==='sell'){tone(659,t,.08,'triangle',.4);tone(988,t+.07,.16,'triangle',.4)}
+  else if(k==='bad'){tone(220,t,.3,'sawtooth',.2,140)}
+  else if(k==='level'){[523,659,784,1047].forEach((f,i)=>tone(f,t+i*.07,.18,'triangle',.35))}
+  else if(k==='alert'){tone(440,t,.12,'square',.2);tone(440,t+.18,.12,'square',.2)}
+  else if(k==='tick'){tone(1200,t,.03,'sine',.12)}
+}
+const CHORDS=[[261.6,329.6,392],[220,261.6,329.6],[174.6,220,261.6],[196,246.9,293.7]];
+const PENTA=[523.3,587.3,659.3,784,880,1046.5];
+function musicTick(){
+  if(!AC||!SET.musicOn||SET.music<=0||document.hidden||AC.state!=='running')return;
+  const now=AC.currentTime;if(musNext<now)musNext=now+.1;
+  while(musNext<now+1.5){
+    const ch=CHORDS[Math.floor(musStep/4)%4],t=musNext;
+    if(musStep%4===0)ch.forEach(f=>{const o=AC.createOscillator(),g=AC.createGain();o.type='sine';o.frequency.value=f/2;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.18,t+.6);g.gain.linearRampToValueAtTime(0,t+3.8);o.connect(g);g.connect(musG);o.start(t);o.stop(t+4)});
+    if(Math.random()<.55){const o=AC.createOscillator(),g=AC.createGain(),f=pick(PENTA)*(season()===3?.84:1);o.type='triangle';o.frequency.value=f;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(.12,t+.02);g.gain.exponentialRampToValueAtTime(.001,t+.9);o.connect(g);g.connect(musG);o.start(t);o.stop(t+1)}
+    musNext+=1;musStep++;
+  }
+}
+addEventListener('pointerdown',audioInit,{passive:true});
+
+/* ======================================================================
+   État de la partie
+   ====================================================================== */
 const KEY='petit-empire-v1';
-let S;
+let S=null,C=null;     // S = toute la partie, C = la ville affichée (et celle qu'on calcule)
+const CITIES=[
+ {id:'village',n:'Petit-Bourg',d:'Ta ville de départ.',cost:0,look:'village',biz:{},price:{}},
+ {id:'cote',n:'Port-Soleil',d:'Ville côtière : hôtel et port +40 %, crêpes +30 %. Café et safran moins chers, soie plus chère.',cost:5e6,look:'sea',biz:{hotel:1.4,port:1.4,crepe:1.3,cinema:.9},price:{cafe:.85,safran:.8,soie:1.15}},
+ {id:'mine',n:'Roche-Noire',d:'Ville minière : atelier +40 %, boulangerie et brasserie +20 %. Cuivre, or et diamants moins chers, parfum plus cher.',cost:3e8,look:'mine',biz:{atelier:1.4,boul:1.2,brasserie:1.2,hotel:.8},price:{cuivre:.75,or:.8,diamant:.85,parfum:1.15}},
+ {id:'capitale',n:'Grand-Capitale',d:'La capitale : banque, bourse et tour +50 %, centre commercial +30 %. Le luxe s\u2019y vend plus cher.',cost:3e10,look:'capital',biz:{banque:1.5,bourse:1.5,tour:1.5,centre:1.3,crepe:.8},price:{parfum:1.25,diamant:1.2,puce:1.15,ble:1.2}},
+];
+const CITY=id=>CITIES.find(c=>c.id===id)||CITIES[0];
+const GRID=36,GW=6;
+function newCity(id,clock){return {id,biz:{},staff:{},infra:{},broken:[],techs:0,nextBreak:(clock||40)+120,rivals:{},absorbed:0,craft:{},craftAcc:{},buffs:{},open:null,priceWar:0,grid:Array(GRID).fill(null),adj:{}}}
+function setS(n){S=n;C=S.cities[S.city]||S.cities.village;MEMO={}}
+function forCities(fn){const keep=C;let r=0;for(const id of Object.keys(S.cities)){C=S.cities[id];const v=fn(C);if(typeof v==='number')r+=v}C=keep;return r}
+let MEMO={};
+function memo(k,f){const key=(C?C.id:'')+':'+k;if(key in MEMO)return MEMO[key];return MEMO[key]=f()}
+function newGood(g){const st={x:(Math.random()-.5)*.5,drift:0,dt:0,inv:0,cost:0,hist:[]};for(let i=0;i<48;i++)stepGood(g,st);return st}
+function newEmp(){return {id:uid(),n:pick(NAMES),t:wpick(TRAIT_W),lv:1,xp:0,worked:0,mood:75+Math.random()*20,raise:1,mgr:false,ask:false,askUntil:0,known:false,strike:false}}
 function fresh(k){
+  const c=k?k.clock:40;
   const s={v:1,cash:50,run:{earned:0},life:k?k.life:0,heritage:k?k.heritage:0,goals:k?k.goals:{},ops:k?k.ops:0,
-    prestiges:k?k.prestiges:0,helpSeen:k?k.helpSeen:false,goods:{},biz:{},upg:{},clock:k?k.clock:25,
-    bestFlip:0,sold:0,nextOp:(k?k.clock:25)+25,nextNews:(k?k.clock:25)+14,boost:{m:1,until:0},mode:1,newGoal:false};
-  for(const g of GOODS){const st={x:(Math.random()-.5)*.5,drift:0,dt:0,inv:0,cost:0,hist:[]};
-    for(let i=0;i<48;i++){stepGood(g,st)} s.goods[g.id]=st}
+    prestiges:k?k.prestiges:0,helpSeen:k?k.helpSeen:false,contractsDone:k?k.contractsDone:0,
+    stars:k?k.stars:0,decos:k?k.decos:{},streak:k?k.streak:{last:'',n:0},daily:k?k.daily:null,
+    cnt:k?k.cnt:{contracts:0,tradeProfit:0,hires:0,infra:0,ops:0,sold:0,repairs:0,crafted:0,wins:0,crisesFixed:0,dailies:0,moves:0},
+    goods:{},upg:{},clock:c,bestFlip:0,sold:0,cities:{village:newCity('village',c)},city:'village',travel:null,view:'rue',todoAll:false,todoHide:false,
+    nextOp:c+25,nextNews:c+20,nextContract:c+35,contracts:[],boost:{m:1,until:0},mode:1,newGoal:false,
+    loan:0,dayIdx:Math.floor(c/DAY),dayStats:{gross:0,trade:0,sal:0,maint:0,int:0},lastDay:null,inDebt:false,mTimer:MT,
+    weather:'soleil',crisis:null,nextCrisis:c+900,special:null,nextSpecial:c+300,hist:[],
+    elect:{next:Math.floor(c/DAY)+10,cands:null,pick:null,don:0},law:null};
+  for(const g of GOODS)s.goods[g.id]=newGood(g);
   return s;
 }
+const CITY_KEYS=['biz','staff','infra','broken','techs','nextBreak','rivals','absorbed','craft','craftAcc','buffs','open','priceWar'];
+function migrate(s){
+  const f=Object.assign(fresh(),s);
+  for(const g of GOODS)if(!f.goods[g.id])f.goods[g.id]=newGood(g);
+  for(const k of['upg','goals','decos'])if(!f[k]||typeof f[k]!=='object'||Array.isArray(f[k]))f[k]={};
+  if(!s.cities){const v=newCity('village',f.clock);for(const k of CITY_KEYS)if(s[k]!=null)v[k]=s[k];f.cities={village:v};f.city='village'}
+  for(const k of CITY_KEYS)delete f[k];
+  for(const id of Object.keys(f.cities)){
+    const c=Object.assign(newCity(id,f.clock),f.cities[id]);f.cities[id]=c;
+    for(const k of['staff','infra','biz','rivals','craft','craftAcc','buffs','adj'])if(!c[k]||typeof c[k]!=='object'||Array.isArray(c[k]))c[k]={};
+    for(const sid in c.staff){const v=c.staff[sid];if(typeof v==='number')c.staff[sid]=Array.from({length:v},newEmp);else if(!Array.isArray(v))c.staff[sid]=[]}
+    if(!Array.isArray(c.broken))c.broken=[];
+    if(!Array.isArray(c.grid)||c.grid.length!==GRID)c.grid=Array(GRID).fill(null);
+  }
+  if(!f.cities[f.city])f.city='village';
+  f.travel=null;
+  f.cnt=Object.assign(fresh().cnt,f.cnt||{});
+  if(!f.streak)f.streak={last:'',n:0};
+  if(!f.dayStats)f.dayStats={gross:0,trade:0,sal:0,maint:0,int:0};
+  for(const k of['contracts','hist'])if(!Array.isArray(f[k]))f[k]=[];
+  if(f.dayIdx==null)f.dayIdx=Math.floor(f.clock/DAY);
+  if(!(f.mTimer>0))f.mTimer=MT;
+  if(!f.elect)f.elect={next:f.dayIdx+10,cands:null,pick:null,don:0};
+  if(!WEATHER[f.weather])f.weather='soleil';
+  return f;
+}
 function stepGood(g,st){
-  st.x+=-.035*st.x+(st.dt>0?st.drift:0)+randn()*g.vol;
+  const tgt=S?(SEASONS[season()].good[g.id]||0):0;
+  st.x+=-.06*(st.x-tgt)+(st.dt>0?st.drift:0)+randn()*g.vol;
   if(st.dt>0)st.dt--;
   st.x=Math.max(-1.25,Math.min(1.25,st.x));
   st.hist.push(g.base*Math.exp(st.x)); if(st.hist.length>48)st.hist.shift();
 }
-function load(){try{const r=localStorage.getItem(KEY);if(r){const s=JSON.parse(r);if(s&&s.v===1){S=Object.assign(fresh(),s);return true}}}catch(e){}S=fresh();return false}
+function load(){try{const r=localStorage.getItem(KEY);if(r){const s=JSON.parse(r);if(s&&s.v===1){setS(migrate(s));return true}}}catch(e){console.error(e)}setS(fresh());return false}
 function save(){S.t=Date.now();try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
 
-/* ---------- Économie ---------- */
-const priceOf=g=>S.goods[g.id].hist[S.goods[g.id].hist.length-1];
+/* ======================================================================
+   Économie
+   ====================================================================== */
+const season=()=>S?Math.floor(S.dayIdx/SEASON_DAYS)%4:0;
+const day=()=>Math.floor(S.clock/DAY)+1;
+const cityPrice=id=>CITY(S.city).price[id]||1;
+const priceOf=g=>S.goods[g.id].hist[S.goods[g.id].hist.length-1]*cityPrice(g.id);
 const curFee=()=>fee(S.upg.nego||0)/100;
 const capacity=()=>cap(S.upg.entrepot||0);
 const used=()=>GOODS.reduce((a,g)=>a+S.goods[g.id].inv,0);
 const goalCount=()=>Object.keys(S.goals).length;
 const bizMult=l=>MILES.reduce((m,t)=>l>=t?m*2:m,1);
-const permMult=()=>(1+.1*S.heritage)*(1+.02*goalCount());
-const globalMult=()=>1.5**(S.upg.marketing||0)*permMult()*S.boost.m;
+const mkMult=()=>1.5**(S.upg.marketing||0);
+const decoBonus=()=>1+DECOS.reduce((a,d)=>a+(S.decos[d.id]?d.b:0),0);
+const permMult=()=>(1+.1*S.heritage)*(1+.02*goalCount())*decoBonus();
 const sellBonus=()=>1+.05*S.heritage;
-function incomePerSec(){let r=0;for(const b of BIZ){const l=lvl(b.id);if(l)r+=b.rate*l*bizMult(l)}return r*globalMult()}
+const staffMax=b=>lvl(b.id)?Math.min(12,1+Math.floor(lvl(b.id)/10)):0;
+const baseProd=b=>{const l=lvl(b.id);return l?b.rate*l*bizMult(l):0};
+const empEff=()=>1+.2*(S.upg.formation||0);
+const empBonusOne=e=>e.mood<25?0:(TRAITS[e.t].b+.05*(e.lv-1))*empEff();
+const empBonus=b=>(C.staff[b.id]||[]).reduce((a,e)=>a+empBonusOne(e),0);
+const hasMgr=b=>(C.staff[b.id]||[]).some(e=>e.mgr);
+const wageOf=(b,e)=>baseProd(b)*mkMult()*.11*TRAITS[e.t].w*(1+.08*(e.lv-1))*e.raise*(e.mgr?2:1);
+const salaryOf=b=>(C.staff[b.id]||[]).reduce((a,e)=>a+wageOf(b,e),0);
+const newWage=b=>baseProd(b)*mkMult()*.11;
+const salaries=()=>BIZ.reduce((a,b)=>a+salaryOf(b),0);
+const LAW_BIZ={commerce:{crepe:1.3,kiosque:1.3,boul:1.3,brasserie:1.3},ecolo:{port:.85,atelier:.85}};
+function bizLocal(b){
+  let m=SEASONS[season()].biz[b.id]||1;
+  m*=CITY(C.id).biz[b.id]||1;
+  m*=adjOf(b.id);
+  m*=(LAW_BIZ[S.law]||{})[b.id]||1;
+  const bf=C.buffs[b.id];if(bf&&bf.until>S.clock)m*=bf.m;
+  if(hasMgr(b))m*=1.25;
+  if(broken('biz',b.id))m*=.2;
+  return m;
+}
+function visitors(){return memo('v',()=>{let v=0;BIZ.forEach((b,i)=>v+=lvl(b.id)*1.55**i*1.5);v+=totalStaff()*2;return v*(S.law==='tourisme'?1.25:1)})}
+function needCap(n){return memo('n'+n,()=>INFRA.reduce((a,i)=>{if(i.need!==n)return a;let c=Math.max(0,cnt(i.id)-broken('infra',i.id))*i.cap;if(S.law==='ecolo'&&(i.id==='parc'||i.id==='banc'))c*=2;return a+c},0)*(n==='sec'&&S.law==='securite'?1.5:1))}
+function needSat(n){const w=(WEATHER[S.weather].need||{})[n]||1;return Math.min(1.25,(needCap(n)+25)/Math.max(1,visitors()*w))}
+function satisfaction(){return memo('s',()=>NEEDS.reduce((a,n)=>a+needSat(n.id),0)/NEEDS.length)}
+function satMult(){const s=satisfaction();return .45+.65*Math.min(s,1)+Math.max(0,s-1)*.8}
+const debtMult=()=>S.cash<0?.7:1;
+const rivalShops=()=>Object.values(C.rivals).reduce((a,r)=>a+(r.shops||0),0);
+const rivalMult=()=>1/(1+rivalShops()*.015);
+const crisisMult=()=>S.crisis?CRISES[S.crisis.id].inc():1;
+const absorbMult=()=>Math.min(1.5,1+.01*C.absorbed);
+let PM=1; // multiplicateur de production commun, recalculé à chaque image
+function calcPM(){PM=mkMult()*permMult()*S.boost.m*satMult()*debtMult()*WEATHER[S.weather].inc*rivalMult()*crisisMult()*absorbMult()*(C.priceWar>S.clock?.8:1);return PM}
+const bizIncome=b=>baseProd(b)*(1+empBonus(b))*bizLocal(b)*PM;
+const grossIncome=()=>BIZ.reduce((a,b)=>a+bizIncome(b),0);
+const maintMult=()=>(1+totalLv()/60)*(S.law==='tourisme'?1.25:1)*((S.crisis&&CRISES[S.crisis.id].maint)||1);
+const maintenance=()=>INFRA.reduce((a,i)=>a+cnt(i.id)*i.maint,0)*maintMult();
+const techWage=()=>1+totalLv()*.04+grossIncome()*.004;
+const techCost=()=>Math.round(80+grossIncome()*20*1.25**C.techs);
+const techPay=()=>C.techs*techWage();
+const LOAN_RATE=.005/60;
+const interest=()=>S.loan*LOAN_RATE;
+const costs=()=>salaries()+maintenance()+interest()+techPay();
+let GROSS_ALL=0,COSTS_ALL=0;
+const incAll=()=>Math.max(GROSS_ALL,grossIncome());
+function allGross(){const r=forCities(()=>{calcPM();return grossIncome()});calcPM();return r}
+function allCosts(){const r=forCities(()=>{calcPM();return salaries()+maintenance()+techPay()})+interest();calcPM();return r}
+const taxRate=()=>Math.max(0,TAX[S.upg.comptable||0]-(S.law==='impots'?4:0))/100;
+const unlockedGoods=()=>GOODS.filter(g=>S.run.earned>=g.unlock||S.goods[g.id].inv>=1);
+const bizDisc=()=>.94**(S.upg.immo||0);
+function bizCost(b,n){const l=lvl(b.id);return b.cost*bizDisc()*1.15**l*(1.15**n-1)/.15}
+function bizMax(b){const l=lvl(b.id);return Math.max(0,Math.floor(Math.log(Math.max(0,S.cash)*.15/(b.cost*bizDisc()*1.15**l)+1)/Math.log(1.15)))}
+const bizQty=b=>S.mode==='max'?Math.max(1,bizMax(b)):S.mode;
+const hireCost=b=>20+baseProd(b)*mkMult()*25*1.3**stf(b.id);
+const infraCost=i=>i.cost*1.22**cnt(i.id)*(S.law==='travaux'?.7:1);
+const loanMax=()=>Math.max(0,1000+incAll()*400-S.loan);
 function earn(a){S.cash+=a;S.run.earned+=a;S.life+=a}
-const unlockedGoods=()=>GOODS.filter(g=>S.run.earned>=g.unlock||S.goods[g.id].inv>0);
-function bizCost(b,n){const l=lvl(b.id);return b.cost*1.15**l*(1.15**n-1)/.15}
-function bizMax(b){const l=lvl(b.id);return Math.max(0,Math.floor(Math.log(S.cash*.15/(b.cost*1.15**l)+1)/Math.log(1.15)))}
-function bizQty(b){return S.mode==='max'?Math.max(1,bizMax(b)):S.mode}
+function addTrade(p){S.dayStats.trade+=p;if(p>0){S.run.earned+=p;S.life+=p;S.cnt.tradeProfit+=p}}
+function buff(id,m,dur){C.buffs[id]={m,until:S.clock+dur}}
 
+/* ======================================================================
+   Actions du joueur
+   ====================================================================== */
+let armedKey=null,armedAt=0;
+function confirmBig(key,cost,label){
+  if(!SET.confirm||cost<Math.max(0,S.cash)*.5||cost<1000)return true;
+  if(armedKey===key&&Date.now()-armedAt<3500){armedKey=null;return true}
+  armedKey=key;armedAt=Date.now();toast(`Touche encore pour confirmer : ${label} pour ${eur(cost)}`);return false;
+}
+function travelling(){if(S.travel){toast(`Tu es en route vers ${CITY(S.travel.to).n}. Le marché sera ouvert à ton arrivée.`);return true}return false}
 function buyGood(id,n){
+  if(travelling())return;
   const g=GOODS.find(x=>x.id===id),st=S.goods[id],unit=priceOf(g)*(1+curFee());
-  const free=capacity()-used();
+  const free=Math.floor(capacity()-used());
   if(free<=0)return toast('Entrepôt plein. Vends ou agrandis-le.');
-  n=Math.min(n,free,Math.floor(S.cash/unit));
+  n=Math.min(n,free,Math.floor(Math.max(0,S.cash)/unit));
   if(n<=0)return toast('Pas assez d’argent.');
-  S.cash-=n*unit;st.inv+=n;st.cost+=n*unit;refresh();
+  if(!confirmBig('g'+id+n,n*unit,`${fmt(n)} ${pl(n,g.unit)}`))return;
+  S.cash-=n*unit;st.inv+=n;st.cost+=n*unit;sfx('buy');refresh();
 }
 function sellGood(id){
-  const g=GOODS.find(x=>x.id===id),st=S.goods[id];if(!st.inv)return;
+  if(travelling())return;
+  const g=GOODS.find(x=>x.id===id),st=S.goods[id];if(st.inv<1)return;
   const rev=st.inv*priceOf(g)*(1-curFee())*sellBonus(),profit=rev-st.cost;
-  S.cash+=rev;if(profit>0){S.run.earned+=profit;S.life+=profit;S.sold++}
-  S.bestFlip=Math.max(S.bestFlip,rev/st.cost);
-  floatTxt((profit>=0?'+':'')+eur(profit),profit>=0?T.good:T.bad);
-  toast(`${st.inv} ${pl(st.inv,g.unit)} de ${g.name.toLowerCase()} vendus : ${profit>=0?'bénéfice':'perte'} ${eur(Math.abs(profit))}`);
+  S.cash+=rev;addTrade(profit);
+  if(profit>0){S.sold++;S.cnt.sold++}
+  S.bestFlip=Math.max(S.bestFlip,rev/Math.max(1e-9,st.cost));
+  floatTxt(sgn(profit),profit>=0?T.good:T.bad);sfx(profit>=0?'sell':'bad');vib(profit>=0?20:60);
+  toast(`${fmt(Math.floor(st.inv))} ${pl(st.inv,g.unit)} de ${g.name.toLowerCase()} vendus : ${profit>=0?'bénéfice':'perte'} ${eur(Math.abs(profit))}`);
   st.inv=0;st.cost=0;refresh();
 }
 function buyBiz(id){
   const b=BIZ.find(x=>x.id===id),n=bizQty(b),c=bizCost(b,n);
   if(c>S.cash)return;
+  if(!confirmBig('b'+id,c,`${b.name} ×${n}`))return;
   const before=bizMult(lvl(id));
-  S.cash-=c;S.biz[id]=lvl(id)+n;
-  if(bizMult(lvl(id))>before)toast(`${b.name} : palier atteint, production ×2 !`);
+  S.cash-=c;C.biz[id]=lvl(id)+n;sfx('buy');
+  if(bizMult(lvl(id))>before){toast(`${b.name} : palier atteint, production ×2 !`);sfx('level')}
+  else if(lvl(id)%10===0)toast(`${b.name} : une place de plus pour embaucher`);
   build('biz');
 }
+function hire(id){
+  const b=BIZ.find(x=>x.id===id);
+  if(stf(id)>=staffMax(b))return toast('Agrandis ce commerce pour embaucher plus (1 poste tous les 10 niveaux).');
+  const c=hireCost(b);if(c>S.cash)return toast('Pas assez d’argent pour recruter.');
+  const e=newEmp();S.cash-=c;emps(id).push(e);S.cnt.hires++;C.open=id;sfx('buy');
+  toast(`${e.n} rejoint ton équipe comme ${b.job}. Son caractère se révélera avec le temps.`);build('biz');
+}
+const findEmp=eid=>{for(const b of BIZ){const e=(C.staff[b.id]||[]).find(x=>x.id===eid);if(e)return [b,e]}return []};
+function fireEmp(eid){const [b,e]=findEmp(eid);if(!e)return;C.staff[b.id]=C.staff[b.id].filter(x=>x!==e);toast(`${e.n} a été renvoyé.`);build('biz')}
+function promote(eid){const [b,e]=findEmp(eid);if(!e||e.lv<5||hasMgr(b))return;e.mgr=true;e.mood=Math.min(100,e.mood+30);sfx('level');toast(`${e.n} devient gérant : ${b.name} +25 % (salaire ×2).`);build('biz')}
+function answerRaise(eid,yes){const [b,e]=findEmp(eid);if(!e)return;e.ask=false;if(yes){e.raise*=1.15;e.mood=Math.min(100,e.mood+30);if(e.mood>=30)e.strike=false;toast(`${e.n} est ravi de son augmentation.`)}else{e.mood-=30;toast(`${e.n} est déçu…`)}build('biz')}
+function bonusFor(id){const b=BIZ.find(x=>x.id===id),c=salaryOf(b)*90+20;if(c>S.cash)return toast('Pas assez d’argent pour la prime.');S.cash-=c;emps(id).forEach(e=>{e.mood=Math.min(100,e.mood+25);if(e.mood>=30)e.strike=false});sfx('coin');toast('Prime versée : toute l’équipe est de bonne humeur !');build('biz')}
+function buyInfra(id){
+  const i=INFRA.find(x=>x.id===id),c=infraCost(i);if(c>S.cash)return;
+  if(!confirmBig('i'+id,c,i.name))return;
+  S.cash-=c;C.infra[id]=cnt(id)+1;S.cnt.infra++;sfx('buy');toast(`${i.name} : +${fmt(i.cap)} places pour les visiteurs`);build('city');
+}
+function sellInfra(id){const i=INFRA.find(x=>x.id===id);if(!cnt(id))return;C.infra[id]--;while(broken('infra',id)>cnt(id)){const k=C.broken.findIndex(x=>x.kind==='infra'&&x.ref===id);C.broken.splice(k,1)}toast(`${i.name} retiré. Entretien économisé.`);build('city')}
+function hireTech(){const c=techCost();if(c>S.cash)return toast('Pas assez d’argent.');S.cash-=c;C.techs++;sfx('buy');toast('Un technicien rejoint ton équipe de réparation.');build('city')}
+function fireTech(){if(!C.techs)return;C.techs--;toast('Technicien renvoyé.');build('city')}
+function rushCost(x){if(x.kind==='biz'){const b=BIZ.find(y=>y.id===x.ref);return Math.round(baseProd(b)*PM*120+50)}const i=INFRA.find(y=>y.id===x.ref);return Math.round(i.cost*.4+20)}
+function rush(bid){const x=C.broken.find(y=>y.id===bid);if(!x)return;const c=rushCost(x);if(c>S.cash)return toast('Pas assez d’argent pour une réparation d’urgence.');S.cash-=c;finishRepair(x,true)}
+function finishRepair(x,urgent){C.broken=C.broken.filter(y=>y!==x);S.cnt.repairs++;sfx('level');toast(`${where()}${x.label} : réparé${urgent?' en urgence':''} !`);if((tab==='city'||tab==='biz')&&C===activeC())build(tab)}
+function borrow(){const a=Math.floor(loanMax());if(a<1)return;S.loan+=a;S.cash+=a;sfx('coin');toast(`Prêt de ${eur(a)} accordé. Intérêts : 0,5 % par minute.`);build('city')}
+function repay(){const a=Math.min(S.loan,Math.max(0,S.cash));if(a<=0)return toast('Pas d’argent pour rembourser.');S.loan-=a;S.cash-=a;if(S.loan<.01)S.loan=0;toast(S.loan?`Remboursé ${eur(a)}`:'Prêt entièrement remboursé !');build('city')}
 function buyUpg(id){
   const u=UPG.find(x=>x.id===id),l=S.upg[id]||0;if(l>=u.max)return;
   const c=u.cost(l);if(c>S.cash)return;
-  S.cash-=c;S.upg[id]=l+1;toast(`${u.name} niveau ${l+1}`);build('upg');
+  if(!confirmBig('u'+id,c,u.name))return;
+  S.cash-=c;S.upg[id]=l+1;sfx('level');toast(`${u.name} niveau ${l+1}`);build('upg');
 }
+function buyDeco(id){const d=DECOS.find(x=>x.id===id);if(S.decos[id]||S.stars<d.c)return;S.stars-=d.c;S.decos[id]=1;sfx('level');toast(`${d.n} installée ! +${Math.round(d.b*100)} % de revenus pour toujours.`);build('goals')}
+function toggleCraft(id){C.craft[id]=!C.craft[id];build('market')}
+/* ---------- commandes ---------- */
+function genContract(){
+  const un=unlockedGoods(),g=pick(un);
+  const budget=Math.max(150,(Math.max(0,S.cash)+incAll()*120)*(.25+Math.random()*.6));
+  const qty=Math.max(3,Math.min(Math.floor(capacity()*.6),Math.round(budget/g.base)));
+  const reward=qty*g.base*(1.45+Math.random()*.6)*(1+.25*(S.upg.vip||0));
+  const c={id:'c'+uid(),g:g.id,qty,reward,until:S.clock+300+Math.random()*300,who:pick(CLIENTS)};
+  S.contracts.push(c);S.nextContract=S.clock+80+Math.random()*80;
+  setNews('Commande',`${c.who} veut ${qty} ${pl(qty,g.unit)} de ${g.name.toLowerCase()}. Regarde le marché !`);
+}
+function deliver(cid){
+  if(travelling())return;
+  const c=S.contracts.find(x=>x.id===cid);if(!c)return;
+  const g=GOODS.find(x=>x.id===c.g),st=S.goods[c.g];
+  if(st.inv<c.qty)return toast(`Il te manque ${fmt(Math.ceil(c.qty-st.inv))} ${pl(c.qty-st.inv,g.unit)}.`);
+  const part=st.cost/st.inv*c.qty;st.inv-=c.qty;st.cost-=part;if(st.inv<=0){st.inv=0;st.cost=0}
+  const profit=c.reward-part;S.cash+=c.reward;addTrade(profit);
+  S.contractsDone++;S.cnt.contracts++;S.contracts=S.contracts.filter(x=>x!==c);
+  floatTxt(sgn(profit),T.gold);sfx('coin');vib(30);toast(`Commande livrée à ${c.who} : ${eur(c.reward)} (bénéfice ${eur(profit)})`);
+  build('market');
+}
+/* ---------- concurrents ---------- */
+const buyoutCost=rid=>Math.round(C.rivals[rid].shops*(grossIncome()*30+500)*(1+.5*(C.rivals[rid].bought||0)));
+function rivalAction(rid,a){
+  const r=C.rivals[rid],R=RIVALS.find(x=>x.id===rid);if(!r)return;
+  if(a==='war'){const c=Math.round(grossIncome()*90+200);if(c>S.cash)return toast('Pas assez d’argent.');S.cash-=c;r.shops=Math.floor(r.shops*.6);C.priceWar=S.clock+60;sfx('alert');toast(`Guerre des prix contre ${R.n} : ses boutiques reculent, mais tes revenus baissent de 20 % pendant 1 min.`)}
+  else if(a==='spy'){const c=Math.round(grossIncome()*45+100);if(c>S.cash)return toast('Pas assez d’argent.');S.cash-=c;const g=pick(unlockedGoods());const st=S.goods[g.id];st.drift=.12;st.dt=5;setNews('Espion',`Ton espion chez ${R.n} : ils vont acheter tout le ${g.name.toLowerCase()} de la région. Le prix va monter !`);toast('Rapport de ton espion dans les nouvelles.')}
+  else if(a==='buy'){const c=buyoutCost(rid);if(c>S.cash)return toast('Pas assez d’argent.');if(!confirmBig('r'+rid,c,`Racheter ${R.n}`))return;S.cash-=c;C.absorbed+=r.shops;toast(`Tu as racheté ${r.shops} boutiques de ${R.n} ! +${r.shops} % de revenus.`);r.shops=0;r.bought=(r.bought||0)+1;r.pause=S.dayIdx+5;sfx('level')}
+  build('city');
+}
+/* ---------- élections ---------- */
+function newElection(){const ks=Object.keys(PROGRAMS).sort(()=>Math.random()-.5).slice(0,3);const ns=[...CANDIDATES].sort(()=>Math.random()-.5);S.elect={next:S.dayIdx+10,cands:ks.map((p,i)=>({p,n:ns[i]})),pick:null,don:0}}
+function vote(i){S.elect.pick=i;toast(`Tu soutiens ${S.elect.cands[i].n}.`);build('city')}
+function donate(){if(S.elect.pick==null)return toast('Choisis d’abord un candidat.');const c=Math.round(incAll()*60+200);if(c>S.cash)return toast('Pas assez d’argent.');S.cash-=c;S.elect.don+=c;sfx('coin');toast(`Don de ${eur(c)} à la campagne.`);build('city')}
+const winChance=()=>S.elect.pick==null?0:Math.min(.92,1/3+.6*S.elect.don/(S.elect.don+incAll()*300+1000));
+function runElection(){
+  const e=S.elect;if(!e.cands){newElection();return}
+  let w;if(e.pick!=null&&Math.random()<winChance())w=e.pick;else{const o=[0,1,2].filter(i=>i!==e.pick);w=pick(o)}
+  const c=e.cands[w];S.law=c.p;if(w===e.pick)S.cnt.wins++;
+  setNews('Élections',`${c.n} est élu${c.n.startsWith('Mme')?'e':''} maire ! Nouvelle loi : ${PROGRAMS[c.p].n} (${PROGRAMS[c.p].d}).`);
+  if(e.pick!=null){toast(w===e.pick?'Ton candidat a gagné l’élection !':'Ton candidat a perdu l’élection.');sfx(w===e.pick?'level':'bad')}
+  newElection();
+}
+/* ---------- héritage ---------- */
 function heritageGain(){return Math.floor(Math.sqrt(S.run.earned/1e6))}
 let cedeArmed=0;
 function cede(){
   const g=heritageGain();if(g<1)return;
   if(Date.now()-cedeArmed>4000){cedeArmed=Date.now();refresh();return}
-  const keep={life:S.life,heritage:S.heritage+g,goals:S.goals,ops:S.ops,prestiges:S.prestiges+1,helpSeen:true,clock:S.clock};
-  S=fresh(keep);cedeArmed=0;
-  toast(`Empire cédé. +${g} points d’héritage : tout rapporte plus !`);
+  const keep={life:S.life,heritage:S.heritage+g,goals:S.goals,ops:S.ops,prestiges:S.prestiges+1,helpSeen:true,clock:S.clock,contractsDone:S.contractsDone,stars:S.stars,decos:S.decos,streak:S.streak,daily:S.daily,cnt:S.cnt};
+  setS(fresh(keep));cedeArmed=0;newElection();
+  toast(`Empire cédé. +${g} points d’héritage : tout rapporte plus !`);sfx('level');
   setNews('Héritage',`Nouvelle génération. Bonus permanent : +${S.heritage*10} % sur les commerces.`);
-  rebuildAll();save();
+  build(tab);save();pushCloud(true);
 }
 
+/* ======================================================================
+   Événements du monde
+   ====================================================================== */
+function fireNews(){
+  const un=new Set(unlockedGoods().map(g=>g.id));
+  const pool=NEWS.filter(n=>(n.g?un.has(n.g):true)&&(n.m?totalLv()>0:true)&&(!n.cond||n.cond()));
+  S.nextNews=S.clock+50+Math.random()*40;
+  if(!pool.length)return;
+  const n=pick(pool);
+  if(n.g){const st=S.goods[n.g];st.drift=n.d*.1;st.dt=6;setNews('Jour '+day(),n.t+' (dans les prochaines minutes)')}
+  else if(n.m){S.boost={m:n.m,until:S.clock+n.dur};setNews('Jour '+day(),n.t);if(n.m>1)sfx('coin')}
+  else if(n.cost){const a=n.cost();if(a<1)return;S.cash-=a;setNews('Jour '+day(),`${n.t} : −${eur(a)}.`);toast(`${n.t} : −${eur(a)}`);sfx('bad')}
+  else setNews('Ville',n.t);
+}
+function setNews(tag,t){$('newsTag').textContent=tag;$('newsTxt').textContent=t}
+let op=null;
+function spawnOp(){op={fx:.05+Math.random()*.9,until:S.clock+12,born:S.clock};const r=S.upg.reseau||0;S.nextOp=S.clock+(45+Math.random()*45)/(1+.45*r)}
+function opValue(){const r=S.upg.reseau||0;return Math.max(25,incAll()/S.boost.m*40*(1+.6*r)+Math.max(0,S.cash)*.02)}
+function collectOp(){const v=opValue();earn(v);S.ops++;S.cnt.ops++;floatTxt('+'+eur(v),T.gold,op.x,op.y);op=null;sfx('coin');vib(25);toast('Pièce dorée : +'+eur(v));refresh()}
+function startCrisis(){
+  const pool=Object.keys(CRISES).filter(k=>!CRISES[k].cond||CRISES[k].cond());
+  S.nextCrisis=S.clock+900+Math.random()*600;
+  if(!pool.length)return;const id=pick(pool),c=CRISES[id];
+  S.crisis={id,until:S.clock+c.dur};if(c.start)c.start();
+  setNews('Crise',`${c.n} ! ${c.d}`);sfx('alert');vib([80,60,80]);
+}
+function fixCrisis(){if(!S.crisis)return;const c=CRISES[S.crisis.id],k=Math.round(c.cost());if(k>S.cash)return toast('Pas assez d’argent.');S.cash-=k;S.cnt.crisesFixed++;toast(`${c.n} : crise réglée !`);sfx('level');S.crisis=null;renderBanner(true)}
+function startSpecial(){
+  const pool=Object.keys(SPECIALS).filter(k=>SPECIALS[k].cond());
+  S.nextSpecial=S.clock+360+Math.random()*240;
+  if(!pool.length)return;const id=pick(pool);
+  S.special={id,until:S.clock+120};setNews('Visite',`${SPECIALS[id].n} est en ville !`);sfx('alert');
+}
+function answerSpecial(i){
+  if(!S.special)return;const sp=SPECIALS[S.special.id],o=sp.opts[i];
+  const c=o.cost?Math.round(o.cost()):0;if(c>S.cash)return toast('Pas assez d’argent.');
+  S.cash-=c;const msg=o.go();S.special=null;setNews('Visite',msg);toast(msg);renderBanner(true);refresh();
+}
+const where=()=>Object.keys(S.cities).length>1?CITY(C.id).n+' · ':'';
+function spawnBreak(){
+  const pool=[];
+  BIZ.forEach(b=>{if(lvl(b.id)&&!broken('biz',b.id))pool.push({kind:'biz',ref:b.id,w:1+Math.log10(lvl(b.id)+1)})});
+  INFRA.forEach(i=>{const free=cnt(i.id)-broken('infra',i.id);if(free>0)pool.push({kind:'infra',ref:i.id,w:.6*Math.min(free,4)})});
+  const rate=(totalLv()*.00004+totalInfra()*.00006)*(1-.2*(S.upg.preventif||0));
+  C.nextBreak=S.clock+Math.max(25,(1/Math.max(rate,1e-6))*(.5+Math.random()));
+  if(!pool.length||C.broken.length>=8||totalLv()<5)return;
+  const tw=pool.reduce((a,x)=>a+x.w,0);let r=Math.random()*tw,x=pool[0];for(const p of pool){r-=p.w;if(r<=0){x=p;break}}
+  const idx=x.kind==='biz'?BIZ.findIndex(b=>b.id===x.ref):3;
+  const B=BIZ.find(b=>b.id===x.ref);
+  const label=x.kind==='biz'?`${B.part} (${B.name.toLowerCase()})`:INFRA.find(i=>i.id===x.ref).brk;
+  C.broken.push({id:uid(),kind:x.kind,ref:x.ref,label,need:x.kind==='biz'?30+idx*8:20,prog:0});
+  setNews('Panne',`${where()}${label} : en panne !${C.techs?' Un technicien s’en occupe.':' Engage un technicien dans l’onglet Ville.'}`);sfx('bad');vib(40);
+}
+function tickRepairs(dt){
+  const speed=1+.5*(S.upg.outils||0);
+  for(const x of C.broken.slice(0,C.techs)){x.prog+=dt*speed;if(x.prog>=x.need)finishRepair(x,false)}
+}
+function tickEmployees(dt){
+  const sat=satisfaction(),rh=1-.25*(S.upg.rh||0);let rebuild=false;
+  for(const b of BIZ){const list=C.staff[b.id];if(!list||!list.length)continue;const mgr=hasMgr(b);
+    for(const e of [...list]){const TR=TRAITS[e.t];
+      e.xp+=dt*TR.x;e.worked+=dt;
+      if(!e.known&&e.worked>=DAY&&e.t!=='voleur')e.known=true;
+      e.mood-=dt*.04*TR.m*rh*(mgr&&!e.mgr?.6:1)*(sat>=1?.5:1);
+      if(e.xp>=e.lv*DAY*.8){e.xp=0;e.lv++;if(e.lv%2===0&&!e.ask){e.ask=true;e.askUntil=S.clock+120;setNews('Équipe',`${where()}${e.n} (${b.name.toLowerCase()}) passe niveau ${e.lv} et demande une augmentation.`);sfx('tick')}}
+      if(e.ask&&S.clock>e.askUntil){e.ask=false;e.mood-=20;setNews('Équipe',`${e.n} attendait une réponse pour son augmentation. Il est vexé.`)}
+      if(e.mood<25&&!e.strike){e.strike=true;setNews('Grève',`${where()}${e.n} est en grève à ${b.name.toLowerCase()} ! Verse une prime ou augmente-le.`);sfx('alert')}
+      if(e.mood>=30&&e.strike)e.strike=false;
+      if(e.mood<=0){C.staff[b.id]=C.staff[b.id].filter(x=>x!==e);setNews('Équipe',`${e.n} en a marre et démissionne de ${b.name.toLowerCase()}.`);sfx('bad');rebuild=true}
+      if(e.t==='voleur'&&Math.random()<dt/420){const v=bizIncome(b)*40+20;S.cash-=v;e.known=true;setNews('Vol',`${e.n} a volé ${eur(v)} dans la caisse de ${b.name.toLowerCase()} ! C’est un voleur.`);sfx('bad');vib(60)}
+    }}
+  if(rebuild&&tab==='biz'&&C===activeC())build('biz');
+}
+function tickCraft(dt){
+  for(const r of RECIPES){if(!C.craft[r.id]||!lvl(r.biz))continue;const st=S.goods[r.from],g=GOODS.find(x=>x.id===r.from);
+    if(st.inv<1)continue;
+    C.craftAcc[r.id]=(C.craftAcc[r.id]||0)+r.per*lvl(r.biz)*(1+.1*stf(r.biz))*(broken('biz',r.biz)?.2:1)*dt;
+    const avg=st.cost/st.inv;let n=0;while(C.craftAcc[r.id]>=1&&st.inv>=1){C.craftAcc[r.id]--;n++;st.inv--}
+    if(!n)continue;
+    const part=avg*n;st.cost-=part;if(st.inv<1){st.inv=0;st.cost=0}
+    const rev=n*priceOf(g)*r.mult*sellBonus(),p=rev-part;S.cash+=rev;addTrade(p);S.cnt.crafted+=n;
+  }
+}
+function endDay(){
+  const d=S.dayStats,tax=d.gross*taxRate();
+  S.cash-=tax;
+  const rep={day:S.dayIdx+1,gross:d.gross,trade:d.trade,sal:d.sal,maint:d.maint,int:d.int,tax,net:d.gross+d.trade-d.sal-d.maint-d.int-tax};
+  S.lastDay=rep;S.dayStats={gross:0,trade:0,sal:0,maint:0,int:0};
+  S.hist.push({day:rep.day,cash:S.cash,net:rep.net});if(S.hist.length>14)S.hist.shift();
+  if(rep.gross>1||rep.sal>0)toast(`Fin du jour ${rep.day} : ${sgn(rep.net)} (impôts ${eur(tax)})`);
+  const oldSeason=season();
+  S.dayIdx++;
+  S.weather=wpick(WEATHER_W[season()]);
+  if(season()!==oldSeason){setNews('Saison',`${SEASONS[season()].ic} C’est ${season()===0?'le printemps':season()===1?'l’été':season()===2?'l’automne':'l’hiver'} ! Certains commerces et produits vont changer.`);sfx('level')}
+  else if(S.weather!=='soleil'&&S.weather!=='nuages')setNews('Météo',`Aujourd’hui : ${WEATHER[S.weather].n.toLowerCase()}. ${S.weather==='neige'?'Les bus ont du mal à circuler.':S.weather==='canicule'?'Les visiteurs ont besoin de toilettes et d’eau.':'Moins de monde dans les rues.'}`);
+  forCities(()=>{if(totalLv()<5)return;for(const R of RIVALS){
+    if(S.run.earned<R.at)continue;
+    const r=C.rivals[R.id]||(C.rivals[R.id]={shops:0,bought:0,pause:0});
+    if(!r.announced){r.announced=1;setNews('Concurrent',`${where()}${R.n} s’installe dans ta ville et va te voler des clients !`);sfx('alert')}
+    if(S.dayIdx>=(r.pause||0))r.shops=Math.min(40,r.shops+Math.max(1,Math.round(totalLv()/120*(.8+Math.random()*.4))));
+  }});
+  if(S.elect.cands&&S.dayIdx>=S.elect.next)runElection();
+  if(tab==='city')build('city');
+}
+function applyOffline(sec){
+  if(sec<20)return;
+  S.boost={m:1,until:0};S.crisis=null;S.special=null;calcPM();
+  const g=S.upg.gerant||0,eff=Math.min(sec,OFF_H[g]*3600),f=OFF_FRAC[g];
+  const gross=allGross()*eff*f,cst=allCosts()*eff*f;
+  S.cash+=gross-cst;S.run.earned+=gross;S.life+=gross;
+  const n=Math.min(30,Math.floor(eff/MT));
+  for(const gd of GOODS)for(let i=0;i<n;i++)stepGood(gd,S.goods[gd.id]);
+  const adv=Math.min(eff,600);
+  S.contracts=S.contracts.filter(c=>c.until>S.clock+adv);
+  forCities(()=>{for(const b of BIZ)for(const e of (C.staff[b.id]||[])){e.mood=Math.max(30,e.mood-adv*.02);e.ask=false;e.strike=false}});
+  S.clock+=adv;S.dayIdx=Math.floor(S.clock/DAY);
+  if(gross>0||cst>0)toast(`Pendant ton absence : ${sgn(gross-cst)}`);
+}
+/* ---------- défi du jour et connexion ---------- */
+function checkDaily(){
+  const t=todayStr();
+  if(S.streak.last!==t){
+    const y=new Date();y.setDate(y.getDate()-1);
+    S.streak.n=S.streak.last===todayStr(y)?S.streak.n+1:1;S.streak.last=t;
+    const n=Math.min(S.streak.n,7),cash=Math.max(100,incAll()*120)*n;
+    earn(cash);S.stars+=n;
+    setNews('Connexion',`Jour ${S.streak.n} d’affilée : +${eur(cash)} et +${n} étoile${n>1?'s':''} ★`);
+    setTimeout(()=>{toast(`Bonus de connexion (jour ${S.streak.n}) : +${eur(cash)} et +${n} ★`);sfx('coin')},800);
+  }
+  if(!S.daily||S.daily.date!==t){
+    const pool=CHALLENGES.filter(c=>!c.cond||c.cond());const c=pool[(new Date().getDate()*7+new Date().getMonth())%pool.length];
+    S.daily={date:t,id:c.id,k:c.k,t:c.t,n:c.n(),start:S.cnt[c.k]||0,done:false};
+  }
+}
+const dailyProg=()=>S.daily?Math.max(0,(S.cnt[S.daily.k]||0)-S.daily.start):0;
+function claimDaily(){
+  if(!S.daily||S.daily.done||dailyProg()<S.daily.n)return;
+  const r=Math.max(500,incAll()*600);earn(r);S.stars+=3;S.daily.done=true;S.cnt.dailies++;
+  sfx('level');vib(40);toast(`Défi réussi ! +${eur(r)} et +3 ★`);build('goals');
+}
+function checkGoals(){
+  let any=false;
+  for(const g of GOALS)if(!S.goals[g.id]&&g.ok()){S.goals[g.id]=1;any=true;toast(`★ ${g.t} : +2 % de revenus pour toujours`);sfx('level')}
+  if(any){S.newGoal=true;if(tab==='goals')build('goals')}
+  const dailyReady=S.daily&&!S.daily.done&&dailyProg()>=S.daily.n;
+  $('gdot').hidden=!((S.newGoal||dailyReady)&&tab!=='goals');
+  $('cdot').hidden=!(satisfaction()<.7||S.cash<0||C.broken.some(x=>x.kind==='infra'))||tab==='city';
+  $('bdot').hidden=!(BIZ.some(b=>(C.staff[b.id]||[]).some(e=>e.ask||e.strike))||C.broken.some(x=>x.kind==='biz'))||tab==='biz';
+  $('mdot').hidden=!(S.contracts.length&&tab!=='market');
+}
+
+/* ======================================================================
+   Sauvegarde : code et compte Google
+   ====================================================================== */
 function exportSave(){
   save();const ta=$('saveCode');
   ta.value=btoa(unescape(encodeURIComponent(JSON.stringify(S))));
@@ -292,15 +931,13 @@ function exportSave(){
 let impArmed=0;
 function importSave(){
   const raw=$('saveCode').value.trim();let s;
-  try{s=JSON.parse(decodeURIComponent(escape(atob(raw))))}catch(e){return toast('Ce code n\u2019est pas valide. Vérifie qu\u2019il est complet.')}
-  if(!s||s.v!==1)return toast('Ce code n\u2019est pas valide.');
+  try{s=JSON.parse(decodeURIComponent(escape(atob(raw))))}catch(e){return toast('Ce code n’est pas valide. Vérifie qu’il est complet.')}
+  if(!s||s.v!==1)return toast('Ce code n’est pas valide.');
   if(Date.now()-impArmed>4000){impArmed=Date.now();$('impBtn').textContent='Confirmer : remplacer ma partie';return}
-  impArmed=0;S=Object.assign(fresh(),s);save();toast('Partie chargée !');build(tab);
+  impArmed=0;setS(migrate(s));save();sizeCanvas();toast('Partie chargée !');build(tab);
 }
-
-/* ---------- Sauvegarde en ligne (Firebase) ---------- */
 const FB_CFG={apiKey:"AIzaSyC0SRYd2aJ3ME5i9kyDaY_AnnWg7k6OJeY",authDomain:"petit-empire.firebaseapp.com",projectId:"petit-empire",storageBucket:"petit-empire.firebasestorage.app",messagingSenderId:"764220516582",appId:"1:764220516582:web:0128cfd09c9d0263f83327"};
-const cloud={user:null,last:0,busy:false};
+const cloud={user:null,last:0,busy:false,lb:null,lbAt:0};
 let fbAuth=null,fbDb=null;
 function authMsg(e){
   if(e&&e.code==='auth/unauthorized-domain')return 'Domaine non autorisé : ajoute jasony28.github.io dans Firebase.';
@@ -311,23 +948,38 @@ function initCloud(){
   if(!window.firebase)return;
   try{firebase.initializeApp(FB_CFG);fbAuth=firebase.auth();fbDb=firebase.firestore()}catch(e){return}
   fbAuth.getRedirectResult().catch(e=>toast(authMsg(e)));
-  fbAuth.onAuthStateChanged(async u=>{cloud.user=u;if(u)await pullCloud();if(tab==='goals')build('goals')});
+  fbAuth.onAuthStateChanged(async u=>{cloud.user=u;cloud.lbAt=0;if(u)await pullCloud();if(tab==='goals'||tab==='settings')build(tab)});
 }
 async function pullCloud(){
   try{
     const d=await fbDb.collection('saves').doc(cloud.user.uid).get();
     if(d.exists){const c=JSON.parse(d.data().data);
-      if(c&&c.v===1&&(c.life||0)>(S.life||0)+.5){S=Object.assign(fresh(),c);save();cloud.last=Date.now();build(tab);toast('Partie récupérée depuis ton compte Google');return}}
+      if(c&&c.v===1&&(c.life||0)>(S.life||0)+.5){setS(migrate(c));save();sizeCanvas();cloud.last=Date.now();build(tab);toast('Partie récupérée depuis ton compte Google');return}}
     await pushCloud(true);
-  }catch(e){toast('Sauvegarde en ligne indisponible pour le moment.')}
+  }catch(e){toast(e&&e.code==='permission-denied'?'Accès refusé : vérifie les règles Firestore.':'Sauvegarde en ligne indisponible pour le moment.')}
 }
 async function pushCloud(silent){
-  if(!cloud.user||cloud.busy)return;
+  if(!cloud.user||cloud.busy||!fbDb)return;
   cloud.busy=true;
-  try{save();await fbDb.collection('saves').doc(cloud.user.uid).set({data:JSON.stringify(S),life:S.life,updated:firebase.firestore.FieldValue.serverTimestamp()});
+  try{save();
+    await fbDb.collection('saves').doc(cloud.user.uid).set({data:JSON.stringify(S),life:S.life,updated:firebase.firestore.FieldValue.serverTimestamp()});
+    fbDb.collection('leaderboard').doc(cloud.user.uid).set({name:(cloud.user.displayName||'Joueur').split(' ')[0].slice(0,20),life:S.life,heritage:S.heritage,updated:firebase.firestore.FieldValue.serverTimestamp()}).catch(()=>{});
     cloud.last=Date.now();if(!silent)toast('Partie sauvegardée en ligne');updCloudTxt()}
   catch(e){if(!silent)toast(e&&e.code==='permission-denied'?'Accès refusé : vérifie les règles Firestore.':'Échec de la sauvegarde en ligne. Vérifie ta connexion.')}
   cloud.busy=false;
+}
+async function loadLB(){
+  if(!cloud.user||!fbDb||Date.now()-cloud.lbAt<30000)return;cloud.lbAt=Date.now();
+  try{const q=await fbDb.collection('leaderboard').orderBy('life','desc').limit(10).get();cloud.lb=q.docs.map(d=>({uid:d.id,...d.data()}));if(tab==='goals')renderLB()}
+  catch(e){cloud.lb='err';if(tab==='goals')renderLB()}
+}
+const esc=s=>String(s).replace(/[<>&"]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));
+function renderLB(){
+  const el=$('lb');if(!el)return;
+  if(!cloud.user){el.innerHTML='<p class="sub">Connecte-toi avec Google pour voir le classement des joueurs.</p>';return}
+  if(cloud.lb==='err'){el.innerHTML='<p class="sub">Classement indisponible : mets à jour les règles Firestore.</p>';return}
+  if(!cloud.lb){el.innerHTML='<p class="sub">Chargement du classement…</p>';return}
+  el.innerHTML=`<div class="lb">${cloud.lb.map((r,i)=>`<span class="mut">${i+1}</span><span class="${r.uid===cloud.user.uid?'me':''}">${esc(r.name||'Joueur')}${r.heritage?` <span class="pill">${r.heritage} ♛</span>`:''}</span><span class="mut">${eur(r.life||0)}</span>`).join('')}</div>`;
 }
 function signIn(){
   if(!fbAuth)return toast('Connexion impossible : vérifie ta connexion internet.');
@@ -338,65 +990,68 @@ function signIn(){
   });
 }
 async function signOutCloud(){await pushCloud(true);await fbAuth.signOut();toast('Déconnecté. Ta partie reste aussi sur ce téléphone.')}
+let delArmed=0;
+async function deleteCloud(){
+  if(!cloud.user)return;
+  if(Date.now()-delArmed>4000){delArmed=Date.now();toast('Touche encore pour supprimer tes données en ligne');return}
+  try{await fbDb.collection('saves').doc(cloud.user.uid).delete();await fbDb.collection('leaderboard').doc(cloud.user.uid).delete();await fbAuth.signOut();toast('Tes données en ligne ont été supprimées.')}
+  catch(e){toast('Suppression impossible pour le moment. Réessaie avec internet.')}
+}
 function updCloudTxt(){
   const t=$('cloudTxt');if(!t)return;
-  t.textContent=cloud.user?`Connecté : ${cloud.user.displayName||cloud.user.email}${cloud.last?' · sauvegardé à '+new Date(cloud.last).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}):''}. Sauvegarde automatique chaque minute.`
-    :(fbAuth?'Connecte-toi pour retrouver ta partie sur n\u2019importe quel appareil.':'Indisponible hors ligne.');
+  t.textContent=cloud.user?`Connecté : ${cloud.user.displayName||cloud.user.email}${cloud.last?' · sauvegardé à '+new Date(cloud.last).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}):''}.${SET.cloudAuto?' Sauvegarde automatique chaque minute.':''}`
+    :(fbAuth?'Connecte-toi pour retrouver ta partie sur n’importe quel appareil.':'Indisponible hors ligne.');
 }
 
-/* ---------- Événements ---------- */
-function fireNews(){
-  const un=new Set(unlockedGoods().map(g=>g.id));
-  const pool=NEWS.filter(n=>n.g===null?totalLv()>0:un.has(n.g));
-  const n=pool[Math.floor(Math.random()*pool.length)];
-  if(n.g){const st=S.goods[n.g];st.drift=n.d*.04;st.dt=22}
-  else S.boost={m:n.m,until:S.clock+n.dur};
-  setNews('Jour '+day(),n.t);
-  S.nextNews=S.clock+35+Math.random()*40;
-}
-function setNews(tag,t){$('newsTag').textContent=tag;$('newsTxt').textContent=t}
-const day=()=>Math.floor(S.clock/120)+1;
-let op=null;
-function spawnOp(){op={fx:.08+Math.random()*.84,until:S.clock+12,born:S.clock};const r=S.upg.reseau||0;S.nextOp=S.clock+(45+Math.random()*45)/(1+.45*r)}
-function opValue(){const r=S.upg.reseau||0;return Math.max(25,incomePerSec()/S.boost.m*40*(1+.6*r)+S.cash*.02)}
-function collectOp(){const v=opValue();earn(v);S.ops++;floatTxt('+'+eur(v),T.gold,op.x,op.y);op=null;toast('Opportunité saisie : +'+eur(v));refresh()}
-function checkGoals(){
-  let any=false;
-  for(const g of GOALS)if(!S.goals[g.id]&&g.ok()){S.goals[g.id]=1;any=true;toast(`★ ${g.t} : +2 % de revenus pour toujours`)}
-  if(any){S.newGoal=true;if(tab==='goals')build('goals')}
-  $('gdot').hidden=!(S.newGoal&&tab!=='goals');
-}
-function applyOffline(sec){
-  if(sec<20)return;
-  S.boost={m:1,until:0};
-  const g=S.upg.gerant||0,eff=Math.min(sec,OFF_H[g]*3600),gain=incomePerSec()*eff*OFF_FRAC[g];
-  for(const gd of GOODS){const n=Math.min(40,Math.floor(eff/1.5));for(let i=0;i<n;i++)stepGood(gd,S.goods[gd.id])}
-  S.clock+=Math.min(eff,600);
-  if(gain>0){earn(gain);toast(`Pendant ton absence : +${eur(gain)}`)}
-}
-
-/* ---------- Interface ---------- */
-let tab='market',refs={},shown={};
+/* ======================================================================
+   Interface
+   ====================================================================== */
+let tab='market',shown={};
 const main=$('main');
+const activeC=()=>S.cities[S.city]||S.cities.village;
 function build(which){
   if(which!==tab)return;
-  refs={};
-  if(tab==='market')buildMarket();else if(tab==='biz')buildBiz();else if(tab==='upg')buildUpg();else buildGoals();
+  C=activeC();MEMO={};ensureGrid();calcPM();
+  ({market:buildMarket,biz:buildBiz,city:buildCity,upg:buildUpg,goals:buildGoals,settings:buildSettings})[tab]();
   refresh();
 }
+/* ---------- bannière : crise et visiteur spécial ---------- */
+let bannerKey='';
+function renderBanner(force){
+  const key=(S.crisis?S.crisis.id:'')+'|'+(S.special?S.special.id:'')+'|'+(S.travel?S.travel.to:'');
+  if(key!==bannerKey||force){bannerKey=key;let h='';
+    if(S.crisis){const c=CRISES[S.crisis.id];h+=`<div class="ev"><div class="top"><div class="name">⚠ ${c.n}<small>${c.d}</small></div><span class="pill bad" id="crT"></span></div><button class="btn danger wide" data-a="fixcrisis" id="crB"></button></div>`}
+    if(S.special){const sp=SPECIALS[S.special.id];h+=`<div class="ev special"><div class="top"><div class="name">${sp.n}<small>${sp.d}</small></div><span class="pill gold" id="spT"></span></div><div class="btns ${sp.opts.length>1?'two':'one'}">${sp.opts.map((o,i)=>`<button class="btn ${i?'alt':''}" data-a="special" data-i="${i}" id="spB${i}">${o.t}</button>`).join('')}</div></div>`}
+    if(S.travel)h=`<div class="ev special"><div class="top"><div class="name">✈ En route vers ${CITY(S.travel.to).n}<small>Le marché rouvre à ton arrivée. Tes commerces continuent de tourner.</small></div><span class="pill gold" id="trT"></span></div></div>`+h;
+    $('banner').innerHTML=h;}
+  if(S.travel&&$('trT'))$('trT').textContent=Math.ceil(S.travel.until-S.clock)+' s';
+  if(S.crisis&&$('crT')){$('crT').textContent=mmss(S.crisis.until-S.clock);const k=Math.round(CRISES[S.crisis.id].cost());const b=$('crB');b.innerHTML=`${CRISES[S.crisis.id].fix}<small>${eur(k)}</small>`;b.disabled=k>S.cash}
+  if(S.special&&$('spT')){$('spT').textContent=mmss(S.special.until-S.clock);SPECIALS[S.special.id].opts.forEach((o,i)=>{const b=$('spB'+i);if(o.cost&&b){const k=Math.round(o.cost());b.innerHTML=`${o.t}<small>${eur(k)}</small>`;b.disabled=k>S.cash}})}
+}
+/* ---------- marché ---------- */
 function buildMarket(){
-  const un=unlockedGoods();shown.market=un.length;
+  const un=unlockedGoods();shown.market=un.length;shown.contracts=S.contracts.map(c=>c.id).join();
   const next=GOODS.find(g=>!un.includes(g));
   let h='';
   if(!S.helpSeen)h+=`<div class="help"><b>Comment devenir riche</b><ol>
-  <li>Achète des produits quand leur prix baisse, revends-les quand il remonte.</li>
-  <li>Lis les nouvelles en haut : elles annoncent les hausses et les chutes.</li>
-  <li>Ouvre des commerces : ils rapportent de l’argent en continu, même hors ligne.</li>
-  <li>Touche les pièces dorées qui apparaissent dans la ville.</li></ol>
+  <li>Achète des produits quand leur prix baisse, revends-les quand il remonte. Les cours changent toutes les 15 secondes.</li>
+  <li>Lis les nouvelles en haut : elles annoncent les hausses, les chutes et les crises.</li>
+  <li>Ouvre des commerces et embauche du personnel. Chaque employé a un caractère, un salaire et une humeur.</li>
+  <li>Dans l’onglet Ville, installe toilettes, bancs et lampadaires, et engage des techniciens pour réparer les pannes.</li>
+  <li>Livre les commandes, relève le défi du jour et touche les pièces dorées. Touche un bâtiment pour voir ses chiffres.</li></ol>
   <button class="btn alt" data-a="help">Compris</button></div>`;
   h+=`<div class="top"><h2>Marché</h2><span class="pill" id="capTxt" style="margin-left:auto"></span></div>
+  <div class="tick"><span id="tickTxt"></span><div class="bar2"><i id="tickBar"></i></div></div>
   <p class="sub" id="feeTxt"></p>`;
-  for(const g of un)h+=`<div class="row" id="g-${g.id}">
+  if(S.contracts.length){
+    h+=`<h3>Commandes de clients</h3>`;
+    for(const c of S.contracts){const g=GOODS.find(x=>x.id===c.g);
+      h+=`<div class="row"><div class="top"><div class="name">${c.who}<small>Veut ${fmt(c.qty)} ${pl(c.qty,g.unit)} de ${g.name.toLowerCase()}</small></div>
+      <div class="price"><span class="up">${eur(c.reward)}</span><small id="ct-${c.id}"></small></div></div>
+      <button class="btn sell wide" data-a="deliver" data-c="${c.id}" id="cb-${c.id}">Livrer</button></div>`}
+    h+=`<h3>Produits</h3>`;
+  }
+  for(const g of un)h+=`<div class="row">
     <div class="top"><div class="name">${g.name}<small>par ${g.unit}</small></div>
     <canvas class="spark" id="sp-${g.id}"></canvas>
     <div class="price"><span id="p-${g.id}"></span><small id="c-${g.id}"></small></div></div>
@@ -406,22 +1061,96 @@ function buildMarket(){
     <button class="btn" data-a="buy" data-g="${g.id}" data-n="1e15">Max</button>
     <button class="btn sell" data-a="sell" data-g="${g.id}" id="s-${g.id}">Vendre</button></div></div>`;
   if(next)h+=`<div class="row locked"><div class="name">${next.name}<small>Se débloque après ${eur(next.unlock)} gagnés</small></div><div class="bar2"><i id="nextBar"></i></div></div>`;
+  const rec=RECIPES.filter(r=>lvl(r.biz)&&un.some(g=>g.id===r.from));
+  if(rec.length){h+=`<h3>Transformation</h3><p class="sub">Tes commerces transforment tes matières premières et revendent le produit fini plus cher, automatiquement.</p>`;
+    for(const r of rec){const g=GOODS.find(x=>x.id===r.from),b=BIZ.find(x=>x.id===r.biz);
+      h+=`<div class="row ${C.craft[r.id]?'gold':''}"><div class="top"><div class="name">${r.name}<small>${g.name} → ${r.name.toLowerCase()} (${b.name.toLowerCase()}) · vendu ${fmt(r.mult)} fois le prix du ${g.name.toLowerCase()}</small></div></div>
+      <div class="meta" id="rm-${r.id}"></div>
+      <button class="btn ${C.craft[r.id]?'alt':'sell'} wide" data-a="craft" data-r="${r.id}">${C.craft[r.id]?'Arrêter la transformation':'Lancer la transformation'}</button></div>`}}
   main.innerHTML=h;
   drawSparks();
 }
+/* ---------- commerces ---------- */
+function visibleBiz(){let v=BIZ.findIndex(b=>lvl(b.id)===0&&b.cost*bizDisc()>S.cash);return v<0?BIZ.length:v+1}
+const empSig=()=>BIZ.map(b=>(C.staff[b.id]||[]).map(e=>e.id+(e.ask?'a':'')+(e.mgr?'m':'')+(e.known?'k':'')+(e.lv>=5?'5':'')+(e.strike?'s':'')).join('.')).join('|')+C.open+C.broken.map(x=>x.id).join()+BIZ.map(b=>lvl(b.id)?1:0).join('')+season();
 function buildBiz(){
-  let vis=BIZ.findIndex(b=>lvl(b.id)===0&&b.cost>S.cash);
-  vis=vis<0?BIZ.length:vis+1;shown.biz=vis;
+  const vis=visibleBiz();shown.biz=vis;shown.emp=empSig();
   let h=`<div class="top"><h2>Commerces</h2><div class="seg" style="margin-left:auto">
     ${[1,10,'max'].map(m=>`<button data-a="mode" data-m="${m}" class="${S.mode==m?'on':''}">${m==='max'?'Max':'×'+m}</button>`).join('')}</div></div>
-    <p class="sub">Chaque palier (10, 25, 50, 100…) double la production du commerce.</p>`;
-  BIZ.slice(0,vis).forEach(b=>{h+=`<div class="row">
-    <div class="top"><div class="lv" id="bl-${b.id}"></div><div class="name">${b.name}<small id="br-${b.id}"></small></div></div>
+    <p class="sub">Chaque palier (10, 25, 50, 100…) double la production. Tous les 10 niveaux, tu peux embaucher une personne de plus. Un employé de niveau 5 peut devenir gérant.</p>`;
+  BIZ.slice(0,vis).forEach(b=>{const l=lvl(b.id),list=C.staff[b.id]||[],brk=C.broken.find(x=>x.kind==='biz'&&x.ref===b.id),sm=SEASONS[season()].biz[b.id];
+    h+=`<div class="row ${brk?'alert':''}">
+    <div class="top"><div class="lv" id="bl-${b.id}"></div><div class="name">${b.name}<small id="br-${b.id}"></small></div>
+      ${brk?'<span class="pill bad" style="margin-left:auto">En panne</span>':sm&&l?`<span class="pill" style="margin-left:auto">${SEASONS[season()].ic} ${sm>1?'+':'−'}${Math.round(Math.abs(sm-1)*100)} %</span>`:''}</div>
     <div class="bar2"><i id="bm-${b.id}"></i></div>
-    <button class="btn wide" data-a="biz" data-b="${b.id}" id="bb-${b.id}"></button></div>`});
+    <button class="btn wide" data-a="biz" data-b="${b.id}" id="bb-${b.id}"></button>
+    ${brk?`<button class="btn danger wide" data-a="rush" data-x="${brk.id}" id="rb-${brk.id}"></button>`:''}
+    ${l?`<div class="staff"><div class="meta" id="bs-${b.id}"></div>
+      <div class="btns two"><button class="btn alt" data-a="hire" data-b="${b.id}" id="bh-${b.id}"></button>
+      <button class="btn alt" data-a="team" data-b="${b.id}">${C.open===b.id?'Masquer l’équipe':`Voir l’équipe (${list.length})`}${list.some(e=>e.ask||e.strike)?' ⚠':''}</button></div>
+      ${C.open===b.id?`${list.length?`<button class="btn alt sm" data-a="prime" data-b="${b.id}" id="pb-${b.id}"></button>`:'<p class="sub">Personne pour l’instant. Embauche quelqu’un !</p>'}
+        ${list.map(e=>`<div class="emp"><div class="who"><b>${e.n}</b> ${e.mgr?'<span class="pill gold">Gérant</span>':''} <span class="pill ${e.known&&e.t==='voleur'?'bad':''}">${e.known?TRAITS[e.t].n:'Caractère ?'}</span>
+          <small id="e-${e.id}"></small></div><div class="act">
+          ${e.ask?`<button class="btn sell sm" data-a="raise" data-e="${e.id}">Augmenter</button><button class="btn alt sm" data-a="noraise" data-e="${e.id}">Refuser</button>`:''}
+          ${!e.mgr&&e.lv>=5&&!hasMgr(b)?`<button class="btn sm" data-a="promote" data-e="${e.id}">Gérant</button>`:''}
+          <button class="btn alt sm" data-a="fire" data-e="${e.id}">Renvoyer</button></div></div>`).join('')}`:''}
+      </div>`:''}</div>`});
   if(vis<BIZ.length)h+=`<div class="row locked"><div class="name">Commerce mystère<small>Économise pour le découvrir</small></div></div>`;
   main.innerHTML=h;
 }
+/* ---------- ville ---------- */
+function visibleInfra(){const budget=Math.max(S.cash,0)+S.run.earned*.3;return INFRA.filter((i,k)=>cnt(i.id)>0||i.cost<=budget*2.5||INFRA.findIndex(x=>x.need===i.need)===k)}
+const citySig=()=>S.city+(S.travel?S.travel.to:'')+Object.keys(S.cities).join()+visibleInfra().length+'|'+C.broken.map(x=>x.id).join()+'|'+Object.entries(C.rivals).map(([k,r])=>k).join()+'|'+(S.elect.cands?S.elect.cands.map(c=>c.p).join():'')+S.elect.pick+'|'+S.law+'|'+(S.lastDay?S.lastDay.day:'')+'|'+S.weather+'|'+(C.techs>0)+'|'+INFRA.map(i=>broken('infra',i.id)).join('');
+function buildCity(){
+  shown.city=citySig();const vis=visibleInfra();const W=WEATHER[S.weather],SE=SEASONS[season()];
+  const owned=CITIES.filter(c=>S.cities[c.id]),nextC=CITIES.find(c=>!S.cities[c.id]);
+  let h=`<h2>Tes villes</h2>
+  <div class="row"><div class="cities">${owned.map(c=>`<button class="btn ${c.id===S.city?'on':'alt'} sm" data-a="travel" data-c="${c.id}">${c.n}${S.travel&&S.travel.to===c.id?' ✈':''}</button>`).join('')}</div>
+   <p class="sub">${CITY(S.city).d}${owned.length>1?` Voyager prend ${[20,10,3][S.upg.jet||0]} s : pendant le voyage, le marché est fermé. Tes autres villes continuent de rapporter.`:''}</p>
+   ${nextC?`<div class="emp"><div class="who"><b>${nextC.n}</b><small style="font-family:var(--body);font-size:12px">${nextC.d}</small></div><div class="act"><button class="btn sm" data-a="found" data-c="${nextC.id}" id="foundB"></button></div></div>`:''}</div>
+  <h2>${CITY(S.city).n}</h2>
+  <div class="row"><div class="name">${SE.ic} ${SE.n} · ${W.ic} ${W.n}<small>Jour ${(S.dayIdx%SEASON_DAYS)+1} sur ${SEASON_DAYS} de la saison${W.inc!==1?` · météo : commerces ${W.inc>1?'+':'−'}${Math.round(Math.abs(W.inc-1)*100)} %`:''}${W.need?` · ${W.need.trans?'transports débordés':'besoin d’hygiène ×1,6'}`:''}${S.law?` · loi : ${PROGRAMS[S.law].n}`:''}</small></div></div>
+  <div class="row" id="satRow"><div class="top"><div class="name">Satisfaction des visiteurs<small id="cvis"></small></div><div class="big" id="csat"></div></div>
+   ${NEEDS.map(n=>`<div class="need"><span>${n.name}</span><div class="bar2" id="nbw-${n.id}"><i id="nb-${n.id}"></i></div><span id="np-${n.id}"></span></div>`).join('')}
+   <p class="sub" id="cwarn"></p></div>
+  <div class="row"><div class="name">Finances par seconde</div><div class="fin" id="cfin"></div><p class="sub" id="ctax"></p></div>
+  ${S.lastDay?`<div class="row" id="cday"></div>`:''}
+  ${S.hist.length>1?`<div class="row"><div class="name">Ta fortune<small>Argent en fin de journée, ${S.hist.length} derniers jours</small></div><canvas class="chart" id="fchart"></canvas></div>`:''}
+  <h2>Réparations</h2>
+  <div class="row ${C.broken.length&&!C.techs?'alert':''}"><div class="top"><div class="name">Équipe de techniciens<small id="tTxt"></small></div><span class="pill" style="margin-left:auto">×${C.techs}</span></div>
+   <div class="btns two"><button class="btn" data-a="tech" id="tHire"></button><button class="btn alt" data-a="untech" ${C.techs?'':'disabled'}>Renvoyer<small>−1 salaire</small></button></div>
+   ${C.broken.length?C.broken.map(x=>`<div class="emp"><div class="who"><b>${x.label}</b><small id="bx-${x.id}"></small><div class="bar2" style="margin-top:4px"><i id="bxb-${x.id}"></i></div></div><div class="act"><button class="btn danger sm" data-a="rush" data-x="${x.id}" id="rb-${x.id}"></button></div></div>`).join(''):'<p class="sub">Aucune panne pour le moment.</p>'}</div>`;
+  const active=RIVALS.filter(R=>C.rivals[R.id]);
+  if(active.length){h+=`<h2>Concurrents</h2><p class="sub">Chaque boutique concurrente te vole environ 1,5 % de clients. Ils grandissent chaque jour avec ta ville.</p>`;
+    for(const R of active){
+      h+=`<div class="row"><div class="top"><div class="name" style="color:${R.col}">${R.n}<small id="rv-${R.id}"></small></div><span class="pill" style="margin-left:auto" id="rs-${R.id}"></span></div>
+      <div class="btns three"><button class="btn alt sm" data-a="rwar" data-r="${R.id}" id="rw-${R.id}"></button><button class="btn alt sm" data-a="rspy" data-r="${R.id}" id="rp-${R.id}"></button><button class="btn sm" data-a="rbuy" data-r="${R.id}" id="rb2-${R.id}"></button></div></div>`}}
+  if(S.elect.cands){h+=`<h2>Élections municipales</h2><p class="sub" id="elTxt"></p>`;
+    S.elect.cands.forEach((c,i)=>{const P=PROGRAMS[c.p];h+=`<div class="row ${S.elect.pick===i?'gold':''}"><div class="name">${c.n}<small>${P.n} : ${P.d}</small></div>
+      ${S.elect.pick===i?`<button class="btn wide" data-a="donate" id="donB"></button>`:`<button class="btn alt wide" data-a="vote" data-i="${i}">Soutenir</button>`}</div>`})}
+  h+=`<div class="row"><div class="name">Banque du village<small id="cloan"></small></div>
+   <div class="btns two"><button class="btn alt" data-a="borrow" id="cbor"></button><button class="btn" data-a="repay" id="crep">Rembourser</button></div></div>
+  <h2>Équipements</h2><p class="sub">Plus tes commerces attirent de visiteurs, plus il faut d’équipements. Chacun coûte un entretien qui augmente avec la taille de la ville.</p>`;
+  for(const n of NEEDS){const list=vis.filter(i=>i.need===n.id);if(!list.length)continue;
+    h+=`<h3>${n.name}</h3>`;
+    for(const i of list){const bk=broken('infra',i.id);h+=`<div class="row ${bk?'alert':''}"><div class="top"><div class="name">${i.name}<small id="ii-${i.id}"></small></div><span class="pill ${bk?'bad':''}" id="ic-${i.id}" style="margin-left:auto"></span></div>
+      <div class="btns two"><button class="btn" data-a="infra" data-i="${i.id}" id="ib-${i.id}"></button><button class="btn alt" data-a="unfra" data-i="${i.id}" id="iu-${i.id}">Retirer<small>−1 entretien</small></button></div></div>`}}
+  main.innerHTML=h;
+  drawChart();
+}
+function drawChart(){
+  const c=$('fchart');if(!c)return;const dpr=window.devicePixelRatio||1,w=c.clientWidth,h=130;c.width=w*dpr;c.height=h*dpr;const x=c.getContext('2d');x.setTransform(dpr,0,0,dpr,0,0);
+  const d=S.hist,vals=d.map(p=>p.cash),mn=Math.min(0,...vals),mx=Math.max(...vals,1),pad=8,r=mx-mn||1;
+  const X=i=>pad+i/(d.length-1)*(w-pad*2),Y=v=>h-18-(v-mn)/r*(h-34);
+  x.strokeStyle=T.ink;x.globalAlpha=.12;x.lineWidth=1;for(let k=0;k<=2;k++){const yy=Y(mn+r*k/2);x.beginPath();x.moveTo(pad,yy);x.lineTo(w-pad,yy);x.stroke()}x.globalAlpha=1;
+  if(mn<0){x.strokeStyle=T.bad;x.globalAlpha=.6;x.beginPath();x.moveTo(pad,Y(0));x.lineTo(w-pad,Y(0));x.stroke();x.globalAlpha=1}
+  x.beginPath();d.forEach((p,i)=>i?x.lineTo(X(i),Y(p.cash)):x.moveTo(X(i),Y(p.cash)));x.strokeStyle=T.gold;x.lineWidth=2.2;x.stroke();
+  x.lineTo(X(d.length-1),Y(mn));x.lineTo(X(0),Y(mn));x.closePath();x.globalAlpha=.15;x.fillStyle=T.gold;x.fill();x.globalAlpha=1;
+  const li=d.length-1;x.beginPath();x.arc(X(li),Y(d[li].cash),3.5,0,7);x.fillStyle=T.gold;x.fill();
+  x.fillStyle=T.ink;x.globalAlpha=.7;x.font='500 10px "DM Mono",monospace';x.textAlign='left';x.fillText('max '+eur(mx),pad,10);x.textAlign='center';
+  d.forEach((p,i)=>{if(i%Math.ceil(d.length/6)===0||i===li)x.fillText('J'+p.day,Math.min(w-14,Math.max(14,X(i))),h-4)});x.globalAlpha=1;
+}
+/* ---------- améliorations ---------- */
 function buildUpg(){
   let h=`<h2>Améliorations</h2><p class="sub">Elles s’appliquent à toute la partie en cours.</p>`;
   for(const u of UPG){const l=S.upg[u.id]||0,maxed=l>=u.max;
@@ -430,100 +1159,216 @@ function buildUpg(){
     ${maxed?'':`<button class="btn wide" data-a="upg" data-u="${u.id}" id="ub-${u.id}">Acheter · ${eur(u.cost(l))}</button>`}</div>`}
   main.innerHTML=h;
 }
+/* ---------- objectifs ---------- */
 function buildGoals(){
   S.newGoal=false;$('gdot').hidden=true;
-  let h=`<div class="her"><h2>Héritage</h2>
+  const dl=S.daily;
+  let h=`<h2>Défi du jour</h2>
+   ${dl?`<div class="row gold"><div class="top"><div class="name">${dl.t}<small id="dTxt"></small></div><span class="pill gold" style="margin-left:auto">+3 ★</span></div>
+     <div class="bar2"><i id="dBar"></i></div>
+     <button class="btn sell wide" data-a="daily" id="dBtn"></button></div>`:''}
+   <div class="row"><div class="top"><div class="name">Série de connexion<small>Reviens chaque jour : le bonus grandit jusqu’au 7e jour.</small></div><span class="big">${S.streak.n} j</span></div></div>
+   <h2>Décorations</h2><p class="sub">Tu as <b>${S.stars} ★</b>. Les étoiles se gagnent avec les défis et la série de connexion. Les décorations restent pour toujours, même après un héritage.</p>`;
+  for(const d of DECOS){const own=!!S.decos[d.id];h+=`<div class="row ${own?'gold':''}"><div class="top"><div class="name">${d.n}<small>+${Math.round(d.b*100)} % de revenus pour toujours</small></div>
+    ${own?'<span class="pill gold" style="margin-left:auto">Installée</span>':`<button class="btn sm" style="margin-left:auto" data-a="deco" data-d="${d.id}" ${S.stars<d.c?'disabled':''}>${d.c} ★</button>`}</div></div>`}
+  h+=`<div class="her"><h2>Héritage</h2>
    <p class="sub">Cède ton empire à la génération suivante : tu repars de zéro, mais chaque point d’héritage donne +10 % sur les commerces et +5 % sur les ventes, pour toujours.</p>
    <div class="meta">Points : <b>${S.heritage}</b> · Générations : <b>${S.prestiges}</b> · Total gagné : <b>${eur(S.life)}</b></div>
    <button class="btn wide" data-a="cede" id="cedeBtn"></button></div>
+   <h2>Classement</h2><div class="row" id="lb"></div>
    <div class="row"><div class="name">Sauvegarde en ligne<small id="cloudTxt"></small></div>
-   ${cloud.user?`<div class="btns" style="grid-template-columns:1fr 1fr"><button class="btn" data-a="cpush">Sauvegarder</button><button class="btn alt" data-a="cout">Se déconnecter</button></div>`:`<button class="btn wide" data-a="cin">Se connecter avec Google</button>`}</div>
-   <div class="row"><div class="name">Code de sauvegarde<small>Copie ton code pour récupérer ta partie ailleurs, ou colle un code puis charge-le.</small></div>
-   <textarea class="code" id="saveCode" rows="3" placeholder="Ton code apparaîtra ici" aria-label="Code de sauvegarde"></textarea>
-   <div class="btns" style="grid-template-columns:1fr 1fr"><button class="btn alt" data-a="export">Copier mon code</button><button class="btn" data-a="import" id="impBtn">Charger ce code</button></div></div>
+   ${cloud.user?`<div class="btns two"><button class="btn" data-a="cpush">Sauvegarder</button><button class="btn alt" data-a="cout">Se déconnecter</button></div>`:`<button class="btn wide" data-a="cin">Se connecter avec Google</button>`}</div>
    <h2>Objectifs</h2><p class="sub">${goalCount()}/${GOALS.length} réussis · chacun donne +2 % de revenus à vie.</p>`;
   for(const g of GOALS){const d=!!S.goals[g.id];
     h+=`<div class="row goal ${d?'done':''}"><span class="chk">${d?'✓':''}</span><div class="name">${g.t}<small>${g.d}</small></div></div>`}
   main.innerHTML=h;
+  renderLB();loadLB();
 }
+/* ---------- paramètres ---------- */
+function seg(key,opts){return `<div class="seg">${opts.map(([v,l])=>`<button data-a="set" data-k="${key}" data-v="${v}" class="${String(SET[key])===String(v)?'on':''}">${l}</button>`).join('')}</div>`}
+function buildSettings(){
+  main.innerHTML=`<h2>Paramètres</h2>
+  <h3>Son</h3>
+  <div class="row"><div class="set"><label for="setSfx">Effets sonores</label><input type="range" id="setSfx" data-r="sfx" min="0" max="1" step=".05" value="${SET.sfx}"></div>
+   <div class="set"><label for="setMus">Musique</label><input type="range" id="setMus" data-r="music" min="0" max="1" step=".05" value="${SET.music}"></div>
+   <div class="set"><label>Musique d’ambiance</label>${seg('musicOn',[[true,'Activée'],[false,'Coupée']])}</div>
+   <div class="set"><label>Vibrations</label>${seg('vib',[[true,'Oui'],[false,'Non']])}</div>
+   <p class="sub">Le son démarre au premier contact avec l’écran.</p></div>
+  <h3>Affichage</h3>
+  <div class="row"><div class="set"><label>Thème</label>${seg('theme',[['auto','Auto'],['light','Clair'],['dark','Sombre']])}</div>
+   <div class="set"><label>Animations de la ville</label>${seg('anim',[['full','Complètes'],['low','Réduites']])}</div>
+   <div class="set"><label>Nombres</label>${seg('longNum',[[false,'Courts (1,2 M)'],[true,'Complets']])}</div></div>
+  <h3>Jeu</h3>
+  <div class="row"><div class="set"><label>Confirmer les gros achats</label>${seg('confirm',[[true,'Oui'],[false,'Non']])}</div>
+   <p class="sub">Demande de toucher deux fois pour un achat qui coûte plus de la moitié de ton argent.</p>
+   <div class="set"><label>Sauvegarde en ligne auto</label>${seg('cloudAuto',[[true,'Oui'],[false,'Non']])}</div>
+   <button class="btn alt wide" data-a="tuto">Revoir le tutoriel</button></div>
+  <h3>Compte</h3>
+  <div class="row"><div class="name">Compte Google<small id="cloudTxt"></small></div>
+   ${cloud.user?`<div class="btns two"><button class="btn alt" data-a="cout">Se déconnecter</button><button class="btn danger" data-a="cdel">Supprimer mes données</button></div>`:`<button class="btn wide" data-a="cin">Se connecter avec Google</button>`}
+   <p class="sub">Supprimer tes données efface ta sauvegarde en ligne et ta place au classement. Ta partie reste sur ce téléphone.</p></div>
+  <div class="row"><div class="name">Code de sauvegarde<small>Copie ton code pour récupérer ta partie ailleurs, ou colle un code puis charge-le.</small></div>
+   <textarea class="code" id="saveCode" rows="3" placeholder="Ton code apparaîtra ici" aria-label="Code de sauvegarde"></textarea>
+   <div class="btns two"><button class="btn alt" data-a="export">Copier mon code</button><button class="btn" data-a="import" id="impBtn">Charger ce code</button></div></div>
+  <div class="row alert"><div class="name">Recommencer à zéro<small>Efface toute ta partie sur ce téléphone, héritage et décorations compris.</small></div>
+   <button class="btn danger wide" data-a="reset" id="resetBtn">Tout effacer</button></div>
+  <p class="sub">Petit Empire ${VERSION} · <a href="privacy.html" style="color:inherit">Politique de confidentialité</a></p>`;
+}
+main.addEventListener('input',e=>{const r=e.target.closest('[data-r]');if(!r)return;SET[r.dataset.r]=+r.value;saveSet();applyVol()});
+main.addEventListener('change',e=>{const r=e.target.closest('[data-r]');if(!r)return;audioInit();sfx('coin')});
+let resetArmed=0;
+function resetAll(){
+  if(Date.now()-resetArmed>4000){resetArmed=Date.now();$('resetBtn').textContent='Confirmer : tout effacer définitivement';return}
+  try{localStorage.removeItem(KEY)}catch(e){}setS(fresh());newElection();checkDaily();sizeCanvas();toast('Nouvelle partie commencée.');save();goTab('market');
+}
+/* ---------- rafraîchissement ---------- */
+function setBar(wrapId,barId,v){const w=$(wrapId),b=$(barId);if(!w||!b)return;b.style.width=Math.min(100,v/1.25*100)+'%';w.className='bar2 '+(v>=1?'good':v>=.7?'mid':'bad')}
 function refresh(){
-  const inc=incomePerSec();
-  $('cash').textContent=eur(S.cash);
-  $('rate').textContent=`${eur(inc)}/s${S.boost.m!==1?' ('+fmt(S.boost.m)+'×)':''} · Jour ${day()}`;
+  C=activeC();calcPM();
+  const gross=grossIncome(),net=GROSS_ALL-COSTS_ALL;
+  $('cityName').textContent=S.travel?`En route vers ${CITY(S.travel.to).n}`:CITY(S.city).n;
+  renderTodo();renderSheet();updPlanInfo();
+  const ce=$('cash');ce.textContent=eur(S.cash);ce.classList.toggle('neg',S.cash<0);
+  $('rate').textContent=`${sgn(net)}/s${S.boost.m!==1?' (×'+fmt(S.boost.m)+')':''} · ${WEATHER[S.weather].ic} ${SEASONS[season()].n} · J${day()}`;
+  renderBanner();
   if(tab==='market'){
-    if(unlockedGoods().length!==shown.market)return build('market');
-    const c=capacity(),u=used();
-    $('capTxt').textContent=`Entrepôt ${fmt(u)} / ${fmt(c)}`;
+    if(unlockedGoods().length!==shown.market||S.contracts.map(c=>c.id).join()!==shown.contracts)return build('market');
+    $('capTxt').textContent=`Entrepôt ${fmt(Math.floor(used()))} / ${fmt(capacity())}`;
+    $('tickTxt').textContent=`Nouveaux cours dans ${Math.ceil(S.mTimer)} s`;
+    $('tickBar').style.width=(S.mTimer/MT*100)+'%';
     $('feeTxt').textContent=`Commission ${fee(S.upg.nego||0)} % à l’achat et à la vente${S.heritage?` · ventes +${S.heritage*5} %`:''}.`;
+    for(const c of S.contracts){const st=S.goods[c.g],g=GOODS.find(x=>x.id===c.g);
+      const t=$('ct-'+c.id);if(t){t.textContent='reste '+mmss(c.until-S.clock);t.className=c.until-S.clock<60?'down':'mut'}
+      const b=$('cb-'+c.id);if(b){b.disabled=st.inv<c.qty;b.innerHTML=st.inv>=c.qty?`Livrer<small>Ton stock : ${fmt(Math.floor(st.inv))} ${pl(st.inv,g.unit)}</small>`:`Il te faut ${fmt(c.qty)} ${pl(c.qty,g.unit)}<small>Ton stock : ${fmt(Math.floor(st.inv))}</small>`}}
     const flair=S.upg.flair;
     for(const g of unlockedGoods()){
       const st=S.goods[g.id],p=priceOf(g),h=st.hist,prev=h[h.length-2]||p,ch=(p/prev-1)*100;
       $('p-'+g.id).textContent=eur(p);
-      const ce=$('c-'+g.id);ce.textContent=(ch>=0?'▲ ':'▼ ')+Math.abs(ch).toFixed(1).replace('.',',')+' %';ce.className=ch>=0?'up':'down';
+      const cel=$('c-'+g.id);cel.textContent=(ch>=0?'▲ ':'▼ ')+Math.abs(ch).toFixed(1).replace('.',',')+' %';cel.className=ch>=0?'up':'down';
       let m='';
-      if(st.inv){const val=st.inv*p*(1-curFee())*sellBonus(),pnl=val-st.cost;
-        m+=`<span>Stock <b>${fmt(st.inv)}</b> · payé ${eur(st.cost/st.inv)}</span><span class="${pnl>=0?'up':'down'}"><b class="${pnl>=0?'up':'down'}">${pnl>=0?'+':''}${eur(pnl)}</b> si tu vends</span>`}
+      if(st.inv>=1){const val=st.inv*p*(1-curFee())*sellBonus(),pnl=val-st.cost;
+        m+=`<span>Stock <b>${fmt(Math.floor(st.inv))}</b> · payé ${eur(st.cost/st.inv)}</span><span><b class="${pnl>=0?'up':'down'}">${sgn(pnl)}</b> si tu vends</span>`}
       else m+=`<span>Aucun stock</span>`;
-      if(flair){const e=-.035*st.x+(st.dt>0?st.drift:0),r=p/g.base;
-        m+=`<span class="pill">${e>.008?'↗ en hausse':e<-.008?'↘ en baisse':'→ stable'}</span><span class="pill">${r<.75?'prix bas':r>1.35?'prix haut':'prix normal'}</span>`}
+      if(flair){const tgt=SEASONS[season()].good[g.id]||0,e=-.06*(st.x-tgt)+(st.dt>0?st.drift:0),r=p/g.base;
+        m+=`<span class="pill">${e>.015?'↗ en hausse':e<-.015?'↘ en baisse':'→ stable'}</span><span class="pill">${r<.75?'prix bas':r>1.35?'prix haut':'prix normal'}</span>`}
       const me=$('m-'+g.id);if(me.innerHTML!==m)me.innerHTML=m;
-      $('s-'+g.id).disabled=!st.inv;
+      $('s-'+g.id).disabled=st.inv<1;
     }
+    for(const r of RECIPES){const el=$('rm-'+r.id);if(!el)continue;const st=S.goods[r.from],g=GOODS.find(x=>x.id===r.from);
+      const rate=r.per*lvl(r.biz)*(1+.1*stf(r.biz));
+      const m=`<span>Cadence <b>${fmt(Math.round(rate*60*10)/10)}</b> par minute</span><span>Stock de ${g.name.toLowerCase()} <b>${fmt(Math.floor(st.inv))}</b></span><span>Prix de vente <b>${eur(priceOf(g)*r.mult)}</b></span>${C.craft[r.id]&&st.inv<1?'<span class="down">Plus de matière première !</span>':''}`;
+      if(el.innerHTML!==m)el.innerHTML=m}
     const nx=$('nextBar');if(nx){const ng=GOODS.find(g=>!unlockedGoods().includes(g));if(ng)nx.style.width=Math.min(100,S.run.earned/ng.unlock*100)+'%'}
   } else if(tab==='biz'){
-    let vis=BIZ.findIndex(b=>lvl(b.id)===0&&b.cost>S.cash);vis=vis<0?BIZ.length:vis+1;
-    if(vis>shown.biz)return build('biz');
-    const gm=globalMult();
+    if(visibleBiz()>shown.biz||empSig()!==shown.emp)return build('biz');
     BIZ.slice(0,shown.biz).forEach(b=>{
       const l=lvl(b.id),n=bizQty(b),c=bizCost(b,n),mult=bizMult(l);
       $('bl-'+b.id).textContent=l;
-      $('br-'+b.id).textContent=l?`${eur(b.rate*l*mult*gm)}/s${mult>1?' · ×'+mult:''}`:`${eur(b.rate*gm)}/s par unité`;
+      const am=l?adjOf(b.id):1,cm=CITY(C.id).biz[b.id]||1;
+      $('br-'+b.id).textContent=l?`${eur(bizIncome(b))}/s${mult>1?' · ×'+mult:''}${hasMgr(b)?' · gérant +25 %':''}${Math.abs(am-1)>.005?` · voisins ${am>1?'+':'−'}${Math.round(Math.abs(am-1)*100)} %`:''}${cm!==1?` · ville ${cm>1?'+':'−'}${Math.round(Math.abs(cm-1)*100)} %`:''}`:`${eur(b.rate*PM*cm)}/s par niveau${cm!==1?` (ville ${cm>1?'+':'−'}${Math.round(Math.abs(cm-1)*100)} %)`:''}`;
       const nextM=MILES.find(t=>t>l)||l,prevM=[0,...MILES].filter(t=>t<=l).pop();
       $('bm-'+b.id).style.width=(nextM>prevM?(l-prevM)/(nextM-prevM)*100:100)+'%';
       const bb=$('bb-'+b.id);bb.innerHTML=`${l?'Agrandir':'Ouvrir'} ×${n}<small>${eur(c)}</small>`;bb.disabled=c>S.cash;
+      const bs=$('bs-'+b.id);if(bs){const list=C.staff[b.id]||[],s=list.length,mx=staffMax(b),grev=list.filter(e=>e.strike).length;
+        const m=`<span>Personnel <b>${s}/${mx}</b></span><span>Clients <b class="up">+${Math.round(empBonus(b)*100)} %</b></span><span>Salaires <b class="${s?'down':''}">−${eur(salaryOf(b))}/s</b></span>${grev?`<span><b class="down">${grev} en grève</b></span>`:''}`;
+        if(bs.innerHTML!==m)bs.innerHTML=m;
+        const hb=$('bh-'+b.id),hc=hireCost(b);
+        hb.innerHTML=s>=mx?`Complet<small>poste suivant : niveau ${(Math.floor(l/10)+1)*10}</small>`:`Embaucher<small>${eur(hc)} · −${eur(newWage(b))}/s</small>`;
+        hb.disabled=s>=mx||hc>S.cash;
+        const pb=$('pb-'+b.id);if(pb){const k=salaryOf(b)*90+20;pb.innerHTML=`Verser une prime à toute l’équipe (${eur(k)})`;pb.disabled=k>S.cash}
+        if(C.open===b.id)for(const e of list){const el=$('e-'+e.id);if(el)el.textContent=`niv ${e.lv} · humeur ${Math.max(0,Math.round(e.mood))} %${e.strike?' · EN GRÈVE':''} · −${eur(wageOf(b,e))}/s`}}
     });
+    for(const x of C.broken){const rb=$('rb-'+x.id);if(rb){const k=rushCost(x);rb.innerHTML=`Réparation d’urgence<small>${eur(k)}</small>`;rb.disabled=k>S.cash}}
+  } else if(tab==='city'){
+    if(citySig()!==shown.city)return build('city');
+    const v=visitors(),sat=satisfaction();
+    $('cvis').textContent=`${fmt(Math.round(v))} visiteurs · revenus ×${fmt(Math.round(satMult()*100)/100)}`;
+    const cs=$('csat');cs.textContent=pct(Math.min(sat,1.25));cs.className='big '+(sat>=1?'up':sat>=.7?'warn':'down');
+    const warns=[];
+    for(const n of NEEDS){const s=needSat(n.id);setBar('nbw-'+n.id,'nb-'+n.id,s);$('np-'+n.id).textContent=pct(s);if(s<.7)warns.push(n.name.toLowerCase())}
+    $('cwarn').textContent=warns.length?`Il manque des équipements : ${warns.join(', ')}.`:sat>=1?'Les visiteurs adorent ta ville, ils dépensent plus !':'Ajoute quelques équipements pour satisfaire tout le monde.';
+    $('satRow').classList.toggle('alert',warns.length>0);
+    const sal=salaries(),mt=maintenance(),it=interest(),tp=techPay();
+    $('cfin').innerHTML=`<span>Revenus des commerces</span><span class="up">+${eur(gross)}</span>
+      <span>Salaires (${totalStaff()} employés)</span><span class="down">−${eur(sal)}</span>
+      ${C.techs?`<span>Techniciens (${C.techs})</span><span class="down">−${eur(tp)}</span>`:''}
+      <span>Entretien (${totalInfra()} équipements)</span><span class="down">−${eur(mt)}</span>
+      ${S.loan?`<span>Intérêts du prêt</span><span class="down">−${eur(it)}</span>`:''}
+      <span class="tot">Bénéfice</span><span class="tot ${net>=0?'up':'down'}">${sgn(net)}</span>`;
+    $('ctax').textContent=`Impôts : ${Math.round(taxRate()*100)} % des revenus, prélevés à la fin de chaque jour (dans ${mmss(DAY-(S.clock%DAY))}).${S.cash<0?' Tu es dans le rouge : tes commerces tournent à 70 % !':''}${rivalShops()?` Concurrents : −${Math.round((1-rivalMult())*100)} % de clients.`:''}`;
+    const cd=$('cday');if(cd&&S.lastDay&&cd.dataset.d!=String(S.lastDay.day)){const d=S.lastDay;cd.dataset.d=d.day;
+      cd.innerHTML=`<div class="name">Bilan du jour ${d.day}</div><div class="fin"><span>Revenus</span><span class="up">+${eur(d.gross)}</span><span>Marché et commandes</span><span class="${d.trade>=0?'up':'down'}">${sgn(d.trade)}</span><span>Salaires et techniciens</span><span class="down">−${eur(d.sal)}</span><span>Entretien</span><span class="down">−${eur(d.maint)}</span>${d.int?`<span>Intérêts</span><span class="down">−${eur(d.int)}</span>`:''}<span>Impôts</span><span class="down">−${eur(d.tax)}</span><span class="tot">Résultat</span><span class="tot ${d.net>=0?'up':'down'}">${sgn(d.net)}</span></div>`}
+    $('tTxt').textContent=C.techs?`Ils réparent ${C.techs} panne${C.techs>1?'s':''} à la fois · salaire ${eur(techWage())}/s chacun`:'Sans technicien, les pannes ne se réparent pas toutes seules.';
+    const th=$('tHire'),tc=techCost();th.innerHTML=`Engager<small>${eur(tc)}</small>`;th.disabled=tc>S.cash;
+    C.broken.forEach((x,k)=>{const t=$('bx-'+x.id);if(!t)return;const working=k<C.techs;t.textContent=working?`Réparation en cours · ${mmss((x.need-x.prog)/(1+.5*(S.upg.outils||0)))}`:'En attente d’un technicien';$('bxb-'+x.id).style.width=(x.prog/x.need*100)+'%';const rb=$('rb-'+x.id),c=rushCost(x);rb.innerHTML=`Urgence<small>${eur(c)}</small>`;rb.disabled=c>S.cash});
+    for(const R of RIVALS){const r=C.rivals[R.id];if(!r||!$('rs-'+R.id))continue;
+      $('rs-'+R.id).textContent=`${r.shops} boutique${r.shops>1?'s':''}`;
+      $('rv-'+R.id).textContent=r.shops?`Te vole environ ${Math.round(r.shops*1.5)} % de clients`:(r.pause>S.dayIdx?`Revient dans ${r.pause-S.dayIdx} jour${r.pause-S.dayIdx>1?'s':''}`:'Prépare son retour…');
+      const w=Math.round(grossIncome()*90+200),sp=Math.round(grossIncome()*45+100),bo=buyoutCost(R.id);
+      const bw=$('rw-'+R.id);bw.innerHTML=`Guerre des prix<small>${eur(w)}</small>`;bw.disabled=!r.shops||w>S.cash;
+      const bp=$('rp-'+R.id);bp.innerHTML=`Espionner<small>${eur(sp)}</small>`;bp.disabled=sp>S.cash;
+      const bb=$('rb2-'+R.id);bb.innerHTML=`Racheter<small>${eur(bo)}</small>`;bb.disabled=!r.shops||bo>S.cash}
+    if(S.elect.cands&&$('elTxt')){const dl=S.elect.next-S.dayIdx;$('elTxt').textContent=`Vote dans ${dl} jour${dl>1?'s':''}. Soutiens un candidat et finance sa campagne pour augmenter ses chances.${S.elect.pick!=null?` Chances de victoire : ${pct(winChance())}.`:''}`;
+      const db=$('donB');if(db){const k=Math.round(incAll()*60+200);db.innerHTML=`Financer la campagne<small>${eur(k)} · déjà ${eur(S.elect.don)}</small>`;db.disabled=k>S.cash}}
+    const fb=$('foundB');if(fb){const nc=CITIES.find(c=>!S.cities[c.id]);if(nc){const ok=S.run.earned>=nc.cost*.4;fb.innerHTML=ok?`Fonder<small>${eur(nc.cost)}</small>`:`Bloqué<small>gagne ${eur(nc.cost*.4)}</small>`;fb.disabled=!ok||nc.cost>S.cash}}
+    const lm=loanMax();
+    $('cloan').textContent=S.loan?`Tu dois ${eur(S.loan)} · intérêts 0,5 % par minute`:'Emprunte pour investir plus vite. Intérêts : 0,5 % par minute.';
+    const bo=$('cbor');bo.innerHTML=`Emprunter<small>${eur(lm)}</small>`;bo.disabled=lm<1;
+    $('crep').disabled=!S.loan||S.cash<=0;
+    for(const i of INFRA){const b=$('ib-'+i.id);if(!b)continue;const c=infraCost(i),bk=broken('infra',i.id);
+      $('ii-'+i.id).textContent=`${fmt(i.cap)} visiteurs chacun · entretien ${eur(i.maint*maintMult())}/s`;
+      $('ic-'+i.id).textContent='×'+cnt(i.id)+(bk?` · ${bk} en panne`:'');
+      b.innerHTML=`Installer<small>${eur(c)}</small>`;b.disabled=c>S.cash;$('iu-'+i.id).disabled=!cnt(i.id)}
   } else if(tab==='upg'){
     for(const u of UPG){const e=$('ub-'+u.id);if(e)e.disabled=u.cost(S.upg[u.id]||0)>S.cash}
-  } else {
+  } else if(tab==='goals'){
     updCloudTxt();
+    if(S.daily&&$('dTxt')){const p=dailyProg(),n=S.daily.n,isMoney=S.daily.k==='tradeProfit';
+      $('dTxt').textContent=S.daily.done?'Réussi ! Reviens demain pour un nouveau défi.':`${isMoney?eur(p):fmt(Math.floor(p))} / ${isMoney?eur(n):n}`;
+      $('dBar').style.width=Math.min(100,p/n*100)+'%';
+      const b=$('dBtn');b.disabled=S.daily.done||p<n;b.innerHTML=S.daily.done?'Défi réussi ✓':p>=n?`Récupérer ${eur(Math.max(500,gross*600))} et 3 ★`:'Pas encore terminé'}
     const g=heritageGain(),b=$('cedeBtn');
     if(g<1){b.disabled=true;b.innerHTML=`Céder l’empire<small>Disponible après 1 M€ gagnés dans la partie (${eur(S.run.earned)})</small>`}
     else{b.disabled=false;b.innerHTML=Date.now()-cedeArmed<4000?`Confirmer : tout repart à zéro<small>Touche encore pour +${g} points</small>`:`Céder l’empire<small>+${g} point${g>1?'s':''} d’héritage maintenant</small>`}
-  }
+  } else if(tab==='settings'){updCloudTxt()}
 }
-function rebuildAll(){build(tab)}
-
-main.addEventListener('click',e=>{
-  const b=e.target.closest('[data-a]');if(!b||b.disabled)return;
-  const a=b.dataset.a;
-  if(a==='buy')buyGood(b.dataset.g,+b.dataset.n);
-  else if(a==='sell')sellGood(b.dataset.g);
-  else if(a==='biz')buyBiz(b.dataset.b);
-  else if(a==='upg')buyUpg(b.dataset.u);
-  else if(a==='mode'){S.mode=b.dataset.m==='max'?'max':+b.dataset.m;build('biz')}
-  else if(a==='cede')cede();
-  else if(a==='export')exportSave();
-  else if(a==='cin')signIn();
-  else if(a==='cpush')pushCloud(false);
-  else if(a==='cout')signOutCloud();
-  else if(a==='import')importSave();
-  else if(a==='help'){S.helpSeen=true;build('market')}
-});
-$('tabs').addEventListener('click',e=>{
-  const b=e.target.closest('[data-tab]');if(!b)return;
-  tab=b.dataset.tab;document.querySelectorAll('.tab').forEach(t=>t.classList.toggle('on',t===b));
-  build(tab);window.scrollTo(0,0);
-});
+/* ---------- clics ---------- */
+const ACTIONS={
+ buy:d=>buyGood(d.g,+d.n),sell:d=>sellGood(d.g),deliver:d=>deliver(d.c),craft:d=>toggleCraft(d.r),
+ biz:d=>buyBiz(d.b),hire:d=>hire(d.b),team:d=>{C.open=C.open===d.b?null:d.b;build('biz')},prime:d=>bonusFor(d.b),
+ fire:d=>fireEmp(d.e),promote:d=>promote(d.e),raise:d=>answerRaise(d.e,true),noraise:d=>answerRaise(d.e,false),
+ infra:d=>buyInfra(d.i),unfra:d=>sellInfra(d.i),tech:hireTech,untech:fireTech,rush:d=>rush(d.x),
+ rwar:d=>rivalAction(d.r,'war'),rspy:d=>rivalAction(d.r,'spy'),rbuy:d=>rivalAction(d.r,'buy'),
+ vote:d=>vote(+d.i),donate,borrow,repay,upg:d=>buyUpg(d.u),deco:d=>buyDeco(d.d),daily:claimDaily,
+ mode:d=>{S.mode=d.m==='max'?'max':+d.m;build('biz')},cede,export:exportSave,import:importSave,
+ cin:signIn,cpush:()=>pushCloud(false),cout:signOutCloud,cdel:deleteCloud,
+ fixcrisis:fixCrisis,special:d=>answerSpecial(+d.i),
+ travel:d=>travelTo(d.c),found:d=>foundCity(d.c),go:d=>goTab(d.t),gobiz:d=>{C.open=d.b;closeSheet();goTab('biz')},closesheet:()=>closeSheet(),
+ sheet:d=>openSheet(d.b),todoall:()=>{S.todoAll=!S.todoAll;todoSig=''},todohide:()=>{S.todoHide=!S.todoHide;todoSig=''},
+ help:()=>{S.helpSeen=true;build('market')},tuto:()=>{S.helpSeen=false;goTab('market')},reset:resetAll,
+ set:d=>{const v=d.v==='true'?true:d.v==='false'?false:d.v;SET[d.k]=v;saveSet();applyVol();if(d.k==='theme')applyTheme();if(d.k==='musicOn'&&v)audioInit();build('settings')},
+};
+function onAction(e){const b=e.target.closest('[data-a]');if(!b||b.disabled)return;const f=ACTIONS[b.dataset.a];if(!f)return;C=activeC();MEMO={};f(b.dataset);MEMO={};GROSS_ALL=allGross();COSTS_ALL=allCosts();refresh()}
+main.addEventListener('click',onAction);
+$('banner').addEventListener('click',onAction);
+$('todo').addEventListener('click',onAction);
+$('sheet').addEventListener('click',e=>{onAction(e);if(SHEET)renderSheet(true)});
+$('viewBtn').addEventListener('click',()=>{S.view=S.view==='plan'?'rue':'plan';planSel=null;sizeCanvas();sfx('tick')});
+function goTab(t){tab=t;document.querySelectorAll('.tab').forEach(x=>x.classList.toggle('on',x.dataset.tab===t));$('gear').classList.toggle('on',t==='settings');build(tab);window.scrollTo(0,0);checkGoals()}
+$('tabs').addEventListener('click',e=>{const b=e.target.closest('[data-tab]');if(b)goTab(b.dataset.tab)});
+$('gear').addEventListener('click',()=>goTab(tab==='settings'?'market':'settings'));
 let toastT;
-function toast(m){const t=$('toast');t.textContent=m;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),2600)}
+function toast(m){const t=$('toast');t.textContent=m;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),2800)}
 
-/* ---------- Dessin ---------- */
+/* ======================================================================
+   Dessin de la ville
+   ====================================================================== */
 let T={};
-function readTokens(){const cs=getComputedStyle(document.documentElement);for(const k of['sky','night','ground','gold','good','bad','ink','line','panel'])T[k]=cs.getPropertyValue('--'+k).trim()}
+function readTokens(){const cs=getComputedStyle(document.documentElement);for(const k of['sky','night','ground','gold','good','bad','ink'])T[k]=cs.getPropertyValue('--'+k).trim()}
 const hex=h=>{h=h.replace('#','');if(h.length===3)h=[...h].map(c=>c+c).join('');return[0,2,4].map(i=>parseInt(h.slice(i,i+2),16))};
 const mix=(a,b,t)=>{const A=hex(a),B=hex(b);return`rgb(${A.map((v,i)=>Math.round(v+(B[i]-v)*t)).join(',')})`};
 function drawSparks(){
-  const dpr=window.devicePixelRatio||1;
+  if(!S)return;const dpr=window.devicePixelRatio||1;
   for(const g of unlockedGoods()){const c=$('sp-'+g.id);if(!c)continue;
     const w=88,h=32;c.width=w*dpr;c.height=h*dpr;const x=c.getContext('2d');x.setTransform(dpr,0,0,dpr,0,0);
     const d=S.goods[g.id].hist,mn=Math.min(...d),mx=Math.max(...d),r=mx-mn||1;
@@ -534,88 +1379,364 @@ function drawSparks(){
     const ly=h-3-(d[d.length-1]-mn)/r*(h-6);x.beginPath();x.arc(w-2,ly,2.4,0,7);x.fillStyle=col;x.fill();
   }
 }
-const cv=$('town'),cx=cv.getContext('2d');let CW=0,CH=150;
-function sizeCanvas(){const dpr=window.devicePixelRatio||1;CW=cv.clientWidth;cv.width=CW*dpr;cv.height=CH*dpr;cx.setTransform(dpr,0,0,dpr,0,0)}
-const stars=Array.from({length:40},()=>[Math.random(),Math.random()*.6]);
-const walkers=Array.from({length:30},()=>({x:Math.random(),v:(Math.random()<.5?-1:1)*(.02+Math.random()*.03),c:['#e9845a','#5aa3c9','#d9a441','#8e6fb3','#4f9e8a'][Math.floor(Math.random()*5)]}));
-let floats=[];
-function floatTxt(t,c,x,y){floats.push({t,c,x:x??CW/2,y:y??CH*.45,life:1.4})}
-function draw(dt){
-  const w=CW,h=CH,gy=h-20;
-  const ph=(S.clock%120)/120,light=Math.max(0,Math.min(1,(.5-.5*Math.cos(ph*2*Math.PI))*1.5-.2));
+const cv=$('town'),cx=cv.getContext('2d');let CW=0,CH=170;
+function planDims(){const vw=$('townwrap').clientWidth,cs=Math.max(40,Math.min(62,Math.floor((vw-20)/GW)));return {cs,ox:Math.floor((vw-cs*GW)/2),oy:10,h:cs*GW+20}}
+function sizeCanvas(){
+  const dpr=Math.min(2,window.devicePixelRatio||1),plan=S&&S.view==='plan';
+  if(plan){CW=$('townwrap').clientWidth;CH=planDims().h}else{CW=Math.max($('townwrap').clientWidth,BIZ.length*42);CH=170}
+  cv.style.width=CW+'px';cv.style.height=CH+'px';cv.width=CW*dpr;cv.height=CH*dpr;cx.setTransform(dpr,0,0,dpr,0,0);
+  $('viewBtn').textContent=plan?'⌂ Rue':'▦ Plan';$('planInfo').hidden=!plan;if(plan)$('townwrap').scrollLeft=0;updPlanInfo(true);
+}
+const stars=Array.from({length:60},()=>[Math.random(),Math.random()*.6]);
+const drops=Array.from({length:90},()=>[Math.random(),Math.random(),.6+Math.random()*.6]);
+const walkers=Array.from({length:45},()=>({x:Math.random(),v:(Math.random()<.5?-1:1)*(.012+Math.random()*.02),c:['#e9845a','#5aa3c9','#d9a441','#8e6fb3','#4f9e8a','#c46aa0'][Math.floor(Math.random()*6)]}));
+let floats=[],fireworks=[];
+function floatTxt(t,c,x,y){const w=$('townwrap');floats.push({t,c,x:x??(w.scrollLeft+w.clientWidth/2),y:y??CH*.45,life:1.4})}
+function drawInfra(id,x,gy,lights,brk){
+  const f=(c,a,b,w,h)=>{cx.fillStyle=c;cx.fillRect(a,b,w,h)};
+  switch(id){
+    case'poubelle':f('#3d7a4a',x-2,gy-6,4,6);f('#2a5a35',x-2.5,gy-7,5,1.5);break;
+    case'wc':f('#4a86c5',x-4,gy-13,8,13);f('#2f5f94',x-5,gy-14,10,2);f('#e8eef3',x-2.5,gy-10,5,2.5);break;
+    case'nettoyage':f('#eeeeee',x-7,gy-8,10,6);f('#2f8f5b',x+3,gy-9,4,7);f('#222',x-5,gy-2,3,2);f('#222',x+2,gy-2,3,2);break;
+    case'hopital':f('#f2f2f2',x-7,gy-16,14,16);f('#d33',x-1,gy-14,2.5,8);f('#d33',x-4,gy-11,8.5,2.5);break;
+    case'lampe':f('#444b55',x-.75,gy-18,1.5,18);f('#444b55',x-.75,gy-18,4,1.5);f(brk?'#555':'#ffe08a',x+2,gy-17,2,2);if(!brk)lights.push([x+3,gy-16]);break;
+    case'camera':f('#555',x-.6,gy-15,1.2,15);f('#222',x-1,gy-17,5,3);f('#e33',x+3,gy-16,1,1);break;
+    case'police':f('#2c4f8c',x-7,gy-13,14,13);f('#e6edf7',x-5,gy-11,10,3);f('#e33',x-1,gy-16,2,3);break;
+    case'banc':f('#8a5a33',x-5,gy-4,10,1.6);f('#8a5a33',x-5,gy-6.5,10,1.2);f('#5c3b20',x-4,gy-4,1,4);f('#5c3b20',x+3,gy-4,1,4);break;
+    case'fontaine':f('#9aa7b0',x-6,gy-3,12,3);if(!brk){cx.strokeStyle='#7cc4ee';cx.lineWidth=1.3;cx.beginPath();cx.moveTo(x,gy-3);cx.quadraticCurveTo(x-1,gy-13,x-5,gy-3);cx.moveTo(x,gy-3);cx.quadraticCurveTo(x+1,gy-13,x+5,gy-3);cx.stroke()}break;
+    case'parc':f('#6b4a2b',x-1,gy-8,2,8);cx.fillStyle=season()===2?'#c9852e':season()===3?'#cfd8d4':'#3f8f4a';cx.beginPath();cx.arc(x,gy-12,6,0,7);cx.arc(x+5,gy-9,4,0,7);cx.fill();break;
+    case'stade':cx.fillStyle='#c9d2d8';cx.beginPath();cx.ellipse(x,gy-5,13,5.5,0,0,7);cx.fill();cx.fillStyle='#4caf50';cx.beginPath();cx.ellipse(x,gy-5,8.5,3,0,0,7);cx.fill();break;
+    case'bus':f('#555',x-.6,gy-14,1.2,14);f('#2f6fd1',x-3,gy-17,6,5);break;
+    case'parking':f('#555',x-.6,gy-12,1.2,12);f('#2f6fd1',x-4,gy-19,8,8);cx.fillStyle='#fff';cx.font='bold 7px sans-serif';cx.fillText('P',x,gy-14.5);break;
+    case'metro':f('#555',x-.6,gy-8,1.2,8);f('#f0c419',x-5,gy-17,10,9);cx.fillStyle='#222';cx.font='bold 7px sans-serif';cx.fillText('M',x,gy-12.3);break;
+  }
+  if(brk){cx.fillStyle='#e53935';cx.beginPath();cx.moveTo(x,gy-27);cx.lineTo(x-4,gy-20);cx.lineTo(x+4,gy-20);cx.closePath();cx.fill();cx.fillStyle='#fff';cx.fillRect(x-.5,gy-25,1,3);cx.fillRect(x-.5,gy-21.3,1,1)}
+}
+function draw(dt){if(S.view==='plan')drawPlan();else drawStreet(dt)}
+let BUB=[];
+function drawStreet(dt){
+  const w=CW,h=CH,gy=h-22,low=lowAnim(),se=season(),wt=S.weather;
+  const ph=(S.clock%DAY)/DAY,light=Math.max(0,Math.min(1,(.5-.5*Math.cos(ph*2*Math.PI))*1.5-.2))*(wt==='orage'?.6:wt==='pluie'||wt==='nuages'?.85:1);
   const g=cx.createLinearGradient(0,0,0,gy);g.addColorStop(0,mix(T.night,T.sky,light));g.addColorStop(1,mix(T.night,T.sky,Math.min(1,light+.25)));
   cx.fillStyle=g;cx.fillRect(0,0,w,h);
   if(light<.6){cx.fillStyle=`rgba(255,255,255,${.8*(1-light/.6)})`;stars.forEach(([sx,sy])=>cx.fillRect(sx*w,sy*gy,1.5,1.5))}
-  const sx=w*(ph<.5?ph*2:(ph-.5)*2),sy=gy-Math.sin((ph<.5?ph*2:(ph-.5)*2)*Math.PI)*(gy-24);
-  cx.beginPath();cx.arc(sx,sy,ph<.5?0:0,0,0);
-  if(light>.15){cx.beginPath();cx.arc(w*(ph*1.6-.3),gy-Math.sin(Math.min(1,Math.max(0,ph*1.6-.3))*Math.PI)*(gy-28),13,0,7);cx.fillStyle='#ffd65a';cx.globalAlpha=light;cx.fill();cx.globalAlpha=1}
-  else{cx.beginPath();cx.arc(w*.82,28,10,0,7);cx.fillStyle='#f3f0dc';cx.fill();cx.beginPath();cx.arc(w*.82+4,25,9,0,7);cx.fillStyle=mix(T.night,T.sky,light);cx.fill()}
-  // bâtiments
-  const n=BIZ.length,sw=w/n,wins=[];
+  const vw=$('townwrap'),sl=vw.scrollLeft,vwW=vw.clientWidth;
+  drawScenery(CITY(C.id).look,w,gy);
+  if(light>.15&&wt!=='orage'){const sp=Math.min(1,Math.max(0,ph*1.6-.3));cx.beginPath();cx.arc(sl+vwW*sp,gy-Math.sin(sp*Math.PI)*(gy-30),wt==='canicule'?18:14,0,7);cx.fillStyle=wt==='canicule'?'#ffb347':'#ffd65a';cx.globalAlpha=light;cx.fill();cx.globalAlpha=1}
+  else if(light<=.15){const mx=sl+vwW*.82;cx.beginPath();cx.arc(mx,28,10,0,7);cx.fillStyle='#f3f0dc';cx.fill();cx.beginPath();cx.arc(mx+4,25,9,0,7);cx.fillStyle=mix(T.night,T.sky,light);cx.fill()}
+  if(wt==='nuages'||wt==='pluie'||wt==='orage'||wt==='neige'){cx.fillStyle=wt==='orage'?'rgba(70,75,90,.85)':'rgba(240,244,248,.7)';for(let k=0;k<6;k++){const cxp=((k*.19+S.clock*.004)%1.2-.1)*w,cyp=22+(k%2)*14;cx.beginPath();cx.arc(cxp,cyp,13,0,7);cx.arc(cxp+14,cyp-5,15,0,7);cx.arc(cxp+30,cyp,12,0,7);cx.fill()}}
+  const n=BIZ.length,sw=w/n,wins=[],lights=[],bubbles=[];
   BIZ.forEach((b,i)=>{
-    const l=lvl(b.id),x0=i*sw+2,bw=sw-4;
-    if(!l){cx.fillStyle='rgba(0,0,0,.18)';cx.fillRect(x0+bw/2-1,gy-14,2,14);cx.fillStyle='#f2efe6';cx.fillRect(x0+bw/2-8,gy-18,16,8);return}
-    const hmax=(gy-30)*(.38+.62*i/(n-1)),bh=14+hmax*Math.min(1,Math.log10(l+1)/2.2);
+    const l=lvl(b.id),x0=i*sw+3,bw=sw-6,brk=broken('biz',b.id);
+    if(!l){cx.fillStyle='rgba(0,0,0,.2)';cx.fillRect(x0+bw/2-1,gy-14,2,14);cx.fillStyle='#f2efe6';cx.fillRect(x0+bw/2-8,gy-19,16,8);return}
+    const hmax=(gy-34)*(.32+.68*i/(n-1)),bh=14+hmax*Math.min(1,Math.log10(l+1)/2.2);
     cx.fillStyle=b.col;cx.fillRect(x0,gy-bh,bw,bh);
     cx.fillStyle='rgba(0,0,0,.18)';cx.fillRect(x0+bw*.72,gy-bh,bw*.28,bh);
-    if(i<3){cx.beginPath();cx.moveTo(x0-2,gy-bh);cx.lineTo(x0+bw/2,gy-bh-10);cx.lineTo(x0+bw+2,gy-bh);cx.fillStyle='#8a3b2a';cx.fill()}
-    if(i===8){cx.fillStyle=b.col;cx.fillRect(x0+bw/2-1.5,gy-bh-16,3,16);cx.beginPath();cx.arc(x0+bw/2,gy-bh-17,2.5,0,7);cx.fillStyle='#ff5a4a';cx.fill()}
+    const gold=S.decos.toits;
+    if(i<3){cx.beginPath();cx.moveTo(x0-2,gy-bh);cx.lineTo(x0+bw/2,gy-bh-10);cx.lineTo(x0+bw+2,gy-bh);cx.fillStyle=gold?'#e8b923':'#8a3b2a';cx.fill()}
+    else if(gold){cx.fillStyle='#e8b923';cx.fillRect(x0-1,gy-bh-3,bw+2,3)}
+    if(se===3){cx.fillStyle='rgba(255,255,255,.92)';cx.fillRect(x0-1,gy-bh-2,bw+2,2.5)}
+    if(b.id==='tour'||b.id==='bourse'){cx.fillStyle=b.col;cx.fillRect(x0+bw/2-1.5,gy-bh-16,3,16);cx.beginPath();cx.arc(x0+bw/2,gy-bh-17,2.5,0,7);cx.fillStyle='#ff5a4a';cx.fill()}
+    if(b.id==='aeroport'){cx.fillStyle='#dfe6ea';cx.fillRect(x0+bw/2-3,gy-bh-12,6,12);cx.fillStyle='#7cc4ee';cx.fillRect(x0+bw/2-5,gy-bh-14,10,4)}
     if(bizMult(l)>1){cx.fillStyle=T.gold;cx.fillRect(x0+3,gy-bh-7,1.5,7);cx.fillRect(x0+4.5,gy-bh-7,6,4)}
-    for(let ry=gy-bh+6;ry<gy-8;ry+=9)for(let rx=x0+4;rx<x0+bw-6;rx+=7)wins.push([rx,ry,(i*31+ry*7+rx*3)%5]);
+    const list=C.staff[b.id]||[];for(let s=0;s<Math.min(list.length,6);s++){cx.fillStyle=list[s].strike?'#e53935':list[s].mgr?'#f2b53a':'#fff';cx.fillRect(x0+2+s*4,gy-4,2.5,4)}
+    for(let ry=gy-bh+6;ry<gy-10;ry+=9)for(let rx=x0+4;rx<x0+bw-6;rx+=7)wins.push([rx,ry,(i*31+ry*7+rx*3)%5,brk]);
+    if(brk&&!low){for(let k=0;k<3;k++){const t=(S.clock*.6+k/3)%1;cx.fillStyle=`rgba(120,120,120,${.5*(1-t)})`;cx.beginPath();cx.arc(x0+bw*.7+Math.sin(t*6+k)*3,gy-bh-4-t*22,3+t*5,0,7);cx.fill()}}
+    const iss=brk?'brk':list.some(e=>e.ask)?'ask':list.some(e=>e.strike)?'strike':null;
+    if(iss)bubbles.push({x:x0+bw/2,y:gy-bh-(i<3?24:20)-(b.id==='tour'||b.id==='bourse'?16:0),t:iss,bid:b.id});
   });
-  cx.fillStyle=T.ground;cx.fillRect(0,gy,w,h-gy);
-  cx.fillStyle='rgba(0,0,0,.12)';cx.fillRect(0,gy+9,w,3);
+  if(S.decos.fanions){cx.strokeStyle='rgba(0,0,0,.35)';cx.lineWidth=.8;cx.beginPath();cx.moveTo(0,gy-60);for(let xx=0;xx<w;xx+=24)cx.quadraticCurveTo(xx+12,gy-52,xx+24,gy-60);cx.stroke();
+    const cols=['#e53935','#fbc02d','#43a047','#1e88e5'];for(let xx=4,k=0;xx<w;xx+=12,k++){const yy=gy-59+Math.sin((xx%24)/24*Math.PI)*6;cx.fillStyle=cols[k%4];cx.beginPath();cx.moveTo(xx,yy);cx.lineTo(xx+6,yy);cx.lineTo(xx+3,yy+6);cx.fill()}}
+  cx.fillStyle=se===3?'#e9eef1':T.ground;cx.fillRect(0,gy,w,h-gy);
+  cx.fillStyle='rgba(0,0,0,.12)';cx.fillRect(0,gy+10,w,3);
+  cx.textAlign='center';cx.textBaseline='middle';
+  let rk=0;for(const R of RIVALS){const r=C.rivals[R.id];if(!r)continue;for(let k=0;k<Math.min(r.shops,6);k++){const x=((rk*.377+.21)%1)*(w-30)+15;rk++;cx.fillStyle=R.col;cx.fillRect(x-6,gy+1,12,8);cx.fillStyle='rgba(255,255,255,.8)';cx.fillRect(x-4,gy+3,3,3);cx.fillStyle='#222';cx.fillRect(x-7,gy,14,1.5)}}
+  INFRA.forEach((it,ti)=>{const c=Math.min(cnt(it.id),it.max),bk=broken('infra',it.id);for(let k=0;k<c;k++){const x=((ti*.1373+k*.6180339+.05)%1)*(w-24)+12;drawInfra(it.id,x,gy+9,lights,k<bk)}});
+  if(S.decos.statue){const x=w*.5;cx.fillStyle='#9aa0a6';cx.fillRect(x-6,gy+1,12,8);cx.fillStyle='#a5713f';cx.fillRect(x-2,gy-12,4,13);cx.beginPath();cx.arc(x,gy-14,3,0,7);cx.fill();cx.fillRect(x+2,gy-11,5,1.6)}
+  if(S.decos.fontaine_or){const x=w*.35;cx.fillStyle='#e8b923';cx.fillRect(x-9,gy+4,18,5);cx.fillRect(x-1.5,gy-6,3,10);cx.strokeStyle='#9fd8f5';cx.lineWidth=1.5;cx.beginPath();cx.moveTo(x,gy-6);cx.quadraticCurveTo(x-3,gy-16,x-8,gy+4);cx.moveTo(x,gy-6);cx.quadraticCurveTo(x+3,gy-16,x+8,gy+4);cx.stroke()}
   if(light<1){cx.fillStyle=`rgba(5,10,35,${.42*(1-light)})`;cx.fillRect(0,0,w,h)}
-  wins.forEach(([x,y,k])=>{cx.fillStyle=light<.5&&k<3?'#ffd979':light<.5?'rgba(20,30,50,.6)':'rgba(255,255,255,.5)';cx.fillRect(x,y,3.5,4.5)});
-  // passants
-  const nw=Math.min(walkers.length,Math.floor(totalLv()/4)+(totalLv()?1:0));
-  for(let i=0;i<nw;i++){const p=walkers[i];p.x+=p.v*dt;if(p.x<0||p.x>1)p.v*=-1;const px=p.x*w,bob=Math.abs(Math.sin(S.clock*8+i))*1.5;
-    cx.fillStyle=p.c;cx.fillRect(px-2,gy+4-bob,4,6);cx.beginPath();cx.arc(px,gy+2-bob,2.2,0,7);cx.fillStyle='#f1c9a5';cx.fill()}
-  // pièce
-  if(op){if(S.clock>op.until)op=null;else{op.x=op.fx*w;op.y=40+Math.sin((S.clock-op.born)*3)*8;
+  wins.forEach(([x,y,k,brk])=>{cx.fillStyle=brk?'rgba(20,20,20,.7)':light<.5&&k<3?'#ffd979':light<.5?'rgba(20,30,50,.6)':'rgba(255,255,255,.5)';cx.fillRect(x,y,3.5,4.5)});
+  if(light<.5)lights.forEach(([x,y])=>{cx.beginPath();cx.arc(x,y,7,0,7);cx.fillStyle='rgba(255,215,120,.28)';cx.fill()});
+  if(S.decos.feux&&light<.3&&!low){if(Math.random()<dt*1.2)fireworks.push({x:sl+Math.random()*vwW,y:20+Math.random()*50,t:0,c:pick(['#ff5252','#ffd740','#69f0ae','#40c4ff','#e040fb'])});
+    fireworks=fireworks.filter(f=>(f.t+=dt)<1.2);fireworks.forEach(f=>{cx.fillStyle=f.c;cx.globalAlpha=1-f.t/1.2;for(let k=0;k<12;k++){const a=k/12*Math.PI*2,r=f.t*26;cx.fillRect(f.x+Math.cos(a)*r,f.y+Math.sin(a)*r+f.t*f.t*8,2,2)}cx.globalAlpha=1})}
+  const v=visitors()*(WEATHER[wt].inc),nw=Math.min(walkers.length,Math.floor(Math.sqrt(v)*1.6)+(totalLv()?1:0));
+  for(let i=0;i<nw;i++){const p=walkers[i];if(!low){p.x+=p.v*dt;if(p.x<0||p.x>1)p.v*=-1}const px=p.x*w,bob=low?0:Math.abs(Math.sin(S.clock*8+i))*1.5,py=gy+13+(i%3)*2;
+    cx.fillStyle=p.c;cx.fillRect(px-2,py-bob,4,6);cx.beginPath();cx.arc(px,py-2-bob,2.2,0,7);cx.fillStyle='#f1c9a5';cx.fill();
+    if((wt==='pluie'||wt==='orage')&&i%2===0){cx.fillStyle='#37474f';cx.beginPath();cx.arc(px,py-6-bob,4.5,Math.PI,0);cx.fill()}}
+  if(!low&&(wt==='pluie'||wt==='orage')){cx.strokeStyle='rgba(180,210,240,.55)';cx.lineWidth=1;cx.beginPath();drops.forEach(d=>{const x=(d[0]*w+S.clock*40*d[2])%w,y=(d[1]*h+S.clock*260*d[2])%h;cx.moveTo(x,y);cx.lineTo(x-2,y+7)});cx.stroke();
+    if(wt==='orage'&&Math.sin(S.clock*1.7)>.995){cx.fillStyle='rgba(255,255,255,.35)';cx.fillRect(0,0,w,h)}}
+  if(!low&&wt==='neige'){cx.fillStyle='rgba(255,255,255,.9)';drops.forEach(d=>{const x=((d[0]*w+Math.sin(S.clock+d[1]*9)*10)%w+w)%w,y=(d[1]*h+S.clock*30*d[2])%h;cx.fillRect(x,y,2,2)})}
+  const sat=satisfaction();
+  BUB=bubbles;const bob=low?0:Math.sin(S.clock*4)*2;
+  for(const q of bubbles){const y=q.y+bob,col=q.t==='brk'?'#e53935':q.t==='ask'?'#e0a10e':'#78909c';
+    cx.beginPath();cx.moveTo(q.x-4,y+8);cx.lineTo(q.x,y+13);cx.lineTo(q.x+4,y+8);cx.fillStyle='#fff';cx.fill();
+    cx.beginPath();cx.arc(q.x,y,9.5,0,7);cx.fill();cx.lineWidth=2.5;cx.strokeStyle=col;cx.stroke();
+    cx.fillStyle=col;cx.font='900 11px Nunito,sans-serif';cx.textAlign='center';cx.textBaseline='middle';cx.fillText(q.t==='brk'?'!':q.t==='ask'?'€':'Zz',q.x,y+.5)}
+  const pillT=`☺ ${pct(Math.min(sat,1.25))} · ${fmt(Math.round(visitors()))} visiteurs`;cx.font='800 11px Nunito,sans-serif';const pw=cx.measureText(pillT).width+16;
+  cx.fillStyle='rgba(0,0,0,.38)';cx.beginPath();if(cx.roundRect)cx.roundRect(sl+8,8,pw,20,10);else cx.rect(sl+8,8,pw,20);cx.fill();
+  cx.fillStyle=sat>=1?'#7be0a6':sat>=.7?'#ffd27a':'#ff8a80';cx.textAlign='left';cx.fillText(pillT,sl+16,18.5);
+  cx.textAlign='center';
+  if(op){if(S.clock>op.until)op=null;else{op.x=sl+op.fx*vwW;op.y=48+Math.sin((S.clock-op.born)*3)*8;
     const fade=Math.min(1,(op.until-S.clock)/2);cx.globalAlpha=fade;
     cx.beginPath();cx.arc(op.x,op.y,18+Math.sin(S.clock*6)*2,0,7);cx.fillStyle='rgba(255,214,90,.3)';cx.fill();
     cx.beginPath();cx.ellipse(op.x,op.y,13*Math.abs(Math.cos(S.clock*2.5))+2,13,0,0,7);cx.fillStyle='#f4b52a';cx.fill();cx.strokeStyle='#a86d07';cx.lineWidth=2;cx.stroke();
-    cx.fillStyle='#7a4c00';cx.font='900 13px Nunito,sans-serif';cx.textAlign='center';cx.textBaseline='middle';
+    cx.fillStyle='#7a4c00';cx.font='900 13px Nunito,sans-serif';
     if(Math.abs(Math.cos(S.clock*2.5))>.4)cx.fillText('€',op.x,op.y+1);cx.globalAlpha=1}}
   floats=floats.filter(f=>(f.life-=dt)>0);
-  floats.forEach(f=>{f.y-=22*dt;cx.globalAlpha=Math.min(1,f.life);cx.font='400 17px "Bagel Fat One",sans-serif';cx.textAlign='center';cx.lineWidth=4;cx.strokeStyle='rgba(0,0,0,.45)';cx.strokeText(f.t,f.x,f.y);cx.fillStyle=f.c;cx.fillText(f.t,f.x,f.y);cx.globalAlpha=1});
+  floats.forEach(f=>{f.y-=22*dt;cx.globalAlpha=Math.min(1,f.life);cx.font='400 17px "Bagel Fat One",sans-serif';cx.lineWidth=4;cx.strokeStyle='rgba(0,0,0,.45)';cx.strokeText(f.t,f.x,f.y);cx.fillStyle=f.c;cx.fillText(f.t,f.x,f.y);cx.globalAlpha=1});
 }
-cv.addEventListener('click',e=>{if(!op)return;const r=cv.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top;if(Math.hypot(x-op.x,y-op.y)<30)collectOp()});
+cv.addEventListener('click',e=>{
+  const r=cv.getBoundingClientRect(),x=e.clientX-r.left,y=e.clientY-r.top;
+  C=activeC();
+  if(S.view==='plan')return planTap(x,y);
+  if(op&&Math.hypot(x-op.x,y-op.y)<30)return collectOp();
+  const q=BUB.find(q=>Math.hypot(x-q.x,y-q.y)<18);if(q)return openSheet(q.bid);
+  const i=Math.floor(x/(CW/BIZ.length)),b=BIZ[i];if(!b||y>CH-22)return;
+  openSheet(b.id);
+});
 
-/* ---------- Boucle ---------- */
-let cloudAcc=0,lastWall=Date.now(),mAcc=0,uiAcc=0,saveAcc=0,gAcc=0;
-function frame(){
-  const now=Date.now();let dt=(now-lastWall)/1000;lastWall=now;
-  if(dt>5){applyOffline(dt);dt=0;build(tab)}
-  dt=Math.min(dt,.5);
+/* ======================================================================
+   Décor propre à chaque ville
+   ====================================================================== */
+function drawScenery(look,w,gy){
+  if(look==='sea'){
+    cx.fillStyle='#3f8fc7';cx.fillRect(0,gy-30,w,30);
+    cx.fillStyle='rgba(255,255,255,.35)';for(let k=0;k<14;k++)cx.fillRect(((k*.173+S.clock*.006)%1)*w,gy-28+(k%4)*7,16,1.5);
+    for(let k=0;k<3;k++){const x=((k*.37+S.clock*.003)%1)*w,y=gy-24+k*5;cx.fillStyle='#f4f4f4';cx.beginPath();cx.moveTo(x,y);cx.lineTo(x,y-12);cx.lineTo(x+8,y);cx.fill();cx.fillStyle='#8a5a33';cx.fillRect(x-6,y,16,3)}
+  }else if(look==='mine'){
+    cx.fillStyle='#7d8790';for(let k=0;k<7;k++){const x=k*w/6-20;cx.beginPath();cx.moveTo(x,gy);cx.lineTo(x+w/12+18,gy-70-(k%3)*18);cx.lineTo(x+w/6+40,gy);cx.fill()}
+    cx.fillStyle='rgba(255,255,255,.55)';for(let k=0;k<7;k++){const x=k*w/6-20,tx=x+w/12+18,ty=gy-70-(k%3)*18;cx.beginPath();cx.moveTo(tx,ty);cx.lineTo(tx-9,ty+14);cx.lineTo(tx+9,ty+14);cx.fill()}
+  }else if(look==='capital'){
+    cx.fillStyle='rgba(40,52,75,.45)';for(let k=0;k<26;k++){const x=k*w/26,hh=40+((k*37)%70);cx.fillRect(x,gy-hh,w/26-3,hh)}
+  }else{
+    cx.fillStyle='rgba(60,120,70,.28)';cx.beginPath();cx.ellipse(w*.25,gy+6,w*.35,34,0,Math.PI,0);cx.ellipse(w*.75,gy+6,w*.4,44,0,Math.PI,0);cx.fill();
+  }
+}
+
+/* ======================================================================
+   Plan de la ville (grille 6×6) et voisinage
+   ====================================================================== */
+const ORDER=[...Array(GRID).keys()].sort((a,b)=>{const d=i=>Math.hypot(i%GW-2.5,Math.floor(i/GW)-2.5);return d(a)-d(b)||a-b});
+const NOISY=['atelier','port','aeroport'],CALM=['hotel','cinema','brasserie','banque','boul'],SHOPS=['crepe','kiosque','boul'];
+const NEED_ADJ={conf:.08,trans:.06,hyg:.03,sec:.03};
+const SHORT={crepe:'Crêpes',kiosque:'Kiosque',boul:'Boulang.',brasserie:'Brasserie',cinema:'Cinéma',atelier:'Atelier',hotel:'Hôtel',port:'Port',centre:'Centre',banque:'Banque',bourse:'Bourse',aeroport:'Aéroport',tour:'Tour'};
+const itemKey=it=>it?it.t+':'+it.id:'';
+function ensureGrid(){
+  if(!C)return;const g=C.grid,want=new Set();
+  BIZ.forEach(b=>{if(lvl(b.id))want.add('b:'+b.id)});INFRA.forEach(i=>{if(cnt(i.id))want.add('i:'+i.id)});
+  const have=new Set();
+  for(let k=0;k<GRID;k++){const key=itemKey(g[k]);if(!key)continue;if(!want.has(key)||have.has(key))g[k]=null;else have.add(key)}
+  for(const key of want){if(have.has(key))continue;const k=ORDER.find(i=>!g[i]);if(k==null)break;const [t,id]=key.split(':');g[k]={t,id}}
+  computeAdj();
+}
+function neigh(k){const r=[],x=k%GW,y=Math.floor(k/GW);if(x>0)r.push(k-1);if(x<GW-1)r.push(k+1);if(y>0)r.push(k-GW);if(y<GW-1)r.push(k+GW);return r}
+function computeAdj(){
+  const g=C.grid;C.adj={};
+  for(let k=0;k<GRID;k++){const it=g[k];if(!it||it.t!=='b')continue;const self=it.id;let m=1;const parts={};
+    const add=(lab,v)=>{m+=v;parts[lab]=(parts[lab]||0)+v};
+    for(const n of neigh(k)){const nb=g[n];if(!nb)continue;
+      if(nb.t==='i'){const I=INFRA.find(x=>x.id===nb.id);add(I.name,NEED_ADJ[I.need]||0)}
+      else{
+        if(NOISY.includes(nb.id)&&CALM.includes(self))add('Bruit : '+BIZ.find(x=>x.id===nb.id).name.toLowerCase(),-.12);
+        if(nb.id==='centre'&&SHOPS.includes(self))add('Centre commercial',.1);
+        if(self==='hotel'&&(nb.id==='brasserie'||nb.id==='cinema'))add(BIZ.find(x=>x.id===nb.id).name,.06);
+        if((self==='banque'&&nb.id==='bourse')||(self==='bourse'&&nb.id==='banque'))add(BIZ.find(x=>x.id===nb.id).name,.1);
+      }}
+    C.adj[self]={m:Math.max(.6,Math.min(1.6,m)),parts};
+  }
+}
+const adjOf=id=>(C&&C.adj&&C.adj[id])?C.adj[id].m:1;
+let planSel=null,planTxt='';
+function planTap(x,y){
+  const d=planDims(),col=Math.floor((x-d.ox)/d.cs),row=Math.floor((y-d.oy)/d.cs);
+  if(col<0||col>=GW||row<0||row>=GW)return;const k=row*GW+col,g=C.grid;
+  if(planSel==null){if(g[k]){planSel=k;sfx('tick')}else toast('Case libre : choisis d’abord un bâtiment.')}
+  else if(k===planSel)planSel=null;
+  else{const a=g[planSel];g[planSel]=g[k];g[k]=a;S.cnt.moves++;computeAdj();planSel=null;sfx('buy');
+    if(a&&a.t==='b'){const m=adjOf(a.id);toast(`${BIZ.find(b=>b.id===a.id).name} déplacé : voisins ${m>=1?'+':'−'}${Math.round(Math.abs(m-1)*100)} %`)}
+    if(tab==='biz')build('biz')}
+  updPlanInfo(true);
+}
+function itemName(it){return it.t==='b'?BIZ.find(b=>b.id===it.id).name:INFRA.find(i=>i.id===it.id).name}
+function updPlanInfo(force){
+  const el=$('planInfo');if(!el||el.hidden||!S)return;
+  let h;const it=planSel!=null?C.grid[planSel]:null;
+  if(it){
+    if(it.t==='b'){const a=C.adj[it.id]||{m:1,parts:{}},ps=Object.entries(a.parts);
+      h=`<b>${itemName(it)}</b> · voisinage <b class="${a.m>=1?'up':'down'}">${a.m>=1?'+':'−'}${Math.round(Math.abs(a.m-1)*100)} %</b>${ps.length?' : '+ps.map(([l,v])=>`${l} ${v>0?'+':'−'}${Math.round(Math.abs(v)*100)} %`).join(', '):''}. Touche une autre case pour le déplacer.`}
+    else h=`<b>${itemName(it)}</b> : donne un bonus aux commerces juste à côté (${Math.round((NEED_ADJ[INFRA.find(i=>i.id===it.id).need]||0)*100)} % chacun). Touche une autre case pour le déplacer.`;
+  }else h=`Touche un bâtiment, puis une case, pour le déplacer. Bancs, fontaines et parcs à côté d’un commerce : +8 %. Transports : +6 %. L’atelier, le port et l’aéroport font du bruit : −12 % pour l’hôtel, le cinéma, la brasserie, la banque et la boulangerie. Le centre commercial aide les petits commerces voisins.`;
+  if(h!==planTxt||force){planTxt=h;el.innerHTML=h}
+}
+function drawPlan(){
+  const d=planDims(),cs=d.cs,se=season();
+  cx.fillStyle=se===3?'#dfe6ea':T.ground;cx.fillRect(0,0,CW,CH);
+  cx.fillStyle='rgba(120,110,90,.35)';cx.fillRect(d.ox-3,d.oy-3,cs*GW+6,cs*GW+6);
+  cx.textAlign='center';cx.textBaseline='middle';
+  for(let k=0;k<GRID;k++){
+    const it=C.grid[k],x=d.ox+(k%GW)*cs+3,y=d.oy+Math.floor(k/GW)*cs+3,s=cs-6;
+    if(!it){cx.fillStyle='rgba(255,255,255,.28)';cx.fillRect(x,y,s,s);continue}
+    const brk=it.t==='b'?broken('biz',it.id):broken('infra',it.id);
+    if(it.t==='b'){const b=BIZ.find(q=>q.id===it.id);
+      cx.fillStyle=b.col;cx.fillRect(x,y,s,s);cx.fillStyle='rgba(0,0,0,.22)';cx.fillRect(x,y,s,s*.24);
+      cx.fillStyle='rgba(255,255,255,.55)';for(let wy=y+s*.34;wy<y+s*.62;wy+=7)for(let wx=x+5;wx<x+s-6;wx+=7)cx.fillRect(wx,wy,3,3.5);
+      cx.fillStyle='#fff';cx.font=`900 ${Math.max(8,Math.round(cs*.17))}px Nunito,sans-serif`;cx.fillText(SHORT[b.id],x+s/2,y+s*.13);
+      cx.font=`400 ${Math.round(cs*.26)}px "Bagel Fat One",sans-serif`;cx.textAlign='left';cx.fillText(lvl(b.id),x+4,y+s*.82);cx.textAlign='center';
+      const m=adjOf(b.id);if(Math.abs(m-1)>.005){const t=(m>1?'+':'−')+Math.round(Math.abs(m-1)*100)+'%';cx.font=`800 ${Math.max(8,Math.round(cs*.16))}px Nunito,sans-serif`;const tw=cx.measureText(t).width+6;cx.fillStyle=m>1?'#1f8456':'#c03b32';cx.fillRect(x+s-tw-2,y+s*.7,tw,cs*.22);cx.fillStyle='#fff';cx.fillText(t,x+s-tw/2-2,y+s*.7+cs*.11)}
+      const list=C.staff[b.id]||[];if(brk||list.some(e=>e.ask||e.strike)){cx.beginPath();cx.arc(x+s-5,y+5,4.5,0,7);cx.fillStyle=brk?'#e53935':'#f2b53a';cx.fill()}
+    }else{const I=INFRA.find(q=>q.id===it.id);
+      cx.fillStyle='#e8eee9';cx.fillRect(x,y,s,s);{const sc=cs/24;cx.save();cx.translate(x+s/2,y+s*.84);cx.scale(sc,sc);drawInfra(I.id,0,0,[],!!brk);cx.restore()}
+      cx.fillStyle='#2b3a40';cx.font=`800 ${Math.max(8,Math.round(cs*.16))}px Nunito,sans-serif`;cx.textAlign='left';cx.fillText('×'+cnt(I.id),x+4,y+s*.14);cx.textAlign='center';
+    }
+    if(brk){cx.strokeStyle='#e53935';cx.lineWidth=2.5;cx.strokeRect(x+1,y+1,s-2,s-2)}
+    if(k===planSel){cx.strokeStyle='#f2b53a';cx.lineWidth=3.5;cx.strokeRect(x-1,y-1,s+2,s+2)}
+  }
+  if(planSel!=null){cx.strokeStyle='rgba(242,181,58,.7)';cx.lineWidth=1.5;cx.setLineDash([4,3]);for(const n of neigh(planSel)){const x=d.ox+(n%GW)*cs+3,y=d.oy+Math.floor(n/GW)*cs+3;cx.strokeRect(x,y,cs-6,cs-6)}cx.setLineDash([])}
+}
+
+/* ======================================================================
+   Fiche rapide d'un bâtiment (en touchant la ville)
+   ====================================================================== */
+let SHEET=null,sheetSig='';
+function openSheet(bid){SHEET=bid;sheetSig='';sfx('tick');renderSheet(true)}
+function closeSheet(){SHEET=null;sheetSig='';$('sheet').hidden=true}
+function costBtn(cls,a,data,label,cost){return `<button class="btn ${cls}" data-a="${a}" ${Object.entries(data).map(([k,v])=>`data-${k}="${v}"`).join(' ')} ${cost!=null?`data-cost="${Math.round(cost)}" ${cost>S.cash?'disabled':''}`:''}>${label}${cost!=null?`<small>${eur(cost)}</small>`:''}</button>`}
+function updCosts(root){root.querySelectorAll('[data-cost]').forEach(b=>{b.disabled=+b.dataset.cost>S.cash})}
+function renderSheet(force){
+  const el=$('sheet');if(!SHEET){el.hidden=true;return}
+  const b=BIZ.find(x=>x.id===SHEET),l=lvl(b.id),list=C.staff[b.id]||[],brk=C.broken.find(x=>x.kind==='biz'&&x.ref===b.id);
+  const sig=[b.id,C.id,l,brk?brk.id:'',list.map(e=>e.id+(e.ask?1:0)+(e.strike?1:0)).join(),C.techs,S.mode].join('|');
+  if(sig===sheetSig&&!force){const t=$('shInc');if(t)t.textContent=l?`${eur(bizIncome(b))}/s · ${list.length} employé${list.length>1?'s':''} · voisins ${adjOf(b.id)>=1?'+':'−'}${Math.round(Math.abs(adjOf(b.id)-1)*100)} %`:'';updCosts(el);return}
+  sheetSig=sig;let h=`<div class="top"><div class="name">${b.name}${l?` · niv ${l}`:''}<small id="shInc"></small></div><button class="btn alt sm" style="margin-left:auto" data-a="closesheet">Fermer</button></div>`;
+  if(!l){h+=`<p class="sub">Terrain libre à ${CITY(C.id).n}. ${b.name} rapporte ${eur(b.rate*PM*(CITY(C.id).biz[b.id]||1))}/s par niveau.</p>${costBtn('wide','biz',{b:b.id},`Ouvrir ×${bizQty(b)}`,bizCost(b,bizQty(b)))}`}
+  else{
+    let issues=0;
+    if(brk){issues++;h+=`<div class="emp"><div class="who"><b>⚠ ${brk.label} : en panne</b><small>${C.techs?'Un technicien va s’en occuper':'Aucun technicien dans cette ville'}</small></div><div class="act">${costBtn('danger sm','rush',{x:brk.id},'Urgence',rushCost(brk))}${C.techs?'':costBtn('alt sm','tech',{},'Technicien',techCost())}</div></div>`}
+    for(const e of list.filter(e=>e.ask)){issues++;h+=`<div class="emp"><div class="who"><b>${e.n} demande une augmentation</b><small>niv ${e.lv} · humeur ${Math.round(e.mood)} %</small></div><div class="act"><button class="btn sell sm" data-a="raise" data-e="${e.id}">Augmenter</button><button class="btn alt sm" data-a="noraise" data-e="${e.id}">Refuser</button></div></div>`}
+    const st=list.filter(e=>e.strike);if(st.length){issues++;h+=`<div class="emp"><div class="who"><b>${st.map(e=>e.n).join(', ')} en grève</b><small>Ils sont payés mais ne travaillent plus</small></div><div class="act">${costBtn('sm','prime',{b:b.id},'Prime',salaryOf(b)*90+20)}</div></div>`}
+    if(!issues)h+=`<p class="sub">Tout va bien ici.</p>`;
+    h+=`<div class="btns two">${costBtn('','biz',{b:b.id},`Agrandir ×${bizQty(b)}`,bizCost(b,bizQty(b)))}<button class="btn alt" data-a="gobiz" data-b="${b.id}">Voir l’équipe</button></div>`;
+  }
+  el.innerHTML=h;el.hidden=false;renderSheet();
+}
+
+/* ======================================================================
+   Liste « À faire »
+   ====================================================================== */
+let todoSig='';
+function todos(){
+  const L=[],un=unlockedGoods();
+  if(S.cash<0)L.push({k:'debt',hot:1,t:'Tu es dans le rouge',s:'Tes commerces tournent à 70 % tant que tu es sous 0 €',b:[['alt sm','go',{t:'city'},'Finances',null]]});
+  for(const c of S.contracts){const st=S.goods[c.g],g=GOODS.find(x=>x.id===c.g),left=c.until-S.clock;
+    if(st.inv>=c.qty)L.push({k:'c'+c.id,t:`Livre ${c.who}`,s:`${c.qty} ${pl(c.qty,g.unit)} de ${g.name.toLowerCase()} · reste ${mmss(left)}`,b:[['sell sm','deliver',{c:c.id},`Livrer ${eur(c.reward)}`,null]]});
+    else if(left<150)L.push({k:'w'+c.id,hot:1,t:`${c.who} attend sa commande`,s:`Il manque ${fmt(Math.ceil(c.qty-st.inv))} ${pl(c.qty-st.inv,g.unit)} de ${g.name.toLowerCase()} · reste ${mmss(left)}`,b:[['alt sm','go',{t:'market'},'Marché',null]]})}
+  for(const x of C.broken)L.push({k:'b'+x.id,hot:!C.techs,t:`${x.label} : en panne`,s:C.techs?'Un technicien est dessus':'Aucun technicien pour réparer',b:[['danger sm','rush',{x:x.id},'Urgence',rushCost(x)],...(C.techs?[]:[['alt sm','tech',{},'Technicien',techCost()]])]});
+  for(const b of BIZ){const list=C.staff[b.id]||[];
+    for(const e of list.filter(e=>e.ask))L.push({k:'a'+e.id,t:`${e.n} veut une augmentation`,s:`${b.name} · il attend ta réponse`,b:[['sell sm','raise',{e:e.id},'Oui',null],['alt sm','noraise',{e:e.id},'Non',null]]});
+    const st=list.filter(e=>e.strike);if(st.length)L.push({k:'s'+b.id+st.length,hot:1,t:`${st.length} en grève · ${b.name}`,s:st.map(e=>e.n).join(', '),b:[['sm','prime',{b:b.id},'Prime',salaryOf(b)*90+20]]})}
+  for(const n of NEEDS){const v=needSat(n.id);if(v>=.7||visitors()<30)continue;
+    const opts=visibleInfra().filter(i=>i.need===n.id).sort((a,b)=>infraCost(a)-infraCost(b));const best=opts.filter(i=>infraCost(i)<=S.cash).pop()||opts[0];
+    L.push({k:'n'+n.id,hot:v<.5,t:`${n.name} insuffisante (${pct(v)})`,s:best?`${best.name} : +${fmt(best.cap)} visiteurs`:'Va voir les équipements',b:best?[['sm','infra',{i:best.id},'Installer',infraCost(best)]]:[['alt sm','go',{t:'city'},'Ville',null]]})}
+  if(S.daily&&!S.daily.done&&dailyProg()>=S.daily.n)L.push({k:'daily',t:'Défi du jour réussi !',s:'Récupère ta récompense et 3 étoiles',b:[['sell sm','daily',{},'Récupérer',null]]});
+  if(S.elect.cands&&S.elect.pick==null&&S.elect.next-S.dayIdx<=2)L.push({k:'vote',t:'Élections bientôt',s:`Vote dans ${S.elect.next-S.dayIdx} jour${S.elect.next-S.dayIdx>1?'s':''}, tu ne soutiens personne`,b:[['alt sm','go',{t:'city'},'Voir',null]]});
+  const rs=rivalShops();if(rs>=10)L.push({k:'riv',t:`Les concurrents te volent ${Math.round((1-rivalMult())*100)} % de clients`,s:`${rs} boutiques concurrentes à ${CITY(C.id).n}`,b:[['alt sm','go',{t:'city'},'Riposter',null]]});
+  return L.sort((a,b)=>(b.hot||0)-(a.hot||0));
+}
+function renderTodo(){
+  const el=$('todo');if(tab==='settings'){if(el.innerHTML)el.innerHTML='';todoSig='';return}
+  const L=todos(),sig=L.map(i=>i.k).join()+'|'+S.todoAll+S.todoHide;
+  if(sig===todoSig){updCosts(el);return}
+  todoSig=sig;
+  if(!L.length){el.innerHTML='';return}
+  const show=S.todoHide?[]:S.todoAll?L:L.slice(0,2);
+  el.innerHTML=`<div class="todo"><div class="head">À faire <span class="pill ${L.some(i=>i.hot)?'bad':''}">${L.length}</span><span class="sp">${!S.todoHide&&L.length>2?`<button class="btn alt sm" data-a="todoall">${S.todoAll?'Moins':'Tout voir'}</button>`:''}<button class="btn alt sm" data-a="todohide">${S.todoHide?'Afficher':'Masquer'}</button></span></div>
+   ${show.map(i=>`<div class="item ${i.hot?'hot':''}"><div class="txt">${i.t}<small>${i.s}</small></div><div class="act">${i.b.map(([cls,a,d,l,c])=>costBtn(cls,a,d,l,c)).join('')}</div></div>`).join('')}</div>`;
+}
+
+/* ======================================================================
+   Villes : voyager et fonder
+   ====================================================================== */
+function travelTo(id){
+  if(!S.cities[id])return;
+  if(S.travel)return toast(`Tu es déjà en route vers ${CITY(S.travel.to).n}.`);
+  if(id===S.city)return toast(`Tu es déjà à ${CITY(id).n}.`);
+  const t=[20,10,3][S.upg.jet||0];S.travel={to:id,until:S.clock+t};
+  sfx('tick');toast(`Départ pour ${CITY(id).n} (${t} s)`);renderBanner(true);build(tab);
+}
+function foundCity(id){
+  const cd=CITY(id);if(S.cities[id])return;
+  if(S.run.earned<cd.cost*.4)return toast(`Gagne d’abord ${eur(cd.cost*.4)} dans la partie.`);
+  if(cd.cost>S.cash)return toast('Pas assez d’argent.');
+  if(!confirmBig('city'+id,cd.cost,`Fonder ${cd.n}`))return;
+  S.cash-=cd.cost;S.cities[id]=newCity(id,S.clock);sfx('level');vib([40,30,40]);
+  setNews('Expansion',`Tu fondes ${cd.n} ! ${cd.d}`);toast(`${cd.n} fondée ! En route…`);
+  travelTo(id);
+}
+function arrive(){
+  S.city=S.travel.to;S.travel=null;C=activeC();MEMO={};planSel=null;closeSheet();ensureGrid();sizeCanvas();
+  setNews('Voyage',`Bienvenue à ${CITY(S.city).n} ! ${CITY(S.city).d}`);sfx('level');renderBanner(true);build(tab);
+}
+
+/* ======================================================================
+   Boucle principale : logique 10 fois par seconde, dessin 30 images/s max
+   ====================================================================== */
+let lastWall=Date.now(),logicAcc=0,drawAcc=0,uiAcc=0,saveAcc=0,gAcc=0,cloudAcc=0,dailyAcc=0,townVisible=true;
+try{new IntersectionObserver(es=>{townVisible=es[0].isIntersecting}).observe($('townbox'))}catch(e){}
+function step(dt){
+  MEMO={};
   S.clock+=dt;
   if(S.boost.m!==1&&S.clock>S.boost.until)S.boost={m:1,until:0};
-  earn(incomePerSec()*dt);
-  mAcc+=dt;if(mAcc>=1.5){mAcc=0;GOODS.forEach(g=>stepGood(g,S.goods[g.id]));if(tab==='market')drawSparks()}
+  if(S.crisis&&S.clock>S.crisis.until){setNews('Crise',`${CRISES[S.crisis.id].n} : c’est terminé.`);S.crisis=null}
+  if(S.special&&S.clock>S.special.until){setNews('Visite',`${SPECIALS[S.special.id].n} est reparti${S.special.id==='star'?'e':''}.`);S.special=null}
+  if(S.travel&&S.clock>=S.travel.until)arrive();
+  let gross=0,sal=0,mt=0;
+  forCities(()=>{calcPM();gross+=grossIncome();sal+=salaries()+techPay();mt+=maintenance();
+    if(S.clock>=C.nextBreak)spawnBreak();tickRepairs(dt);tickCraft(dt)});
+  C=activeC();calcPM();
+  const it=interest();GROSS_ALL=gross;COSTS_ALL=sal+mt+it;
+  earn(gross*dt);S.cash-=COSTS_ALL*dt;
+  const ds=S.dayStats;ds.gross+=gross*dt;ds.sal+=sal*dt;ds.maint+=mt*dt;ds.int+=it*dt;
+  if(S.cash<0&&!S.inDebt){S.inDebt=true;setNews('Alerte','Tu es dans le rouge ! Tes commerces tournent à 70 %. Licencie, retire des équipements ou vends du stock.');sfx('alert');vib([60,40,60])}
+  else if(S.cash>=0&&S.inDebt)S.inDebt=false;
+  S.mTimer-=dt;
+  if(S.mTimer<=0){S.mTimer=MT;GOODS.forEach(g=>stepGood(g,S.goods[g.id]));if(tab==='market'){drawSparks();sfx('tick')}}
+  if(Math.floor(S.clock/DAY)>S.dayIdx)endDay();
   if(S.clock>=S.nextNews)fireNews();
   if(!op&&S.clock>=S.nextOp)spawnOp();
-  gAcc+=dt;if(gAcc>1){gAcc=0;checkGoals()}
-  uiAcc+=dt;if(uiAcc>.25){uiAcc=0;refresh()}
+  if(S.contracts.length<3&&S.clock>=S.nextContract&&S.run.earned>=30)genContract();
+  if(S.contracts.some(c=>S.clock>c.until)){const lost=S.contracts.filter(c=>S.clock>c.until);S.contracts=S.contracts.filter(c=>S.clock<=c.until);toast(`Commande annulée : ${lost[0].who} n’a pas été livré à temps`)}
+  if(!S.crisis&&S.clock>=S.nextCrisis&&S.run.earned>=2e4)startCrisis();
+  if(!S.special&&S.clock>=S.nextSpecial)startSpecial();
+  gAcc+=dt;if(gAcc>=1){const g=gAcc;gAcc=0;forCities(()=>{calcPM();tickEmployees(g);ensureGrid()});C=activeC();MEMO={};calcPM();checkGoals()}
+  uiAcc+=dt;if(uiAcc>=.25){uiAcc=0;refresh();musicTick()}
   saveAcc+=dt;if(saveAcc>5){saveAcc=0;save()}
-  cloudAcc+=dt;if(cloudAcc>60){cloudAcc=0;pushCloud(true)}
-  draw(dt);
+  cloudAcc+=dt;if(cloudAcc>60){cloudAcc=0;if(SET.cloudAuto)pushCloud(true)}
+  dailyAcc+=dt;if(dailyAcc>60){dailyAcc=0;checkDaily()}
+}
+function frame(){
+  const now=Date.now();let dt=(now-lastWall)/1000;lastWall=now;
+  if(dt>5){applyOffline(dt);build(tab);dt=0}
+  dt=Math.min(dt,.5);
+  logicAcc+=dt;if(logicAcc>=.1){step(Math.min(logicAcc,.5));logicAcc=0}
+  drawAcc+=dt;
+  if(townVisible&&drawAcc>=(lowAnim()?.066:.033)){draw(Math.min(drawAcc,.2));drawAcc=0}
   requestAnimationFrame(frame);
 }
-function start(data){
-  if(data&&data.S)S=data.S;
-  else if(load()&&S.t)applyOffline((Date.now()-S.t)/1000);
-  readTokens();sizeCanvas();build(tab);
+function start(){
+  const had=load();
+  if(had&&S.t)applyOffline((Date.now()-S.t)/1000);
+  if(!S.elect.cands)newElection();
+  forCities(()=>ensureGrid());C=activeC();
+  applyTheme();sizeCanvas();checkDaily();
+  GROSS_ALL=allGross();COSTS_ALL=allCosts();build(tab);
   lastWall=Date.now();requestAnimationFrame(frame);
 }
 addEventListener('resize',sizeCanvas);
-document.addEventListener('visibilitychange',()=>{if(document.hidden){save();pushCloud(true)}});
+document.addEventListener('visibilitychange',()=>{if(document.hidden){save();if(SET.cloudAuto)pushCloud(true);if(AC)AC.suspend()}else if(AC)AC.resume()});
 try{matchMedia('(prefers-color-scheme: dark)').addEventListener('change',()=>{readTokens();drawSparks()})}catch(e){}
-new MutationObserver(()=>{readTokens();drawSparks()}).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
-start({});
+start();
 initCloud();
 if('serviceWorker' in navigator)addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
 </script>
-
 </body>
 </html>
